@@ -1,6 +1,7 @@
-# Playbooks
+# Ansible Roles
 
-Inventory and secrets are in a separate repository.
+Ansible roles for some light infrastructure management and workload deployment via podman's quadlet feature.\
+Efficient, boring, and just works.
 
 ## Roles
 
