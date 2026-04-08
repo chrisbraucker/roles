@@ -1,0 +1,17 @@
+#!/bin/sh -
+remoteip=$(echo $SSH_CONNECTION | cut -d' ' -f 1)
+if last --ip --hostlast {{ bastion_sshrc_lastlog_params }} | grep $remoteip 2>&1 > /dev/null; then
+    exit 0
+fi
+
+localip=$(echo $SSH_CONNECTION | cut -d' ' -f 3)
+port=$(echo $SSH_CONNECTION | cut -d' ' -f 4)
+
+token="{{ bastion_sshrc_token }}"
+chat="{{ bastion_sshrc_chatid }}"
+hostsfx="{{ bastion_sshrc_hostsfx }}"
+msg="<b>SSH login:</b> $(hostname).$hostsfx
+at: $(date +%FT%T)
+from: <code>${remoteip}</code>
+via: <code>${USER}</code>@<code>${localip}:${port}</code>"
+curl -fs -XPOST "https://api.telegram.org/bot$token/sendMessage?chat_id=$chat&parse_mode=HTML" -F "text=$msg" > /dev/null

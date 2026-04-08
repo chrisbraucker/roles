@@ -24,7 +24,7 @@
       import dnf
       b = dnf.Base()
       b.read_all_repos()
-      repos = b.repos.get_matching("{{ repo_match }}")
+      repos = b.repos.get_matching("{{ common_repo_match }}")
       for i in repos:
         if i._repo.isEnabled():
           print(i._repo.getCachedir())

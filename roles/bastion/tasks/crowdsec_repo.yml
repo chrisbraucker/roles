@@ -1,0 +1,45 @@
+---
+- name: 'Add crowdsec packagecloud repo'
+  ansible.builtin.copy:
+    src: 'yum-crowdsec.repo'
+    dest: '/etc/yum.repos.d/crowdsec.repo'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'system_conf_t'
+
+
+- name: 'Trust crowdsec GPG keys'
+  ansible.builtin.include_role:
+    name: 'common'
+    tasks_from: 'gpg_keys.yml'
+  vars:
+    common_repo_match: 'packagecloud-crowdsec*'
+  loop_control:
+    loop_var: 'gpg'
+  loop:
+    - url: 'https://packagecloud.io/crowdsec/crowdsec/gpgkey'
+      file: 'packagecloud-crowdsec'
+      checksum: 'sha256:cd5729fe6f95d29efc48f1cfe63e0d4a3088506cf99f3cf74b572c4b70429980'
+      fingerprint: '6A89E3C2303A901A889971D3376ED5326E93CD0C'
+
+    - url: 'https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-B78D1222C9AD2D5D.pub.gpg'
+      file: 'packagecloud-crowdsec-B78D1222C9AD2D5D.pub'
+      checksum: 'sha256:098b8f0d66708335712c1dc51459e7dfb3ce685746eef00a942bf643b17d6fa6'
+      fingerprint: 'CABA475ADF1A7001B538B73E47C285C1D059946B'
+
+    - url: 'https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-FED78314A2468CCF.pub.gpg'
+      file: 'packagecloud-crowdsec-FED78314A2468CCF.pub'
+      checksum: 'sha256:427635fd158d46f5e2e86ce7dde68b330f959f6a7b727076633cf34914e0eeb0'
+      fingerprint: '9082D8CACBBEB0DAB218BAB04C3D386C3CDF0DB4'
+
+    - url: 'https://packagecloud.io/crowdsec/crowdsec/gpgkey/crowdsec-crowdsec-EDE2C695EC9A5A5C.pub.gpg'
+      file: 'packagecloud-crowdsec-EDE2C695EC9A5A5C.pub'
+      checksum: 'sha256:d6f3b5460a3654d06ccf8933c54d76bdda137c083091c5e2f634fc44f3a641f2'
+      fingerprint: '781AD9A69D9EAB7C6B4773ED02DA1539EA83274E'
+
+
+- name: 'Refresh dnf'
+  ansible.builtin.dnf:
+    update_cache: true

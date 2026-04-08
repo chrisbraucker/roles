@@ -4,6 +4,10 @@ Inventory and secrets are in a separate repository.
 
 ## Roles
 
+### Bastion
+
+Hardens hosts that are exposed to the elements with firewall, fail2ban and others.
+
 ### Common
 
-A module to configure defaults for debian and almalinux-based distros.
+Configures defaults for debian and almalinux-based distros.

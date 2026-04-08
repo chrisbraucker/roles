@@ -59,7 +59,7 @@ argument_specs:
             required: true
             description: 'Expected GPG fingerprint imported into rpm and dnf trust stores.'
 
-      repo_match:
+      common_repo_match:
         type: 'str'
         required: true
         description: 'DNF repository glob used to discover enabled repo cache directories.'

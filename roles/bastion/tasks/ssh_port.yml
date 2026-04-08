@@ -1,0 +1,119 @@
+---
+- name: 'Check existing secondary SSH port drop-in'
+  ansible.builtin.stat:
+    path: '/etc/ssh/sshd_config.d/50-sshd-secondary-port.conf'
+  register: 'bastion_sshd_2nd_port_dropin'
+
+
+- name: 'Read existing secondary SSH port drop-in'
+  ansible.builtin.slurp:
+    src: '/etc/ssh/sshd_config.d/50-sshd-secondary-port.conf'
+  register: 'bastion_sshd_2nd_port_dropin_content'
+  when: 'bastion_sshd_2nd_port_dropin.stat.exists'
+
+
+- name: 'Determine previously managed secondary SSH port'
+  ansible.builtin.set_fact:
+    bastion_previous_sshd_2nd_port: >-
+      {{
+        (
+          bastion_sshd_2nd_port_dropin_content.content
+          | b64decode
+          | regex_findall('^Port\\s+(\\d+)$', multiline=True)
+          | join('')
+        )
+      }}
+  when: 'bastion_sshd_2nd_port_dropin.stat.exists'
+
+
+- name: 'Add secondary SSH port'
+  ansible.builtin.template:
+    src: 'sshd-secondary-port.conf'
+    dest: '/etc/ssh/sshd_config.d/50-sshd-secondary-port.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+    validate: 'sshd -t -f %s'
+  notify: 'Reload sshd'
+  when: 'bastion_sshd_2nd_port'
+
+
+- name: 'Remove secondary SSH port drop-in when disabled'
+  ansible.builtin.file:
+    path: '/etc/ssh/sshd_config.d/50-sshd-secondary-port.conf'
+    state: 'absent'
+  notify: 'Reload sshd'
+  when: 'not bastion_sshd_2nd_port'
+
+
+- name: 'Remove previous secondary SSH port from SELinux context'
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      if semanage port -l | grep ssh | grep -q {{ bastion_previous_sshd_2nd_port }}; then
+        semanage port -d -t ssh_port_t -p tcp {{ bastion_previous_sshd_2nd_port }}
+      else
+        printf ABSENT
+      fi
+    executable: '/bin/bash'
+  register: 'bastion_semanage_port_remove'
+  changed_when: 'bastion_semanage_port_remove.stdout != "ABSENT"'
+  when:
+    - '(bastion_previous_sshd_2nd_port | default("")) | length > 0'
+    - '(bastion_sshd_2nd_port | default("") | string) != bastion_previous_sshd_2nd_port'
+    - 'ansible_facts.selinux is defined'
+    - "ansible_facts.selinux.status == 'enabled' and ansible_facts.selinux.mode == 'enforcing'"
+
+
+- name: 'Allow secondary SSH port in SELinux context'
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      if semanage port -l | grep ssh | grep -q {{ bastion_sshd_2nd_port }}; then
+        printf EXISTS
+      else
+        semanage port -a -t ssh_port_t -p tcp {{ bastion_sshd_2nd_port }}
+      fi
+    executable: '/bin/bash'
+  register: 'bastion_semanage_port'
+  changed_when: 'bastion_semanage_port.stdout != "EXISTS"'
+  when:
+    - 'bastion_sshd_2nd_port'
+    - 'ansible_facts.selinux is defined'
+    - "ansible_facts.selinux.status == 'enabled' and ansible_facts.selinux.mode == 'enforcing'"
+
+
+- name: 'Remove previous secondary SSH port from firewall'
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      if firewall-cmd --service=ssh --get-ports --permanent | grep -q {{ bastion_previous_sshd_2nd_port }}; then
+        firewall-cmd --service=ssh --remove-port {{ bastion_previous_sshd_2nd_port }}/tcp --permanent
+        firewall-cmd --reload
+      else
+        printf ABSENT
+      fi
+    executable: '/bin/bash'
+  register: 'bastion_firewall_port_remove'
+  changed_when: 'bastion_firewall_port_remove.stdout != "ABSENT"'
+  when:
+    - '(bastion_previous_sshd_2nd_port | default("")) | length > 0'
+    - '(bastion_sshd_2nd_port | default("") | string) != bastion_previous_sshd_2nd_port'
+
+
+- name: 'Allow secondary SSH port in firewall'
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      if firewall-cmd --service=ssh --get-ports --permanent | grep -q {{ bastion_sshd_2nd_port }}; then
+        printf EXISTS
+      else
+        firewall-cmd --service=ssh --add-port {{ bastion_sshd_2nd_port }}/tcp --permanent
+        firewall-cmd --reload
+      fi
+    executable: '/bin/bash'
+  register: 'bastion_firewall_port'
+  changed_when: 'bastion_firewall_port.stdout != "EXISTS"'
+  when: 'bastion_sshd_2nd_port'

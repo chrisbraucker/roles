@@ -1,0 +1,88 @@
+---
+- name: 'Copy sshrc'
+  ansible.builtin.template:
+    src: 'sshrc.j2'
+    dest: '/etc/ssh/sshrc'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  when:
+    - '(bastion_sshrc_token | length) > 0'
+    - '(bastion_sshrc_chatid | length) > 0'
+  tags:
+    - 'sshrc'
+
+
+- name: 'Remove sshrc when notifications are not configured'
+  ansible.builtin.file:
+    path: '/etc/ssh/sshrc'
+    state: 'absent'
+  when:
+    - '(bastion_sshrc_token | length) == 0 or (bastion_sshrc_chatid | length) == 0'
+  tags:
+    - 'sshrc'
+
+
+- name: 'Manage secondary SSH port'
+  ansible.builtin.import_tasks: 'ssh_port.yml'
+
+
+- name: 'Install Fail2Ban'
+  ansible.builtin.dnf:
+    pkg:
+      - 'fail2ban'
+      - 'python3-inotify'
+    state: 'latest'
+  tags:
+    - 'fail2ban'
+
+
+- name: 'Configure Fail2Ban'
+  ansible.builtin.template:
+    src: 'fail2ban-jail.local.j2'
+    dest: '/etc/fail2ban/jail.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: etc_t
+  notify: 'Restart Fail2Ban'
+  tags:
+    - 'fail2ban'
+
+
+- name: 'Enable and start Fail2Ban'
+  ansible.builtin.systemd:
+    name: 'fail2ban.service'
+    state: 'started'
+    enabled: true
+  tags:
+    - 'fail2ban'
+
+
+- name: 'Add CrowdSec repo'
+  ansible.builtin.import_tasks: 'crowdsec_repo.yml'
+  when: 'bastion_crowdsec_enabled | bool'
+  tags:
+    - 'crowdsec'
+
+
+- name: 'Install CrowdSec nftables firewall bouncer'
+  ansible.builtin.dnf:
+    pkg: 'crowdsec-firewall-bouncer-nftables'
+    state: 'latest'
+  when: 'bastion_crowdsec_enabled | bool'
+  tags:
+    - 'crowdsec'
+
+
+- name: 'Enable CrowdSec bouncer'
+  ansible.builtin.systemd:
+    name: 'crowdsec-firewall-bouncer'
+    state: 'started'
+    enabled: true
+  when: 'bastion_crowdsec_enabled | bool'
+  tags:
+    - 'crowdsec'
