@@ -1,0 +1,6 @@
+---
+- name: 'Enable epel repo'
+  ansible.builtin.dnf:
+    pkg:
+      - 'epel-release'
+    state: 'latest'

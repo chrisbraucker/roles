@@ -1,0 +1,14 @@
+---
+- name: 'Set timezone'
+  community.general.timezone:
+    name: '{{ common_timezone }}'
+
+
+- name: 'Run OS-dependent setup'
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
+
+
+- name: 'Configure SSH'
+  ansible.builtin.import_tasks: 'ssh.yml'
+  tags:
+    - 'ssh'

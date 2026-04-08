@@ -1,0 +1,9 @@
+---
+common_management_user: 'mgmt'
+
+common_ssh_authorized_keys: []
+common_ssh_allow_group: 'ssh'
+
+common_gpg_cache_dir: '/var/cache/gpg'
+
+common_timezone: 'UTC'

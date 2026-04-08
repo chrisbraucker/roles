@@ -1,0 +1,45 @@
+---
+- name: 'Download key'
+  ansible.builtin.get_url:
+    url: '{{ gpg.url }}'
+    dest: '{{ (common_gpg_cache_dir, gpg.file) | path_join }}'
+    checksum: '{{ gpg.checksum }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'var_t'
+
+
+- name: 'Trust in rpm'
+  ansible.builtin.rpm_key:
+    key: '{{ (common_gpg_cache_dir, gpg.file) | path_join }}'
+    fingerprint: '{{ gpg.fingerprint }}'
+    state: 'present'
+
+
+- name: 'Get dnf cache for repo'
+  ansible.builtin.command: |
+      /usr/libexec/platform-python -c '
+      import dnf
+      b = dnf.Base()
+      b.read_all_repos()
+      repos = b.repos.get_matching("{{ repo_match }}")
+      for i in repos:
+        if i._repo.isEnabled():
+          print(i._repo.getCachedir())
+      '
+  register: common_repocache
+  changed_when: false
+
+
+- name: 'Trust in dnf'
+  ansible.builtin.shell: |
+    if gpg --no-autostart --homedir '{{ item }}' --list-keys '{{ gpg.fingerprint }}'; then
+      printf PRESENT >&2
+    else
+      gpg --no-autostart --homedir '{{ item }}' --import '{{ (common_gpg_cache_dir, gpg.file) | path_join }}'
+    fi
+  register: 'common_trust_key'
+  changed_when: '"PRESENT" not in common_trust_key.stderr'
+  loop: '{{ common_repocache.stdout_lines }}'

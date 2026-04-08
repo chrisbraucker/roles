@@ -1,0 +1,70 @@
+---
+argument_specs:
+  main:
+    short_description: 'Applies common host baseline configuration.'
+    options:
+      common_ssh_authorized_keys:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description:
+          - 'Exclusive SSH public key set for the management user when non-empty.'
+          - 'If empty, the authorized_keys file is left untouched.'
+
+      common_management_user:
+        type: 'str'
+        default: 'mgmt'
+        description: 'Management user that receives SSH access and baseline group membership.'
+
+      common_ssh_allow_group:
+        type: 'str'
+        default: 'ssh'
+        description: 'SSH allow-group rendered into the managed sshd drop-in.'
+
+      common_timezone:
+        type: 'str'
+        default: 'UTC'
+        description: 'System timezone applied by the role.'
+
+      common_gpg_cache_dir:
+        type: 'str'
+        default: '/var/cache/gpg'
+        description: 'Cache directory used by the shared GPG helper task.'
+
+  gpg_keys:
+    short_description: 'Downloads and trusts repository GPG keys for rpm and enabled dnf repos.'
+    options:
+      gpg:
+        type: 'dict'
+        required: true
+        description: 'GPG key definition consumed by the helper task.'
+        options:
+          url:
+            type: 'str'
+            required: true
+            description: 'Source URL for the key file.'
+
+          file:
+            type: 'str'
+            required: true
+            description: 'Filename used when caching the downloaded key locally.'
+
+          checksum:
+            type: 'str'
+            required: true
+            description: 'Checksum passed to get_url for key verification.'
+
+          fingerprint:
+            type: 'str'
+            required: true
+            description: 'Expected GPG fingerprint imported into rpm and dnf trust stores.'
+
+      repo_match:
+        type: 'str'
+        required: true
+        description: 'DNF repository glob used to discover enabled repo cache directories.'
+
+      common_gpg_cache_dir:
+        type: 'str'
+        default: '/var/cache/gpg'
+        description: 'Cache directory used to store downloaded key material.'

@@ -1,0 +1,57 @@
+---
+- name: 'Update existing packages'
+  ansible.builtin.dnf:
+    pkg: '*'
+    state: 'latest'
+  tags:
+    - 'upgrade'
+
+
+- name: 'Run distro-dependent setup'
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+
+
+- name: 'Install packages'
+  ansible.builtin.dnf:
+    pkg:
+      - 'firewalld'
+    state: 'latest'
+
+
+# see https://bugzilla.redhat.com/show_bug.cgi?id=1729287#c3 for reasoning
+- name: '[FIX] Add sysctl to initramfs to satisfy firewalld module loading in systemd-modules-load.service'
+  ansible.builtin.copy:
+    src: 'dracut-99-sysctl.conf'
+    dest: '/etc/dracut.conf.d/99-sysctl.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Regenerate initramfs'
+
+
+- name: 'Enable DHCP6 client in firewalld'
+  ansible.posix.firewalld:
+    service: 'dhcpv6-client'
+    state: 'enabled'
+    zone: 'public'
+    permanent: true
+    immediate: true
+
+
+- name: 'Restart NetworkManager'
+  ansible.builtin.systemd:
+    name: 'NetworkManager.service'
+    state: 'restarted'
+
+
+- name: 'Create GPG cache'
+  ansible.builtin.file:
+    dest: '{{ common_gpg_cache_dir }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    seuser: 'system_u'
+    setype: 'var_t'

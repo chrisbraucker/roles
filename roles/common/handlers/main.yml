@@ -1,0 +1,9 @@
+- name: 'Systemd reload daemon'
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+
+- name: 'Regenerate initramfs'
+  ansible.builtin.command:
+    cmd: 'dracut -f'
+  changed_when: true

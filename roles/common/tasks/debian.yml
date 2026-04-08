@@ -1,0 +1,24 @@
+---
+- name: 'Update packages'
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: 'full'
+  tags:
+    - 'upgrade'
+
+
+- name: 'Install packages'
+  ansible.builtin.apt:
+    pkg:
+      - 'firewalld'
+      - 'ca-certificates'
+      - 'curl'
+      - 'gnupg'
+    state: 'latest'
+
+
+- name: 'Remove unused packages'
+  ansible.builtin.apt:
+    pkg:
+      - 'ufw'
+    state: 'absent'

@@ -1,0 +1,41 @@
+---
+- name: 'Apply SSH public keys'
+  ansible.posix.authorized_key:
+    key: "{{ (common_ssh_authorized_keys | default([], true)) | join('\n') }}"
+    user: '{{ common_management_user }}'
+    exclusive: true
+  when: '(common_ssh_authorized_keys | default([], true) | length) > 0'
+
+
+- name: 'Add ssh group'
+  ansible.builtin.group:
+    name: '{{ common_ssh_allow_group }}'
+    system: true
+    state: 'present'
+
+
+- name: 'Add management user to group'
+  ansible.builtin.user:
+    name: '{{ common_management_user }}'
+    groups: '{{ common_ssh_allow_group }}'
+    append: true
+
+
+- name: 'Add secondary SSH config.d'
+  ansible.builtin.template:
+    src: 'sshd.conf'
+    dest: '/etc/ssh/sshd_config.d/50-sshd.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+    validate: 'sshd -t -f %s'
+  vars:
+    ssh_group: '{{ common_ssh_allow_group }}'
+
+
+- name: 'Reload sshd'
+  ansible.builtin.systemd:
+    name: 'sshd'
+    state: 'reloaded'
