@@ -1,0 +1,13 @@
+---
+- name: 'Enable linger'
+  ansible.builtin.command:
+    cmd: 'loginctl enable-linger {{ podman_rootless_user }}'
+    creates: '/var/lib/systemd/linger/{{ podman_rootless_user }}'
+  become: true
+
+
+- name: 'Add user to journald group'
+  ansible.builtin.user:
+    name: '{{ podman_rootless_user }}'
+    groups: 'systemd-journal'
+    append: true

@@ -1,0 +1,52 @@
+---
+argument_specs:
+  main:
+    short_description: 'Installs podman and prepares the default service account.'
+    options:
+      podman_containers_user:
+        type: 'str'
+        default: 'containers'
+        description: 'Default service account intended for rootful Podman-managed workloads.'
+
+      podman_containers_home:
+        type: 'str'
+        default: '/opt/containers'
+        description: 'Home directory for the default Podman service account.'
+
+      podman_subuid_start:
+        type: 'int'
+        default: 200000
+        description: 'Starting subordinate UID range assigned to the default Podman service account.'
+
+      podman_subuid_count:
+        type: 'int'
+        default: 131072
+        description: 'Subordinate UID range size assigned to the default Podman service account.'
+
+      podman_subgid_start:
+        type: 'int'
+        default: 200000
+        description: 'Starting subordinate GID range assigned to the default Podman service account.'
+
+      podman_subgid_count:
+        type: 'int'
+        default: 131072
+        description: 'Subordinate GID range size assigned to the default Podman service account.'
+
+
+  rootless_compat_user:
+    short_description: 'Enable rootless compat systems, such as lingering.'
+    options:
+      podman_rootless_user:
+        type: 'str'
+        required: true
+        description: 'Existing user to prepare for optional rootless Podman usage.'
+
+
+  socket_activation:
+    short_description: 'Enable user-scoped Podman socket activation for an existing rootless user.'
+    options:
+      podman_rootless_user:
+        type: 'str'
+        required: true
+        description: 'Existing user whose systemd user manager should own podman.socket.'

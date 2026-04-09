@@ -1,0 +1,103 @@
+---
+- name: 'On dnf-based distros'
+  when: 'ansible_pkg_mgr == "dnf"'
+  block:
+
+    - name: 'Remove other containerization tech'
+      ansible.builtin.dnf:
+        pkg:
+          - 'docker'
+          - 'docker-client'
+          - 'docker-client-latest'
+          - 'docker-common'
+          - 'docker-latest'
+          - 'docker-latest-logrotate'
+          - 'docker-engine'
+          - 'docker.io'
+          - 'containerd'
+          - 'runc'
+        state: 'absent'
+
+
+    - name: 'Install podman'
+      ansible.builtin.dnf:
+        name:
+          - 'podman'
+
+
+- name: 'On apt-based distros'
+  when: 'ansible_pkg_mgr == "apt"'
+  block:
+
+    - name: 'Remove other containerization tech'
+      ansible.builtin.apt:
+        name:
+          - 'docker'
+          - 'docker-client'
+          - 'docker-client-latest'
+          - 'docker-common'
+          - 'docker-latest'
+          - 'docker-latest-logrotate'
+          - 'docker-engine'
+          - 'docker.io'
+          - 'containerd'
+          - 'runc'
+        state: 'absent'
+
+
+    - name: 'Install podman'
+      ansible.builtin.apt:
+        name:
+          - 'podman'
+
+
+- name: 'Ensure default containers service user exists'
+  ansible.builtin.user:
+    name: '{{ podman_containers_user }}'
+    comment: 'Podman service user'
+    system: true
+    shell: '/usr/sbin/nologin'
+    create_home: true
+    home: '{{ podman_containers_home }}'
+
+
+- name: 'Ensure subuid mapping for containers user'
+  ansible.builtin.lineinfile:
+    path: '/etc/subuid'
+    regexp: '^{{ podman_containers_user }}:'
+    line: '{{ podman_containers_user }}:{{ podman_subuid_start }}:{{ podman_subuid_count }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    create: true
+
+
+- name: 'Ensure subgid mapping for containers user'
+  ansible.builtin.lineinfile:
+    path: '/etc/subgid'
+    regexp: '^{{ podman_containers_user }}:'
+    line: '{{ podman_containers_user }}:{{ podman_subgid_start }}:{{ podman_subgid_count }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    create: true
+
+
+- name: 'Enable rootless compat for ping and port binding'
+  ansible.builtin.copy:
+    src: 'sysctl.d-99-containers.conf'
+    dest: '/etc/sysctl.d/99-containers.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Reload sysctl settings'
+
+
+- name: 'Set containerization fact'
+  ansible.builtin.set_fact:
+    podman_containerization: true
+    cacheable: true
+  tags:
+    - 'fact'

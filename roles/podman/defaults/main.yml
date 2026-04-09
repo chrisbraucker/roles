@@ -1,0 +1,7 @@
+---
+podman_containers_user: 'containers'
+podman_containers_home: '/opt/containers'
+podman_subuid_start: 200000
+podman_subuid_count: 65536
+podman_subgid_start: 200000
+podman_subgid_count: 65536

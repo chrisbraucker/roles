@@ -1,0 +1,18 @@
+---
+- name: 'Get podman rootless user uid'
+  ansible.builtin.command:
+    cmd: 'id -u {{ podman_rootless_user }}'
+  register: 'podman_rootless_user_uid'
+  changed_when: false
+
+
+- name: 'Enable podman.sock'
+  ansible.builtin.systemd:
+    name: 'podman.socket'
+    state: 'started'
+    enabled: true
+    scope: 'user'
+  become: true
+  become_user: '{{ podman_rootless_user }}'
+  environment:
+    XDG_RUNTIME_DIR: '/run/user/{{ podman_rootless_user_uid.stdout }}'
