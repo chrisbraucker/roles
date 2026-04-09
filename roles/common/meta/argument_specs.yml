@@ -26,6 +26,26 @@ argument_specs:
         default: 'UTC'
         description: 'System timezone applied by the role.'
 
+      common_journald_manage:
+        type: 'bool'
+        default: false
+        description: 'Whether the role should manage a journald drop-in.'
+
+      common_journald_storage:
+        type: 'str'
+        default: 'volatile'
+        description: 'Storage mode written to the journald drop-in when management is enabled.'
+
+      common_journald_runtime_max_use:
+        type: 'str'
+        default: ''
+        description: 'Optional RuntimeMaxUse limit for volatile journald storage.'
+
+      common_journald_system_max_use:
+        type: 'str'
+        default: ''
+        description: 'Optional SystemMaxUse limit for persistent journald storage.'
+
       common_gpg_cache_dir:
         type: 'str'
         default: '/var/cache/gpg'

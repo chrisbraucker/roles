@@ -4,6 +4,12 @@
     name: '{{ common_timezone }}'
 
 
+- name: 'Configure journald'
+  ansible.builtin.import_tasks: 'journald.yml'
+  tags:
+    - 'journald'
+
+
 - name: 'Run OS-dependent setup'
   ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
 

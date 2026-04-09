@@ -7,3 +7,8 @@ common_ssh_allow_group: 'ssh'
 common_gpg_cache_dir: '/var/cache/gpg'
 
 common_timezone: 'UTC'
+
+common_journald_manage: false
+common_journald_storage: 'volatile'
+common_journald_runtime_max_use: ''
+common_journald_system_max_use: ''

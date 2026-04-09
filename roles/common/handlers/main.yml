@@ -7,3 +7,9 @@
   ansible.builtin.command:
     cmd: 'dracut -f'
   changed_when: true
+
+
+- name: 'Restart systemd-journald'
+  ansible.builtin.systemd:
+    name: 'systemd-journald.service'
+    state: 'restarted'

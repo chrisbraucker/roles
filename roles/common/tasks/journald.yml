@@ -1,0 +1,32 @@
+---
+- name: 'Ensure journald drop-in directory exists'
+  ansible.builtin.file:
+    path: '/etc/systemd/journald.conf.d'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  when: 'common_journald_manage | bool'
+
+
+- name: 'Configure journald drop-in'
+  ansible.builtin.template:
+    src: 'journald.conf.j2'
+    dest: '/etc/systemd/journald.conf.d/50-common.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Restart systemd-journald'
+  when: 'common_journald_manage | bool'
+
+
+- name: 'Remove journald drop-in when management is disabled'
+  ansible.builtin.file:
+    path: '/etc/systemd/journald.conf.d/50-common.conf'
+    state: 'absent'
+  notify: 'Restart systemd-journald'
+  when: 'not common_journald_manage | bool'
