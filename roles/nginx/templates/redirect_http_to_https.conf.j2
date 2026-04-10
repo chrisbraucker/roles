@@ -1,0 +1,9 @@
+server {
+    listen {{ nginx_global_https_redirect_http_port }} default_server;
+    {% if nginx_global_https_redirect_http_ipv6 %}
+    listen [::]:{{ nginx_global_https_redirect_http_port }} default_server;
+    {% endif %}
+    server_name _;
+
+    return 308 https://$host$request_uri;
+}

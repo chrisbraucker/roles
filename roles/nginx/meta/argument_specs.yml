@@ -1,0 +1,162 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys nginx core as a Quadlet-managed reverse proxy.'
+    options:
+      nginx_base_dir:
+        type: 'str'
+        default: '/srv/nginx'
+        description: 'Base host directory for nginx configuration, content, cache, and certificates.'
+
+      nginx_image:
+        type: 'str'
+        default: 'docker.io/library/nginx:mainline'
+        description: 'Container image used for the nginx workload.'
+
+      nginx_service_name:
+        type: 'str'
+        default: 'nginx'
+        description: 'Quadlet and systemd service name for the nginx container.'
+
+      nginx_publish_ports:
+        type: 'list'
+        elements: 'str'
+        default:
+          - '80:80/tcp'
+          - '443:443/tcp'
+        description: 'Host ports published by the nginx container.'
+
+      nginx_manage_edge_network:
+        type: 'bool'
+        default: true
+        description: 'Whether the role should create the default edge Quadlet network.'
+
+      nginx_networks:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'edge.network'
+        description: 'Quadlet networks attached to the nginx container.'
+
+      nginx_ssl_session_cache:
+        type: 'str'
+        default: 'shared:SSL:10m'
+        description: 'Global TLS session cache policy rendered into the nginx http block.'
+
+      nginx_ssl_session_timeout:
+        type: 'str'
+        default: '1h'
+        description: 'Global TLS session reuse timeout rendered into the nginx http block.'
+
+      nginx_ssl_stapling_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether HTTPS sites should render OCSP stapling directives.'
+
+      nginx_ssl_stapling_verify:
+        type: 'bool'
+        default: true
+        description: 'Whether stapled OCSP responses should be verified when stapling is enabled.'
+
+      nginx_ssl_stapling_resolver:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Resolver servers used for OCSP responder lookups when stapling is enabled.'
+
+      nginx_ssl_stapling_resolver_valid:
+        type: 'str'
+        default: ''
+        description: 'Optional resolver validity window appended to the OCSP resolver configuration.'
+
+      nginx_global_https_redirect:
+        type: 'bool'
+        default: false
+        description: 'Whether nginx should render a catch-all HTTP server that redirects to HTTPS.'
+
+      nginx_global_https_redirect_http_port:
+        type: 'int'
+        default: 80
+        description: 'HTTP listen port used by the global HTTPS redirect server.'
+
+      nginx_global_https_redirect_http_ipv6:
+        type: 'bool'
+        default: true
+        description: 'Whether the global HTTPS redirect server should also listen on IPv6.'
+
+  http_site:
+    short_description: 'Renders nginx HTTP site definitions and related HTTP snippets.'
+    options:
+      nginx_base_dir:
+        type: 'str'
+        default: '/srv/nginx'
+        description: 'Base host directory for nginx configuration, content, cache, and certificates.'
+
+      nginx_http_sites:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Structured HTTP server definitions rendered into http.d.'
+
+      nginx_ssl_stapling_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether HTTPS sites should render OCSP stapling directives.'
+
+      nginx_ssl_stapling_verify:
+        type: 'bool'
+        default: true
+        description: 'Whether stapled OCSP responses should be verified when stapling is enabled.'
+
+      nginx_ssl_stapling_resolver:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Resolver servers used for OCSP responder lookups when stapling is enabled.'
+
+      nginx_ssl_stapling_resolver_valid:
+        type: 'str'
+        default: ''
+        description: 'Optional resolver validity window appended to the OCSP resolver configuration.'
+
+      nginx_http_site_hsts_default:
+        type: 'bool'
+        default: false
+        description: 'Default HSTS enablement for HTTPS HTTP sites.'
+
+      nginx_http_site_hsts_header_value:
+        type: 'str'
+        default: 'max-age=31536000; includeSubDomains'
+        description: 'Default Strict-Transport-Security header value used when a site enables HSTS.'
+
+      nginx_http_snippets:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Additional raw HTTP config snippets rendered into http.d.'
+
+      nginx_include_snippets:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Reusable include snippets rendered into includes.'
+
+  stream_site:
+    short_description: 'Renders nginx stream proxy definitions and related stream snippets.'
+    options:
+      nginx_base_dir:
+        type: 'str'
+        default: '/srv/nginx'
+        description: 'Base host directory for nginx configuration, content, cache, and certificates.'
+
+      nginx_stream_sites:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Structured stream proxy definitions rendered into stream.d.'
+
+      nginx_stream_snippets:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Additional raw stream config snippets rendered into stream.d.'

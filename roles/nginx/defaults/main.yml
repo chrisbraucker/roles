@@ -1,0 +1,64 @@
+---
+nginx_base_dir: '/srv/nginx'
+nginx_config_dir: '{{ (nginx_base_dir, "config") | path_join }}'
+nginx_http_config_dir: '{{ (nginx_config_dir, "http.d") | path_join }}'
+nginx_stream_config_dir: '{{ (nginx_config_dir, "stream.d") | path_join }}'
+nginx_include_config_dir: '{{ (nginx_config_dir, "includes") | path_join }}'
+nginx_html_dir: '{{ (nginx_base_dir, "html") | path_join }}'
+nginx_cache_dir: '{{ (nginx_base_dir, "cache") | path_join }}'
+nginx_cert_dir: '{{ (nginx_base_dir, "certs") | path_join }}'
+
+nginx_config_owner: 'root'
+nginx_config_group: 'root'
+nginx_config_dir_mode: '0755'
+nginx_config_file_mode: '0644'
+
+nginx_image: 'docker.io/library/nginx:mainline'
+nginx_service_name: 'nginx'
+nginx_container_name: 'nginx'
+nginx_service_user: 'containers'
+nginx_state: 'started'
+nginx_enable: true
+nginx_restart: 'on-failure'
+nginx_timeout_start: '30s'
+nginx_timeout_stop: '15s'
+nginx_publish_ports:
+  - '80:80/tcp'
+  - '443:443/tcp'
+nginx_networks:
+  - 'edge.network'
+nginx_extra_volumes: []
+nginx_extra_quadlet_args: []
+nginx_env: {}
+nginx_env_files: []
+
+nginx_manage_edge_network: true
+nginx_edge_network:
+  name: 'edge'
+  description: 'Ingress network for reverse proxy workloads'
+  network_name: 'edge'
+  driver: 'bridge'
+
+nginx_worker_processes: 'auto'
+nginx_worker_connections: 1024
+nginx_keepalive_timeout: '65s'
+nginx_client_max_body_size: '64m'
+nginx_sendfile: true
+nginx_server_tokens: false
+nginx_ssl_session_cache: 'shared:SSL:10m'
+nginx_ssl_session_timeout: '1h'
+nginx_ssl_stapling_enabled: false
+nginx_ssl_stapling_verify: true
+nginx_ssl_stapling_resolver: []
+nginx_ssl_stapling_resolver_valid: ''
+nginx_http_site_hsts_default: false
+nginx_http_site_hsts_header_value: 'max-age=31536000; includeSubDomains'
+nginx_global_https_redirect: false
+nginx_global_https_redirect_http_port: 80
+nginx_global_https_redirect_http_ipv6: true
+
+nginx_http_sites: []
+nginx_stream_sites: []
+nginx_http_snippets: []
+nginx_stream_snippets: []
+nginx_include_snippets: []

@@ -1,0 +1,61 @@
+---
+- name: 'Validate nginx stream site definitions'
+  ansible.builtin.assert:
+    that:
+      - 'item.name is defined or item.filename is defined'
+      - 'item.listen is defined'
+      - 'item.proxy_pass is defined or item.upstream_servers is defined'
+    fail_msg: >-
+      Each nginx stream site needs a name or filename, a listen address, and
+      either proxy_pass or upstream_servers.
+  loop: '{{ nginx_stream_sites }}'
+  loop_control:
+    label: '{{ item.name | default(item.filename | default("<unnamed stream site>")) }}'
+
+
+- name: 'Ensure nginx stream config directories exist'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'directory'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_dir_mode }}'
+  loop:
+    - '{{ nginx_config_dir }}'
+    - '{{ nginx_stream_config_dir }}'
+
+
+- name: 'Render nginx main configuration'
+  ansible.builtin.template:
+    src: 'nginx.conf.j2'
+    dest: '{{ (nginx_config_dir, "nginx.conf") | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  notify: 'Restart nginx'
+
+
+- name: 'Render nginx stream snippets'
+  ansible.builtin.copy:
+    content: '{{ item.content }}'
+    dest: '{{ (nginx_stream_config_dir, item.filename) | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  loop: '{{ nginx_stream_snippets }}'
+  loop_control:
+    label: '{{ item.filename }}'
+  notify: 'Restart nginx'
+
+
+- name: 'Render nginx stream site configs'
+  ansible.builtin.template:
+    src: 'stream_site.conf.j2'
+    dest: '{{ (nginx_stream_config_dir, ((item.filename | default(item.name)) ~ ".conf")) | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  loop: '{{ nginx_stream_sites }}'
+  loop_control:
+    label: '{{ item.name | default(item.filename | default("<unnamed stream site>")) }}'
+  notify: 'Restart nginx'

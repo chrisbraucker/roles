@@ -19,6 +19,25 @@ Notable options:
 - `common_journald_manage`: manages a `journald.conf.d` drop-in when enabled
 - `common_journald_storage`: journald storage mode, for example `volatile` for memory-only host logs
 
+### Nginx
+
+Deploys nginx as a Quadlet-managed reverse proxy and renders `nginx.conf` plus structured HTTP and stream site definitions into a mounted host config tree.
+
+Entry points:
+- `main`: deploys nginx core, directories, base config, and the Quadlet-managed container
+- `http_site`: renders HTTP site definitions, include snippets, and HTTP snippets
+- `stream_site`: renders stream proxy definitions and stream snippets
+
+Core options:
+- `nginx_global_https_redirect`: renders a catch-all HTTP server that redirects all requests to HTTPS
+- `nginx_global_https_redirect_http_port`: HTTP listen port for that redirect server, default `80`
+- `nginx_ssl_session_cache`: global TLS session cache policy, default `shared:SSL:10m`
+- `nginx_ssl_session_timeout`: global TLS session reuse timeout, default `1h`
+- `nginx_ssl_stapling_enabled`: feature-gates OCSP stapling and requires resolver configuration plus trusted chain paths on HTTPS sites
+
+HTTP site behavior:
+- per-site `hsts: true` enables HSTS; the header value defaults to `nginx_http_site_hsts_header_value`
+
 
 ### Podman
 

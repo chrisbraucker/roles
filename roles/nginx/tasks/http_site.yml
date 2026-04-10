@@ -1,0 +1,86 @@
+---
+- name: 'Validate nginx HTTP site definitions'
+  ansible.builtin.assert:
+    that:
+      - 'item.name is defined or item.filename is defined'
+      - 'item.server_name is defined'
+      - 'item.upstream is defined or item.locations is defined or item.root is defined'
+      - >-
+        not (item.listen_https | default(false))
+        or (item.tls_certificate is defined and item.tls_certificate_key is defined)
+      - >-
+        not ((item.listen_https | default(false)) and (nginx_ssl_stapling_enabled | bool))
+        or (
+          (item.tls_trusted_certificate is defined or item.tls_certificate_chain is defined)
+          and (nginx_ssl_stapling_resolver | length > 0)
+        )
+    fail_msg: >-
+      Each nginx HTTP site needs a name or filename, server_name, and either
+      upstream, locations, or root. HTTPS listeners also need certificate
+      paths. If OCSP stapling is enabled, a trusted certificate chain path and
+      resolver are also required.
+  loop: '{{ nginx_http_sites }}'
+  loop_control:
+    label: '{{ item.name | default(item.filename | default("<unnamed http site>")) }}'
+
+
+- name: 'Ensure nginx HTTP config directories exist'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'directory'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_dir_mode }}'
+  loop:
+    - '{{ nginx_config_dir }}'
+    - '{{ nginx_http_config_dir }}'
+    - '{{ nginx_include_config_dir }}'
+
+
+- name: 'Render nginx main configuration'
+  ansible.builtin.template:
+    src: 'nginx.conf.j2'
+    dest: '{{ (nginx_config_dir, "nginx.conf") | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  notify: 'Restart nginx'
+
+
+- name: 'Render nginx include snippets'
+  ansible.builtin.copy:
+    content: '{{ item.content }}'
+    dest: '{{ (nginx_include_config_dir, item.filename) | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  loop: '{{ nginx_include_snippets }}'
+  loop_control:
+    label: '{{ item.filename }}'
+  notify: 'Restart nginx'
+
+
+- name: 'Render nginx HTTP snippets'
+  ansible.builtin.copy:
+    content: '{{ item.content }}'
+    dest: '{{ (nginx_http_config_dir, item.filename) | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  loop: '{{ nginx_http_snippets }}'
+  loop_control:
+    label: '{{ item.filename }}'
+  notify: 'Restart nginx'
+
+
+- name: 'Render nginx HTTP site configs'
+  ansible.builtin.template:
+    src: 'http_site.conf.j2'
+    dest: '{{ (nginx_http_config_dir, ((item.filename | default(item.name)) ~ ".conf")) | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  loop: '{{ nginx_http_sites }}'
+  loop_control:
+    label: '{{ item.name | default(item.filename | default("<unnamed http site>")) }}'
+  notify: 'Restart nginx'
