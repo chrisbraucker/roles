@@ -52,7 +52,6 @@ quadlet_services:
       - 'logger.service'
 
     # Systemd service controls
-    service_user: 'containers'
     restart: 'on-failure'
     timeout_stop: '15s'
     timeout_start: '30s'

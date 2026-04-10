@@ -3,7 +3,6 @@ quadlet_unit_dir: '/etc/containers/systemd'
 quadlet_default_state: 'started'
 quadlet_default_enable: true
 quadlet_default_restart: 'on-failure'
-quadlet_default_user: 'containers'
 quadlet_default_cgroups_mode: 'no-conmon'
 quadlet_default_no_new_privileges: true
 quadlet_default_wanted_by:

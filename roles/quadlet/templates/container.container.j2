@@ -11,7 +11,6 @@ Wants=network-online.target
 {% endfor %}
 
 [Service]
-User={{ item.service_user | default(quadlet_default_user) }}
 Restart={{ item.restart | default(quadlet_default_restart) }}
 {% if item.timeout_start is defined %}TimeoutStartSec={{ item.timeout_start }}
 {% endif %}
