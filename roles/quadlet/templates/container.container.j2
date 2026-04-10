@@ -53,6 +53,8 @@ NoNewPrivileges={{ 'true' if (item.no_new_privileges | default(quadlet_default_n
 {% endfor %}
 {% for cap in item.drop_capabilities | default([]) %}DropCapability={{ cap }}
 {% endfor %}
+{% for cap in item.add_capabilities | default([]) %}AddCapability={{ cap }}
+{% endfor %}
 {% if item.mask is defined %}Mask={{ item.mask }}
 {% endif %}
 {% for secret in item.secrets | default([]) %}Secret={{ secret }}

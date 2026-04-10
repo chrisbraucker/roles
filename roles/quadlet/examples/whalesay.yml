@@ -97,8 +97,9 @@ quadlet_services:
     devices:
       - '/dev/null:/dev/demo-null'
     drop_capabilities:
-      - 'CAP_NET_RAW'
-      - 'CAP_SYS_ADMIN'
+      - 'ALL'
+    add_capabilities:
+      - 'CHOWN'
     mask: '/proc/acpi:/proc/kcore'
     secrets:
       - 'whalesay-token,type=env,target=WHALE_TOKEN'
