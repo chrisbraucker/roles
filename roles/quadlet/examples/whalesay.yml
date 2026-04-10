@@ -1,0 +1,123 @@
+# Example inventory vars for the quadlet role.
+# This is intentionally overbuilt to demonstrate the full current interface,
+# not because docker/whalesay needs any of this in practice.
+quadlet_networks:
+  - name: 'edge'
+    description: 'Example public-ish network for ingress-facing workloads'
+    network_name: 'edge'
+    driver: 'bridge'
+    dns:
+      - '9.9.9.9'
+      - '1.1.1.1'
+    subnets:
+      - '10.89.0.0/24'
+    gateways:
+      - '10.89.0.1'
+    ip_ranges:
+      - '10.89.0.128/25'
+    labels:
+      com.example.scope: 'edge'
+    options:
+      isolate: 'false'
+    wanted_by:
+      - 'multi-user.target'
+
+  - name: 'whale-int'
+    description: 'Example private service network'
+    network_name: 'whale-int'
+    driver: 'bridge'
+    internal: true
+    disable_dns: false
+    ipam_driver: 'host-local'
+    subnets:
+      - '10.90.0.0/24'
+    gateways:
+      - '10.90.0.1'
+    ipv6: false
+    labels:
+      com.example.scope: 'internal'
+    wanted_by:
+      - 'multi-user.target'
+
+quadlet_services:
+  - name: 'whalesay'
+    description: 'Demonstration container that says things like a very large, opinionated cow'
+    image: 'docker.io/docker/whalesay:latest'
+    unit_requires:
+      - 'edge-network.service'
+    unit_wants:
+      - 'logger.service'
+    unit_after:
+      - 'edge-network.service'
+      - 'logger.service'
+
+    # Systemd service controls
+    service_user: 'containers'
+    restart: 'on-failure'
+    timeout_stop: '15s'
+    timeout_start: '30s'
+    service_type: 'oneshot'
+    remain_after_exit: false
+    state: 'started'
+    enable: true
+    wanted_by:
+      - 'multi-user.target'
+      - 'whale-demo.target'
+
+    # Container naming and process controls
+    container_name: 'whalesay-demo'
+    command: 'cowsay Podman Quadlet can be both boring and slightly ridiculous'
+    container_user: '0'
+    workdir: '/tmp'
+    timezone: 'local'
+    no_new_privileges: true
+    cgroups_mode: 'no-conmon'
+    notify: false
+    userns: 'host'
+
+    # Environment sources
+    env:
+      DEMO_MODE: 'everything-enabled'
+      WHALE_MOOD: 'dramatic'
+    env_files:
+      - '/etc/whalesay/demo.env'
+
+    # Storage
+    volumes:
+      - '/srv/whalesay/data:/data:Z'
+      - '/srv/whalesay/cache:/cache:Z'
+
+    # Networking
+    ports:
+      - '8088:8080/tcp'
+    networks:
+      - 'edge.network'
+      - 'whale-int.network'
+
+    # Hardware passthrough
+    devices:
+      - '/dev/null:/dev/demo-null'
+    drop_capabilities:
+      - 'CAP_NET_RAW'
+      - 'CAP_SYS_ADMIN'
+    mask: '/proc/acpi:/proc/kcore'
+    secrets:
+      - 'whalesay-token,type=env,target=WHALE_TOKEN'
+
+    # Metadata
+    labels:
+      traefik.enable: 'false'
+      io.containers.autoupdate: 'registry'
+      com.example.purpose: 'show-every-supported-field'
+
+    # Health checks
+    health_cmd: 'CMD-SHELL test -d /data'
+    health_interval: '30s'
+    health_retries: 3
+    health_start_period: '5s'
+    health_timeout: '5s'
+
+    # Raw Podman arguments for settings not modeled directly by the role
+    extra_args:
+      - '--pull=newer'
+      - '--log-driver=journald'

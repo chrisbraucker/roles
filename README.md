@@ -24,3 +24,9 @@ Notable options:
 
 Ensures presence of the latest distro-maintained podman version on the host and configures sysctls for low-friction, rootful container usage.
 Additionally provides helpers to enable rootless container execution beyond session lifecycle via linger.
+
+
+### Quadlet
+
+Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.
+Provides support for containers and networks, which can be consumed as lightweight playbook-driven instructions or by other roles if more configuration is needed.
