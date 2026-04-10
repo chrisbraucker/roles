@@ -1,0 +1,67 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys containerized certbot renewal through Quadlet and a systemd timer.'
+    options:
+      certbot_email:
+        type: 'str'
+        default: ''
+        description: 'Contact email to be used for certificate registration later.'
+
+      certbot_server:
+        type: 'str'
+        default: 'https://acme-v02.api.letsencrypt.org/directory'
+        description: 'ACME directory URL used for certificate issuance later.'
+
+      certbot_key_type:
+        type: 'str'
+        default: 'ecdsa'
+        description: 'Default key type to use for future certificate requests.'
+
+      certbot_container_image:
+        type: 'str'
+        default: 'docker.io/certbot/certbot:latest'
+        description: 'Container image used for certbot renewal runs.'
+
+      certbot_challenge_type:
+        type: 'str'
+        default: ''
+        description: 'Selected ACME challenge setup imported by the role, for example http_01.'
+
+      certbot_service_name:
+        type: 'str'
+        default: 'certbot'
+        description: 'Base name for the Quadlet certbot unit; Quadlet generates a matching -container.service unit.'
+
+      certbot_timer_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the certbot renewal timer should be enabled and started.'
+
+      certbot_timer_on_calendar:
+        type: 'str'
+        default: 'daily'
+        description: 'OnCalendar expression used by the certbot renewal timer.'
+
+      certbot_timer_randomized_delay_sec:
+        type: 'str'
+        default: '1h'
+        description: 'Randomized delay applied to the certbot renewal timer.'
+
+      certbot_timer_persistent:
+        type: 'bool'
+        default: true
+        description: 'Whether missed timer runs should be triggered after downtime.'
+
+      certbot_reload_service_name:
+        type: 'str'
+        default: 'nginx.service'
+        description: 'Optional systemd service reloaded after successful certbot execution via an OnSuccess hook.'
+
+  http_01:
+    short_description: 'Prepares shared filesystem paths for HTTP-01 webroot challenges.'
+    options:
+      certbot_http_01_webroot:
+        type: 'str'
+        default: '/var/www/letsencrypt'
+        description: 'Webroot directory that an HTTP server should expose for ACME HTTP-01 challenges.'

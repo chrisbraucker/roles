@@ -45,14 +45,17 @@ nginx_keepalive_timeout: '65s'
 nginx_client_max_body_size: '64m'
 nginx_sendfile: true
 nginx_server_tokens: false
+
 nginx_ssl_session_cache: 'shared:SSL:10m'
 nginx_ssl_session_timeout: '1h'
 nginx_ssl_stapling_enabled: false
 nginx_ssl_stapling_verify: true
 nginx_ssl_stapling_resolver: []
 nginx_ssl_stapling_resolver_valid: ''
+
 nginx_http_site_hsts_default: false
 nginx_http_site_hsts_header_value: 'max-age=31536000; includeSubDomains'
+
 nginx_global_https_redirect: false
 nginx_global_https_redirect_http_port: 80
 nginx_global_https_redirect_http_ipv6: true

@@ -9,6 +9,8 @@ Wants=network-online.target
 {% endfor %}
 {% for unit in item.unit_after | default([]) %}After={{ unit }}
 {% endfor %}
+{% for unit in item.unit_on_success | default([]) %}OnSuccess={{ unit }}
+{% endfor %}
 
 [Service]
 Restart={{ item.restart | default(quadlet_default_restart) }}

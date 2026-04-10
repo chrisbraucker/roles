@@ -1,0 +1,6 @@
+[Unit]
+Description=Reload dependent service after successful certbot renewal
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl reload {{ certbot_reload_service_name }}

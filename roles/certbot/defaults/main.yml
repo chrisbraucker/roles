@@ -1,0 +1,19 @@
+---
+certbot_email: ''
+certbot_server: 'https://acme-v02.api.letsencrypt.org/directory'
+certbot_key_type: 'ecdsa'
+certbot_container_image: 'docker.io/certbot/certbot:latest'
+certbot_challenge_type: ''
+certbot_service_name: 'certbot'
+certbot_timer_enabled: true
+certbot_timer_on_calendar: 'daily'
+certbot_timer_randomized_delay_sec: '1h'
+certbot_timer_persistent: true
+
+certbot_config_dir: '/etc/letsencrypt'
+certbot_work_dir: '/var/lib/letsencrypt'
+certbot_logs_dir: '/var/log/letsencrypt'
+
+certbot_reload_service_name: 'nginx.service'
+
+certbot_http_01_webroot: '/var/www/letsencrypt'

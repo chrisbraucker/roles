@@ -1,0 +1,20 @@
+---
+- name: 'Ensure HTTP-01 webroot directories exist'
+  ansible.builtin.file:
+    path: '{{ (certbot_http_01_webroot, ".well-known", "acme-challenge") | path_join }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+
+- name: 'Set certbot HTTP-01 challenge facts'
+  ansible.builtin.set_fact:
+    certbot_challenge_type: 'http_01'
+    certbot_authenticator: 'webroot'
+    certbot_challenge_volumes:
+      - '{{ certbot_http_01_webroot }}:{{ certbot_http_01_webroot }}:Z'
+    certbot_authenticator_args:
+      - '--webroot'
+      - '--webroot-path'
+      - '{{ certbot_http_01_webroot }}'
