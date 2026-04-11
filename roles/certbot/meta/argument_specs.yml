@@ -31,7 +31,13 @@ argument_specs:
       certbot_service_name:
         type: 'str'
         default: 'certbot'
-        description: 'Base name for the Quadlet certbot unit; Quadlet generates a matching -container.service unit.'
+        description: 'Base name for the Quadlet certbot unit and matching renewal timer.'
+
+      certbot_certificates:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Certificate objects managed by the certificates task entrypoint.'
 
       certbot_timer_enabled:
         type: 'bool'
@@ -57,6 +63,50 @@ argument_specs:
         type: 'str'
         default: 'nginx.service'
         description: 'Optional systemd service reloaded after successful certbot execution via an OnSuccess hook.'
+
+  certificates:
+    short_description: 'Issues and updates certificates from structured certificate objects.'
+    options:
+      certbot_email:
+        type: 'str'
+        default: ''
+        description: 'Contact email to be used for certificate registration and certificate issuance.'
+
+      certbot_server:
+        type: 'str'
+        default: 'https://acme-v02.api.letsencrypt.org/directory'
+        description: 'ACME directory URL used for certificate issuance.'
+
+      certbot_key_type:
+        type: 'str'
+        default: 'ecdsa'
+        description: 'Default key type to use for certificate requests unless overridden per certificate.'
+
+      certbot_container_image:
+        type: 'str'
+        default: 'docker.io/certbot/certbot:latest'
+        description: 'Container image used for certificate issuance runs.'
+
+      certbot_challenge_type:
+        type: 'str'
+        default: ''
+        description: 'Selected ACME challenge setup imported by the role, for example http_01.'
+
+      certbot_service_name:
+        type: 'str'
+        default: 'certbot'
+        description: 'Base name used when generating temporary issuance container names.'
+
+      certbot_certificates:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Certificate objects with a certificate name and domains list.'
+
+      certbot_reload_service_name:
+        type: 'str'
+        default: 'nginx.service'
+        description: 'Optional systemd service reloaded after certificate issuance updates.'
 
   http_01:
     short_description: 'Prepares shared filesystem paths for HTTP-01 webroot challenges.'

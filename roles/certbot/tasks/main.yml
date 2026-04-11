@@ -1,40 +1,6 @@
 ---
-- name: 'Validate certbot container configuration'
-  ansible.builtin.assert:
-    that:
-      - 'certbot_container_image | length > 0'
-      - 'certbot_service_name | length > 0'
-    fail_msg: 'certbot_container_image and certbot_service_name must be set.'
-
-
-- name: 'Ensure certbot base directories exist'
-  ansible.builtin.file:
-    path: '{{ item.path }}'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '{{ item.mode | default("0755") }}'
-  loop:
-    - path: '{{ certbot_config_dir }}'
-    - path: '{{ certbot_work_dir }}'
-    - path: '{{ certbot_logs_dir }}'
-  loop_control:
-    label: '{{ item.path }}'
-
-
-- name: 'Configure certbot challenge prerequisites'
-  ansible.builtin.include_tasks: '{{ certbot_challenge_type }}.yml'
-  when: 'certbot_challenge_type | length > 0'
-
-
-- name: 'Assemble certbot quadlet volumes'
-  ansible.builtin.set_fact:
-    certbot_quadlet_volumes: '{{ certbot_default_volumes + certbot_challenge_volumes | default([]) }}'
-  vars:
-    certbot_default_volumes:
-      - '{{ certbot_config_dir }}:/etc/letsencrypt:Z'
-      - '{{ certbot_work_dir }}:/var/lib/letsencrypt:Z'
-      - '{{ certbot_logs_dir }}:/var/log/letsencrypt:Z'
+- name: 'Prepare certbot runtime'
+  ansible.builtin.import_tasks: 'setup.yml'
 
 
 - name: 'Deploy certbot renewal container through quadlet'
@@ -53,7 +19,7 @@
         enable: false
         wanted_by: []
         unit_on_success: '{{ [certbot_service_name ~ "-post.service"] if certbot_reload_service_name | length > 0 else [] }}'
-        volumes: '{{ certbot_quadlet_volumes }}'
+        volumes: '{{ certbot_container_volumes }}'
 
 
 - name: 'Render certbot post-hook service'
@@ -91,6 +57,6 @@
 
 - name: 'Enable and start certbot renewal timer'
   ansible.builtin.systemd:
-    name: '{{ certbot_service_name }}-container.timer'
+    name: '{{ certbot_service_name }}.timer'
     state: '{{ "started" if certbot_timer_enabled else "stopped" }}'
     enabled: '{{ certbot_timer_enabled }}'

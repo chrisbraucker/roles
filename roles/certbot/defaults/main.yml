@@ -5,6 +5,7 @@ certbot_key_type: 'ecdsa'
 certbot_container_image: 'docker.io/certbot/certbot:latest'
 certbot_challenge_type: ''
 certbot_service_name: 'certbot'
+certbot_certificates: []
 certbot_timer_enabled: true
 certbot_timer_on_calendar: 'daily'
 certbot_timer_randomized_delay_sec: '1h'

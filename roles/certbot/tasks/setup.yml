@@ -1,0 +1,40 @@
+---
+- name: 'Validate certbot container configuration'
+  ansible.builtin.assert:
+    that:
+      - 'certbot_container_image | length > 0'
+      - 'certbot_service_name | length > 0'
+      - 'certbot_challenge_type in ["", "http_01"]'
+    fail_msg: >-
+      certbot_container_image and certbot_service_name must be set, and
+      certbot_challenge_type must be empty or one of: http_01.
+
+
+- name: 'Ensure certbot base directories exist'
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '{{ item.mode | default("0755") }}'
+  loop:
+    - path: '{{ certbot_config_dir }}'
+    - path: '{{ certbot_work_dir }}'
+    - path: '{{ certbot_logs_dir }}'
+  loop_control:
+    label: '{{ item.path }}'
+
+
+- name: 'Configure certbot challenge prerequisites'
+  ansible.builtin.include_tasks: '{{ certbot_challenge_type }}.yml'
+  when: 'certbot_challenge_type | length > 0'
+
+
+- name: 'Assemble certbot container volumes'
+  ansible.builtin.set_fact:
+    certbot_container_volumes: '{{ certbot_default_volumes + certbot_challenge_volumes | default([]) }}'
+  vars:
+    certbot_default_volumes:
+      - '{{ certbot_config_dir }}:/etc/letsencrypt:Z'
+      - '{{ certbot_work_dir }}:/var/lib/letsencrypt:Z'
+      - '{{ certbot_logs_dir }}:/var/log/letsencrypt:Z'

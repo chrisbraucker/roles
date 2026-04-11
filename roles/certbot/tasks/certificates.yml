@@ -1,0 +1,76 @@
+---
+- name: 'Prepare certbot runtime'
+  ansible.builtin.import_tasks: 'setup.yml'
+
+
+- name: 'Validate certbot certificate configuration'
+  ansible.builtin.assert:
+    that:
+      - 'certbot_challenge_type | length > 0'
+      - 'certbot_certificates | length > 0'
+      - 'item.name is defined'
+      - 'item.domains is defined'
+      - 'item.domains | length > 0'
+    fail_msg: >-
+      certbot certificates require a configured challenge type plus certificate
+      entries with a name and at least one domain.
+  loop: '{{ certbot_certificates }}'
+  loop_control:
+    label: '{{ item.name | default("<unnamed certificate>") }}'
+
+
+- name: 'Issue or update certbot managed certificates'
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'podman',
+          'run',
+          '--rm',
+          '--name',
+          certbot_service_name ~ '-issue-' ~ item.name,
+          '--volume',
+          certbot_config_dir ~ ':/etc/letsencrypt:Z',
+          '--volume',
+          certbot_work_dir ~ ':/var/lib/letsencrypt:Z',
+          '--volume',
+          certbot_logs_dir ~ ':/var/log/letsencrypt:Z'
+        ]
+        + (
+          certbot_challenge_volumes
+          | default([])
+          | map('regex_replace', '^(.*)$', '--volume=\\1')
+          | list
+        )
+        + [
+          certbot_container_image,
+          'certonly',
+          '--non-interactive',
+          '--agree-tos',
+          '--server',
+          item.server | default(certbot_server),
+          '--cert-name',
+          item.name,
+          '--key-type',
+          item.key_type | default(certbot_key_type)
+        ]
+        + (
+          ['--email', certbot_email]
+          if certbot_email | length > 0
+          else ['--register-unsafely-without-email']
+        )
+        + (certbot_authenticator_args | default([]))
+        + (
+          item.domains
+          | map('regex_replace', '^(.*)$', '-d=\\1')
+          | list
+        )
+      }}
+  register: 'certbot_issue_result'
+  changed_when: >-
+    'Certificate not yet due for renewal' not in certbot_issue_result.stdout
+    and 'No renewals were attempted' not in certbot_issue_result.stdout
+  loop: '{{ certbot_certificates }}'
+  loop_control:
+    label: '{{ item.name }}'
+  notify: 'Reload certbot target service'
