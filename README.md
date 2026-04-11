@@ -44,6 +44,7 @@ Core options:
 - `nginx_ssl_session_cache`: global TLS session cache policy, default `shared:SSL:10m`
 - `nginx_ssl_session_timeout`: global TLS session reuse timeout, default `1h`
 - `nginx_ssl_stapling_enabled`: feature-gates OCSP stapling and requires resolver configuration plus trusted chain paths on HTTPS sites
+- `nginx_certbot_http_01_enabled`: mounts and serves the certbot HTTP-01 webroot on the global HTTP redirect server when enabled
 
 HTTP site behavior:
 - per-site `hsts: true` enables HSTS; the header value defaults to `nginx_http_site_hsts_header_value`

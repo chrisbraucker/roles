@@ -9,6 +9,11 @@
           if nginx_mount_letsencrypt | bool
           else []
         )
+        + (
+          [nginx_certbot_http_01_webroot ~ ':' ~ nginx_certbot_http_01_webroot ~ ':Z,ro']
+          if nginx_certbot_http_01_enabled | bool
+          else []
+        )
         + nginx_extra_volumes
       }}
   vars:
@@ -37,9 +42,18 @@
     - path: '{{ nginx_cert_dir }}'
     - path: '{{ nginx_letsencrypt_dir }}'
       mode: '0755'
+    - path: '{{ nginx_certbot_http_01_webroot }}'
+      mode: '0755'
   loop_control:
     label: '{{ item.path }}'
-  when: 'item.path != nginx_letsencrypt_dir or nginx_mount_letsencrypt | bool'
+  when: >-
+    (
+      item.path != nginx_letsencrypt_dir
+      or nginx_mount_letsencrypt | bool
+    ) and (
+      item.path != nginx_certbot_http_01_webroot
+      or nginx_certbot_http_01_enabled | bool
+    )
 
 
 - name: 'Render nginx main configuration'

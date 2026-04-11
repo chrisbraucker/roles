@@ -5,5 +5,13 @@ server {
     {% endif %}
     server_name _;
 
+    {% if nginx_certbot_http_01_enabled | bool %}
+    location ^~ /.well-known/acme-challenge/ {
+        root {{ nginx_certbot_http_01_webroot }};
+        default_type text/plain;
+        try_files $uri =404;
+    }
+    {% endif %}
+
     return 308 https://$host$request_uri;
 }

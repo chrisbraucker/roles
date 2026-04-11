@@ -48,6 +48,16 @@ argument_specs:
         default: '/etc/letsencrypt'
         description: 'Host path mounted into the nginx container when certbot managed certificates are consumed.'
 
+      nginx_certbot_http_01_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether nginx should mount and serve the certbot HTTP-01 webroot from the global HTTP server.'
+
+      nginx_certbot_http_01_webroot:
+        type: 'str'
+        default: '/var/www/letsencrypt'
+        description: 'Host and container path used for the certbot HTTP-01 webroot.'
+
       nginx_ssl_session_cache:
         type: 'str'
         default: 'shared:SSL:10m'

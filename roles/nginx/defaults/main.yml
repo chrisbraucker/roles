@@ -10,6 +10,8 @@ nginx_cert_dir: '{{ (nginx_base_dir, "certs") | path_join }}'
 nginx_mount_letsencrypt: false
 nginx_letsencrypt_dir: '/etc/letsencrypt'
 nginx_letsencrypt_live_dir: '/etc/letsencrypt/live'
+nginx_certbot_http_01_enabled: '{{ certbot_challenge_type | default("") == "http_01" }}'
+nginx_certbot_http_01_webroot: '{{ certbot_http_01_webroot | default("/var/www/letsencrypt") }}'
 
 nginx_config_owner: 'root'
 nginx_config_group: 'root'
