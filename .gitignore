@@ -2,3 +2,8 @@
 .ansible/
 secrets.yml
 inventory
+
+# Python
+venv
+.venv
+__pycache__
