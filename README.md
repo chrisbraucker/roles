@@ -28,6 +28,7 @@ Entry points:
 - `certificates`: issues or updates certificate lineages from structured certificate objects
 - `http_01`: prepares the shared ACME webroot for HTTP-01 challenges
 
+
 ### Nginx
 
 Deploys nginx as a Quadlet-managed reverse proxy and renders `nginx.conf` plus structured HTTP and stream site definitions into a mounted host config tree.
@@ -60,3 +61,11 @@ Additionally provides helpers to enable rootless container execution beyond sess
 
 Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.
 Provides support for containers and networks, which can be consumed as lightweight playbook-driven instructions or by other roles if more configuration is needed.
+
+Default container hardening baseline:
+- `DropCapability=all`
+- `NoNewPrivileges=true`
+- `ReadOnly=true`
+- `ReadOnlyTmpfs=true`
+
+Per-service writable scratch can be opened explicitly with `Tmpfs=` entries or bind mounts.

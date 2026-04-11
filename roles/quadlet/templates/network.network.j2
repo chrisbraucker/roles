@@ -1,41 +1,58 @@
 # {{ ansible_managed }}
 [Unit]
 Description={{ item.description | default(item.name) }}
-{% for unit in item.unit_requires | default([]) %}Requires={{ unit }}
+{% for unit in item.unit_requires | default([]) -%}
+Requires={{ unit }}
 {% endfor %}
-{% for unit in item.unit_wants | default([]) %}Wants={{ unit }}
+{% for unit in item.unit_wants | default([]) -%}
+Wants={{ unit }}
 {% endfor %}
-{% for unit in item.unit_after | default([]) %}After={{ unit }}
+{% for unit in item.unit_after | default([]) -%}
+After={{ unit }}
 {% endfor %}
 
 [Network]
-{% if item.network_name is defined %}NetworkName={{ item.network_name }}
+{% if item.network_name is defined -%}
+NetworkName={{ item.network_name }}
 {% endif %}
-{% if item.driver is defined %}Driver={{ item.driver }}
+{% if item.driver is defined -%}
+Driver={{ item.driver }}
 {% endif %}
-{% if item.disable_dns is defined %}DisableDNS={{ 'true' if item.disable_dns else 'false' }}
+{% if item.disable_dns is defined -%}
+DisableDNS={{ 'true' if item.disable_dns else 'false' }}
 {% endif %}
-{% for dns_server in item.dns | default([]) %}DNS={{ dns_server }}
+{% for dns_server in item.dns | default([]) -%}
+DNS={{ dns_server }}
 {% endfor %}
-{% if item.internal is defined %}Internal={{ 'true' if item.internal else 'false' }}
+{% if item.internal is defined -%}
+Internal={{ 'true' if item.internal else 'false' }}
 {% endif %}
-{% if item.ipam_driver is defined %}IPAMDriver={{ item.ipam_driver }}
+{% if item.ipam_driver is defined -%}
+IPAMDriver={{ item.ipam_driver }}
 {% endif %}
-{% for ip_range in item.ip_ranges | default([]) %}IPRange={{ ip_range }}
+{% for ip_range in item.ip_ranges | default([]) -%}
+IPRange={{ ip_range }}
 {% endfor %}
-{% if item.ipv6 is defined %}IPv6={{ 'true' if item.ipv6 else 'false' }}
+{% if item.ipv6 is defined -%}
+IPv6={{ 'true' if item.ipv6 else 'false' }}
 {% endif %}
-{% for label_key, label_val in (item.labels | default({})).items() %}Label={{ label_key }}={{ label_val }}
+{% for label_key, label_val in (item.labels | default({})).items() -%}
+Label={{ label_key }}={{ label_val }}
 {% endfor %}
-{% for opt_key, opt_val in (item.options | default({})).items() %}Options={{ opt_key }}={{ opt_val }}
+{% for opt_key, opt_val in (item.options | default({})).items() -%}
+Options={{ opt_key }}={{ opt_val }}
 {% endfor %}
-{% for subnet in item.subnets | default([]) %}Subnet={{ subnet }}
+{% for subnet in item.subnets | default([]) -%}
+Subnet={{ subnet }}
 {% endfor %}
-{% for gateway in item.gateways | default([]) %}Gateway={{ gateway }}
+{% for gateway in item.gateways | default([]) -%}
+Gateway={{ gateway }}
 {% endfor %}
-{% for arg in item.extra_args | default([]) %}PodmanArgs={{ arg }}
+{% for arg in item.extra_args | default([]) -%}
+PodmanArgs={{ arg }}
 {% endfor %}
 
 [Install]
-{% for target in item.wanted_by | default(quadlet_default_wanted_by) %}WantedBy={{ target }}
+{% for target in item.wanted_by | default(quadlet_default_wanted_by) -%}
+WantedBy={{ target }}
 {% endfor %}

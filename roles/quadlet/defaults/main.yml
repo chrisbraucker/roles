@@ -4,7 +4,11 @@ quadlet_default_state: 'started'
 quadlet_default_enable: true
 quadlet_default_restart: 'on-failure'
 quadlet_default_cgroups_mode: 'no-conmon'
+quadlet_default_drop_capabilities:
+  - 'all'
 quadlet_default_no_new_privileges: true
+quadlet_default_read_only: true
+quadlet_default_read_only_tmpfs: true
 quadlet_default_wanted_by:
   - 'multi-user.target'
 quadlet_networks: []
