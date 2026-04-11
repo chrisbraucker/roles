@@ -1,0 +1,1 @@
+(allow init_t container_runtime_t (bpf (prog_run)))

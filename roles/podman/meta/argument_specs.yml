@@ -15,7 +15,7 @@ argument_specs:
 
       podman_subuid_start:
         type: 'int'
-        default: 200000
+        default: 1048576
         description: 'Starting subordinate UID range assigned to the default Podman service account.'
 
       podman_subuid_count:
@@ -25,13 +25,21 @@ argument_specs:
 
       podman_subgid_start:
         type: 'int'
-        default: 200000
+        default: 1048576
         description: 'Starting subordinate GID range assigned to the default Podman service account.'
 
       podman_subgid_count:
         type: 'int'
         default: 131072
         description: 'Subordinate GID range size assigned to the default Podman service account.'
+
+      podman_manage_selinux_bpf_compat:
+        type: 'bool'
+        default: true
+        description: >-
+          Whether the role should install a temporary local SELinux
+          compatibility module on affected AlmaLinux 10 hosts with older
+          container-selinux policy.
 
 
   rootless_compat_user:

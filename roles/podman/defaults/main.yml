@@ -5,3 +5,4 @@ podman_subuid_start: 1048576
 podman_subuid_count: 131072
 podman_subgid_start: 1048576
 podman_subgid_count: 131072
+podman_manage_selinux_bpf_compat: true

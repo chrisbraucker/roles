@@ -1,0 +1,76 @@
+---
+- name: 'Gather installed package facts'
+  ansible.builtin.package_facts:
+    manager: 'auto'
+
+
+- name: 'Check installed SELinux policy modules'
+  ansible.builtin.command:
+    cmd: 'semodule -l'
+  register: 'podman_selinux_modules'
+  changed_when: false
+  when: 'ansible_facts["selinux"]["status"] | default("disabled") == "enabled"'
+
+
+- name: 'Determine whether Podman SELinux BPF compatibility module is required'
+  ansible.builtin.set_fact:
+    podman_selinux_bpf_compat_required: >-
+      {{
+        podman_manage_selinux_bpf_compat | bool
+        and ansible_facts['distribution'] == 'AlmaLinux'
+        and ansible_facts['distribution_major_version'] == '10'
+        and ansible_facts['selinux']['status'] | default('disabled') == 'enabled'
+        and 'container-selinux' in ansible_facts.packages
+        and (
+          ansible_facts.packages['container-selinux'][0].version
+          is version('2.241.0', '<')
+        )
+      }}
+
+
+- name: 'Ensure local SELinux module directory exists'
+  ansible.builtin.file:
+    path: '/etc/selinux/local'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  when: 'podman_selinux_bpf_compat_required | bool'
+
+
+- name: 'Install Podman SELinux BPF compatibility module source'
+  ansible.builtin.copy:
+    src: 'podman-init-container-runtime-bpf-compat.cil'
+    dest: '/etc/selinux/local/podman-init-container-runtime-bpf-compat.cil'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'podman_selinux_bpf_compat_source'
+  when: 'podman_selinux_bpf_compat_required | bool'
+
+
+- name: 'Load Podman SELinux BPF compatibility module'
+  ansible.builtin.command:
+    cmd: 'semodule -i /etc/selinux/local/podman-init-container-runtime-bpf-compat.cil'
+  changed_when: true
+  when:
+    - 'podman_selinux_bpf_compat_required | bool'
+    - >-
+      podman_selinux_bpf_compat_source.changed
+      or 'podman-init-container-runtime-bpf-compat' not in (podman_selinux_modules.stdout | default(''))
+
+
+- name: 'Remove Podman SELinux BPF compatibility module when no longer required'
+  ansible.builtin.command:
+    cmd: 'semodule -r podman-init-container-runtime-bpf-compat'
+  changed_when: true
+  when:
+    - 'not podman_selinux_bpf_compat_required | bool'
+    - "'podman-init-container-runtime-bpf-compat' in (podman_selinux_modules.stdout | default(''))"
+
+
+- name: 'Remove Podman SELinux BPF compatibility module source when no longer required'
+  ansible.builtin.file:
+    path: '/etc/selinux/local/podman-init-container-runtime-bpf-compat.cil'
+    state: 'absent'
+  when: 'not podman_selinux_bpf_compat_required | bool'
