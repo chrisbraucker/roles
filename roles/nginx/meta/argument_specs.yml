@@ -38,6 +38,26 @@ argument_specs:
           - 'edge.network'
         description: 'Quadlet networks attached to the nginx container.'
 
+      nginx_static_edge_ip_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether nginx should use a fixed IP address on the first attached edge network.'
+
+      nginx_static_edge_ip:
+        type: 'str'
+        default: '10.89.0.2'
+        description: 'Static IP address assigned to nginx on the managed edge network when enabled.'
+
+      nginx_edge_subnet:
+        type: 'str'
+        default: '10.89.0.0/24'
+        description: 'Subnet assigned to the managed edge network when nginx_static_edge_ip_enabled is true.'
+
+      nginx_edge_gateway:
+        type: 'str'
+        default: '10.89.0.1'
+        description: 'Gateway assigned to the managed edge network when nginx_static_edge_ip_enabled is true.'
+
       nginx_mount_letsencrypt:
         type: 'bool'
         default: false

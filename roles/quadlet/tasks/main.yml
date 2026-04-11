@@ -60,8 +60,13 @@
 - name: 'Enable and start quadlet network services'
   ansible.builtin.systemd:
     name: '{{ item.name }}-network.service'
-    state: '{{ item.state | default(quadlet_default_state) }}'
-    enabled: '{{ item.enable | default(quadlet_default_enable) }}'
+    state: '{{ (item.state if item.state is defined else none) | default_if_none_or_empty(quadlet_default_state) }}'
+    enabled: >-
+      {{
+        quadlet_default_enable
+        if (item.enable is not defined or item.enable is none)
+        else item.enable
+      }}
   loop: '{{ quadlet_networks }}'
   loop_control:
     label: '{{ item.name }}'
@@ -70,8 +75,13 @@
 - name: 'Enable and start quadlet services'
   ansible.builtin.systemd:
     name: '{{ item.name }}.service'
-    state: '{{ item.state | default(quadlet_default_state) }}'
-    enabled: '{{ item.enable | default(quadlet_default_enable) }}'
+    state: '{{ (item.state if item.state is defined else none) | default_if_none_or_empty(quadlet_default_state) }}'
+    enabled: >-
+      {{
+        quadlet_default_enable
+        if (item.enable is not defined or item.enable is none)
+        else item.enable
+      }}
   loop: '{{ quadlet_services }}'
   loop_control:
     label: '{{ item.name }}'

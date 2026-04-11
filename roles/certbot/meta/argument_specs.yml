@@ -26,6 +26,9 @@ argument_specs:
       certbot_challenge_type:
         type: 'str'
         default: ''
+        choices:
+          - ''
+          - 'http_01'
         description: 'Selected ACME challenge setup imported by the role, for example http_01.'
 
       certbot_service_name:

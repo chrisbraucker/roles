@@ -17,7 +17,7 @@ OnSuccess={{ unit }}
 {% endfor %}
 
 [Service]
-Restart={{ item.restart | default(quadlet_default_restart) }}
+Restart={{ (item.restart if item.restart is defined else none) | default_if_none_or_empty(quadlet_default_restart) }}
 {% if item.timeout_start is defined -%}
 TimeoutStartSec={{ item.timeout_start }}
 {% endif %}
@@ -32,10 +32,10 @@ TimeoutStopSec={{ item.timeout_stop }}
 {% endif %}
 
 [Container]
-ContainerName={{ item.container_name | default(item.name) }}
+ContainerName={{ (item.container_name if item.container_name is defined else none) | default_if_none_or_empty('systemd-' ~ item.name) }}
 Image={{ item.image }}
 {% if item.cgroups_mode is defined or quadlet_default_cgroups_mode | length > 0 -%}
-CgroupsMode={{ item.cgroups_mode | default(quadlet_default_cgroups_mode) }}
+CgroupsMode={{ (item.cgroups_mode if item.cgroups_mode is defined else none) | default_if_none_or_empty(quadlet_default_cgroups_mode) }}
 {% endif %}
 {% if item.command is defined -%}
 Command={{ item.command }}

@@ -6,7 +6,6 @@ nginx_stream_config_dir: '{{ (nginx_config_dir, "stream.d") | path_join }}'
 nginx_include_config_dir: '{{ (nginx_config_dir, "includes") | path_join }}'
 nginx_html_dir: '{{ (nginx_base_dir, "html") | path_join }}'
 nginx_cache_dir: '{{ (nginx_base_dir, "cache") | path_join }}'
-nginx_cert_dir: '{{ (nginx_base_dir, "certs") | path_join }}'
 nginx_mount_letsencrypt: false
 nginx_letsencrypt_dir: '/etc/letsencrypt'
 nginx_letsencrypt_live_dir: '/etc/letsencrypt/live'
@@ -21,14 +20,12 @@ nginx_config_file_mode: '0644'
 nginx_image: 'docker.io/library/nginx:mainline'
 nginx_service_name: 'nginx'
 nginx_container_name:
-nginx_state: 'started'
-nginx_enable: true
+nginx_state:
+nginx_enable:
 nginx_restart:
 nginx_timeout_start: '30s'
 nginx_timeout_stop: '15s'
-nginx_publish_ports:
-  - '80:80/tcp'
-  - '443:443/tcp'
+nginx_publish_ports: []
 nginx_networks:
   - 'edge.network'
 nginx_extra_volumes: []
@@ -37,6 +34,10 @@ nginx_env: {}
 nginx_env_files: []
 
 nginx_manage_edge_network: true
+nginx_static_edge_ip_enabled: false
+nginx_static_edge_ip: '10.89.0.2'
+nginx_edge_subnet: '10.89.0.0/24'
+nginx_edge_gateway: '10.89.0.1'
 nginx_edge_network:
   name: 'edge'
   description: 'Ingress network for reverse proxy workloads'
