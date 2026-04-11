@@ -2,3 +2,4 @@
 - name: 'Reload systemd for quadlet units'
   ansible.builtin.systemd:
     daemon_reload: true
+  become: true

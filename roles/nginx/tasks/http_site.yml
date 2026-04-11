@@ -48,17 +48,6 @@
     - '{{ nginx_http_config_dir }}'
     - '{{ nginx_include_config_dir }}'
 
-
-- name: 'Render nginx main configuration'
-  ansible.builtin.template:
-    src: 'nginx.conf.j2'
-    dest: '{{ (nginx_config_dir, "nginx.conf") | path_join }}'
-    owner: '{{ nginx_config_owner }}'
-    group: '{{ nginx_config_group }}'
-    mode: '{{ nginx_config_file_mode }}'
-  notify: 'Restart nginx'
-
-
 - name: 'Render nginx include snippets'
   ansible.builtin.copy:
     content: '{{ item.content }}'

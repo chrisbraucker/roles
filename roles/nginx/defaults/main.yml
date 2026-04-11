@@ -20,11 +20,10 @@ nginx_config_file_mode: '0644'
 
 nginx_image: 'docker.io/library/nginx:mainline'
 nginx_service_name: 'nginx'
-nginx_container_name: 'nginx'
-nginx_service_user: 'containers'
+nginx_container_name:
 nginx_state: 'started'
 nginx_enable: true
-nginx_restart: 'on-failure'
+nginx_restart:
 nginx_timeout_start: '30s'
 nginx_timeout_stop: '15s'
 nginx_publish_ports:
@@ -45,9 +44,9 @@ nginx_edge_network:
   driver: 'bridge'
 
 nginx_worker_processes: 'auto'
-nginx_worker_connections: 1024
+nginx_worker_connections: 256
 nginx_keepalive_timeout: '65s'
-nginx_client_max_body_size: '64m'
+nginx_client_max_body_size: '10m'
 nginx_sendfile: false
 nginx_server_tokens: false
 
