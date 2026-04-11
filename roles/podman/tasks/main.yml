@@ -54,11 +54,10 @@
 - name: 'Ensure default containers service user exists'
   ansible.builtin.user:
     name: '{{ podman_containers_user }}'
-    comment: 'Podman service user'
+    comment: 'Podman service user for user namespacing'
     system: true
     shell: '/usr/sbin/nologin'
-    create_home: true
-    home: '{{ podman_containers_home }}'
+    create_home: false
 
 
 - name: 'Ensure subuid mapping for containers user'
@@ -81,6 +80,15 @@
     group: 'root'
     mode: '0644'
     create: true
+
+
+- name: 'Ensure default containers root exists'
+  ansible.builtin.file:
+    path: '{{ podman_containers_root }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
 
 
 - name: 'Enable rootless compat for ping and port binding'

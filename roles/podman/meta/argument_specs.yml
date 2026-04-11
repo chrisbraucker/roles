@@ -8,10 +8,10 @@ argument_specs:
         default: 'containers'
         description: 'Default service account intended for rootful Podman-managed workloads.'
 
-      podman_containers_home:
+      podman_containers_root:
         type: 'str'
         default: '/opt/containers'
-        description: 'Home directory for the default Podman service account.'
+        description: 'Default mount point root for container host storage mapping.'
 
       podman_subuid_start:
         type: 'int'

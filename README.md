@@ -56,6 +56,9 @@ HTTP site behavior:
 Ensures presence of the latest distro-maintained podman version on the host and configures sysctls for low-friction, rootful container usage.
 Additionally provides helpers to enable rootless container execution beyond session lifecycle via linger.
 
+Rootful containers by default map host storage under `/opt/containers/`.
+Additionally, the containers users is created and supplied with substitute UID and GID ranges in case UserNS mapping is desired.
+
 
 ### Quadlet
 

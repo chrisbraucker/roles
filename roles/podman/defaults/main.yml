@@ -1,6 +1,6 @@
 ---
 podman_containers_user: 'containers'
-podman_containers_home: '/opt/containers'
+podman_containers_root: '/opt/containers'
 podman_subuid_start: 200000
 podman_subuid_count: 131072
 podman_subgid_start: 200000
