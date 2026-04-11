@@ -7,17 +7,29 @@
       - 'item.upstream is defined or item.locations is defined or item.root is defined'
       - >-
         not (item.listen_https | default(false))
-        or (item.tls_certificate is defined and item.tls_certificate_key is defined)
+        or (
+          (item.tls_certificate is defined and item.tls_certificate_key is defined)
+          or item.tls_certificate_name is defined
+        )
+      - >-
+        not ((item.listen_https | default(false)) and (item.tls_certificate_name is defined))
+        or (nginx_mount_letsencrypt | bool)
       - >-
         not ((item.listen_https | default(false)) and (nginx_ssl_stapling_enabled | bool))
         or (
-          (item.tls_trusted_certificate is defined or item.tls_certificate_chain is defined)
+          (
+            item.tls_trusted_certificate is defined
+            or item.tls_certificate_chain is defined
+            or item.tls_certificate_name is defined
+          )
           and (nginx_ssl_stapling_resolver | length > 0)
         )
     fail_msg: >-
       Each nginx HTTP site needs a name or filename, server_name, and either
       upstream, locations, or root. HTTPS listeners also need certificate
-      paths. If OCSP stapling is enabled, a trusted certificate chain path and
+      paths or a tls_certificate_name. Sites that reference certbot managed
+      certificates require nginx_mount_letsencrypt. If OCSP stapling is
+      enabled, a trusted certificate chain path or tls_certificate_name and a
       resolver are also required.
   loop: '{{ nginx_http_sites }}'
   loop_control:

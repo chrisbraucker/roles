@@ -38,6 +38,16 @@ argument_specs:
           - 'edge.network'
         description: 'Quadlet networks attached to the nginx container.'
 
+      nginx_mount_letsencrypt:
+        type: 'bool'
+        default: false
+        description: "Whether the role should mount the host Let's Encrypt tree into the nginx container."
+
+      nginx_letsencrypt_dir:
+        type: 'str'
+        default: '/etc/letsencrypt'
+        description: 'Host path mounted into the nginx container when certbot managed certificates are consumed.'
+
       nginx_ssl_session_cache:
         type: 'str'
         default: 'shared:SSL:10m'
@@ -128,6 +138,16 @@ argument_specs:
         type: 'str'
         default: 'max-age=31536000; includeSubDomains'
         description: 'Default Strict-Transport-Security header value used when a site enables HSTS.'
+
+      nginx_mount_letsencrypt:
+        type: 'bool'
+        default: false
+        description: 'Whether nginx is allowed to consume certbot managed certificates via tls_certificate_name.'
+
+      nginx_letsencrypt_live_dir:
+        type: 'str'
+        default: '/etc/letsencrypt/live'
+        description: 'Container path used to derive fullchain, privkey, and chain paths for tls_certificate_name.'
 
       nginx_http_snippets:
         type: 'list'

@@ -37,6 +37,8 @@ Core options:
 
 HTTP site behavior:
 - per-site `hsts: true` enables HSTS; the header value defaults to `nginx_http_site_hsts_header_value`
+- per-site `tls_certificate_name` derives Let’s Encrypt paths under `/etc/letsencrypt/live/<name>/` when `nginx_mount_letsencrypt` is enabled
+- per-location proxy controls support `proxy_buffering`, `proxy_request_buffering`, `proxy_send_timeout`, and `proxy_read_timeout`
 
 
 ### Podman

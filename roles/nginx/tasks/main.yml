@@ -1,7 +1,16 @@
 ---
 - name: 'Assemble nginx quadlet volumes'
   ansible.builtin.set_fact:
-    nginx_quadlet_volumes: '{{ nginx_default_volumes + nginx_extra_volumes }}'
+    nginx_quadlet_volumes: >-
+      {{
+        nginx_default_volumes
+        + (
+          [nginx_letsencrypt_dir ~ ':/etc/letsencrypt:Z,ro']
+          if nginx_mount_letsencrypt | bool
+          else []
+        )
+        + nginx_extra_volumes
+      }}
   vars:
     nginx_default_volumes:
       - '{{ nginx_config_dir }}:/etc/nginx:Z'
@@ -26,8 +35,11 @@
     - path: '{{ nginx_html_dir }}'
     - path: '{{ nginx_cache_dir }}'
     - path: '{{ nginx_cert_dir }}'
+    - path: '{{ nginx_letsencrypt_dir }}'
+      mode: '0755'
   loop_control:
     label: '{{ item.path }}'
+  when: 'item.path != nginx_letsencrypt_dir or nginx_mount_letsencrypt | bool'
 
 
 - name: 'Render nginx main configuration'

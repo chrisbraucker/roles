@@ -7,6 +7,9 @@ nginx_include_config_dir: '{{ (nginx_config_dir, "includes") | path_join }}'
 nginx_html_dir: '{{ (nginx_base_dir, "html") | path_join }}'
 nginx_cache_dir: '{{ (nginx_base_dir, "cache") | path_join }}'
 nginx_cert_dir: '{{ (nginx_base_dir, "certs") | path_join }}'
+nginx_mount_letsencrypt: false
+nginx_letsencrypt_dir: '/etc/letsencrypt'
+nginx_letsencrypt_live_dir: '/etc/letsencrypt/live'
 
 nginx_config_owner: 'root'
 nginx_config_group: 'root'
@@ -43,7 +46,7 @@ nginx_worker_processes: 'auto'
 nginx_worker_connections: 1024
 nginx_keepalive_timeout: '65s'
 nginx_client_max_body_size: '64m'
-nginx_sendfile: true
+nginx_sendfile: false
 nginx_server_tokens: false
 
 nginx_ssl_session_cache: 'shared:SSL:10m'
