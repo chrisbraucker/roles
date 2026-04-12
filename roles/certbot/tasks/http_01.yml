@@ -13,7 +13,7 @@
     certbot_challenge_type: 'http_01'
     certbot_authenticator: 'webroot'
     certbot_challenge_volumes:
-      - '{{ certbot_http_01_webroot }}:{{ certbot_http_01_webroot }}:Z'
+      - '{{ certbot_http_01_webroot }}:{{ certbot_http_01_webroot }}:z'
     certbot_authenticator_args:
       - '--webroot'
       - '--webroot-path'

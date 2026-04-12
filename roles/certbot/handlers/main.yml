@@ -6,6 +6,6 @@
 
 - name: 'Reload certbot target service'
   ansible.builtin.systemd_service:
-    name: '{{ certbot_reload_service_name }}'
-    state: 'reloaded'
+    name: '{{ certbot_service_name }}-post.service'
+    state: 'restarted'
   when: 'certbot_reload_service_name | length > 0'

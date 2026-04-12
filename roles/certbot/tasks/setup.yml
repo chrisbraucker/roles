@@ -35,6 +35,6 @@
     certbot_container_volumes: '{{ certbot_default_volumes + certbot_challenge_volumes | default([]) }}'
   vars:
     certbot_default_volumes:
-      - '{{ certbot_config_dir }}:/etc/letsencrypt:Z'
+      - '{{ certbot_config_dir }}:/etc/letsencrypt:z'
       - '{{ certbot_work_dir }}:/var/lib/letsencrypt:Z'
       - '{{ certbot_logs_dir }}:/var/log/letsencrypt:Z'

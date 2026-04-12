@@ -1,6 +1,6 @@
 ---
 certbot_email: ''
-certbot_server: 'https://acme-v02.api.letsencrypt.org/directory'
+certbot_server: ''
 certbot_key_type: 'ecdsa'
 certbot_container_image: 'docker.io/certbot/certbot:latest'
 certbot_challenge_type: ''

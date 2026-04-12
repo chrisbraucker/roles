@@ -33,12 +33,39 @@
   notify: 'Reload systemd daemon'
 
 
+- name: 'Ensure certbot post-hook script directory exists'
+  ansible.builtin.file:
+    path: '/usr/local/libexec'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  when: 'certbot_reload_service_name | length > 0'
+
+
+- name: 'Render certbot post-hook script'
+  ansible.builtin.template:
+    src: 'certbot-post.sh.j2'
+    dest: '{{ ("/usr/local/libexec", certbot_service_name ~ "-post.sh") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  when: 'certbot_reload_service_name | length > 0'
+
+
 - name: 'Remove certbot post-hook service when reload action is disabled'
   ansible.builtin.file:
     path: '{{ ("/etc/systemd/system", certbot_service_name ~ "-post.service") | path_join }}'
     state: 'absent'
   when: 'certbot_reload_service_name | length == 0'
   notify: 'Reload systemd daemon'
+
+
+- name: 'Remove certbot post-hook script when reload action is disabled'
+  ansible.builtin.file:
+    path: '{{ ("/usr/local/libexec", certbot_service_name ~ "-post.sh") | path_join }}'
+    state: 'absent'
+  when: 'certbot_reload_service_name | length == 0'
 
 
 - name: 'Render certbot renewal timer'

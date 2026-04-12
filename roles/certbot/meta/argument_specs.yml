@@ -10,8 +10,8 @@ argument_specs:
 
       certbot_server:
         type: 'str'
-        default: 'https://acme-v02.api.letsencrypt.org/directory'
-        description: 'ACME directory URL used for certificate issuance later.'
+        default: ''
+        description: 'Optional ACME directory URL used for certificate issuance later. When unset, certbot uses its own default server selection.'
 
       certbot_key_type:
         type: 'str'
@@ -77,8 +77,8 @@ argument_specs:
 
       certbot_server:
         type: 'str'
-        default: 'https://acme-v02.api.letsencrypt.org/directory'
-        description: 'ACME directory URL used for certificate issuance.'
+        default: ''
+        description: 'Optional ACME directory URL used for certificate issuance. When unset, certbot uses its own default server selection.'
 
       certbot_key_type:
         type: 'str'

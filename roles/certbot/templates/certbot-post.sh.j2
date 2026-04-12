@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+{% if nginx_runtime_gid is defined and nginx_runtime_gid is not none and (nginx_runtime_gid | string | length > 0) %}
+for root in "{{ certbot_config_dir }}/live" "{{ certbot_config_dir }}/archive"; do
+    if [ -d "$root" ]; then
+        chgrp -R "{{ nginx_runtime_gid }}" "$root"
+        chmod -R g+r "$root"
+        find "$root" -type d -exec chmod g+x {} +
+    fi
+done
+{% endif %}
+
+exec /usr/bin/systemctl reload {{ certbot_reload_service_name }}

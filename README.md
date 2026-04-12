@@ -9,47 +9,32 @@ Efficient, boring, and just works.
 
 Hardens hosts that are exposed to the elements with firewall, fail2ban and others.
 
+[Role README](roles/bastion/README.md)
 
 ### Common
 
 Configures defaults for debian and almalinux-based distros.
 
-Notable options:
-- `common_ssh_authorized_keys`: exclusive SSH keys for the management user when non-empty
-- `common_journald_manage`: manages a `journald.conf.d` drop-in when enabled
-- `common_journald_storage`: journald storage mode, for example `volatile` for memory-only host logs
+[Role README](roles/common/README.md)
+
+### Firewall
+
+Installs and manages the host firewall baseline via firewalld.
+
+[Role README](roles/firewall/README.md)
 
 ### Certbot
 
 Deploys certbot renewal as a Quadlet-managed oneshot container plus a systemd timer.
 
-Entry points:
-- `main`: deploys the renewal container, post-success reload hook, and timer
-- `certificates`: issues or updates certificate lineages from structured certificate objects
-- `http_01`: prepares the shared ACME webroot for HTTP-01 challenges
+[Role README](roles/certbot/README.md)
 
 
 ### Nginx
 
 Deploys nginx as a Quadlet-managed reverse proxy and renders `nginx.conf` plus structured HTTP and stream site definitions into a mounted host config tree.
 
-Entry points:
-- `main`: deploys nginx core, directories, base config, and the Quadlet-managed container
-- `http_site`: renders HTTP site definitions, include snippets, and HTTP snippets
-- `stream_site`: renders stream proxy definitions and stream snippets
-
-Core options:
-- `nginx_global_https_redirect`: renders a catch-all HTTP server that redirects all requests to HTTPS
-- `nginx_global_https_redirect_http_port`: HTTP listen port for that redirect server, default `80`
-- `nginx_ssl_session_cache`: global TLS session cache policy, default `shared:SSL:10m`
-- `nginx_ssl_session_timeout`: global TLS session reuse timeout, default `1h`
-- `nginx_ssl_stapling_enabled`: feature-gates OCSP stapling and requires resolver configuration plus trusted chain paths on HTTPS sites
-- `nginx_certbot_http_01_enabled`: mounts and serves the certbot HTTP-01 webroot on the global HTTP redirect server when enabled
-
-HTTP site behavior:
-- per-site `hsts: true` enables HSTS; the header value defaults to `nginx_http_site_hsts_header_value`
-- per-site `tls_certificate_name` derives Let's Encrypt paths under `/etc/letsencrypt/live/<name>/` when `nginx_mount_letsencrypt` is enabled
-- per-location proxy controls support `proxy_buffering`, `proxy_request_buffering`, `proxy_send_timeout`, and `proxy_read_timeout`
+[Role README](roles/nginx/README.md)
 
 
 ### Podman
@@ -57,8 +42,7 @@ HTTP site behavior:
 Ensures presence of the latest distro-maintained podman version on the host and configures sysctls for low-friction, rootful container usage.
 Additionally provides helpers to enable rootless container execution beyond session lifecycle via linger.
 
-Rootful containers by default map host storage under `/opt/containers/`.
-Additionally, the containers users is created and supplied with substitute UID and GID ranges in case UserNS mapping is desired.
+[Role README](roles/podman/README.md)
 
 
 ### Quadlet
@@ -66,10 +50,4 @@ Additionally, the containers users is created and supplied with substitute UID a
 Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.
 Provides support for containers and networks, which can be consumed as lightweight playbook-driven instructions or by other roles if more configuration is needed.
 
-Default container hardening baseline:
-- `DropCapability=all`
-- `NoNewPrivileges=true`
-- `ReadOnly=true`
-- `ReadOnlyTmpfs=true`
-
-Per-service writable scratch can be opened explicitly with `Tmpfs=` entries or bind mounts.
+[Role README](roles/quadlet/README.md)

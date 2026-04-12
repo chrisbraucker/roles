@@ -39,7 +39,7 @@
         + (
           certbot_challenge_volumes
           | default([])
-          | map('regex_replace', '^(.*)$', '--volume=\\1')
+          | map('strformat', '--volume=%s')
           | list
         )
         + [
@@ -47,13 +47,24 @@
           'certonly',
           '--non-interactive',
           '--agree-tos',
-          '--server',
-          item.server | default(certbot_server),
           '--cert-name',
           item.name,
           '--key-type',
           item.key_type | default(certbot_key_type)
         ]
+        + (
+          ['--server', item.server]
+          if (
+            item.server is defined
+            and item.server is not none
+            and item.server != ''
+          )
+          else (
+            ['--server', certbot_server]
+            if certbot_server | length > 0
+            else []
+          )
+        )
         + (
           ['--email', certbot_email]
           if certbot_email | length > 0
@@ -62,7 +73,7 @@
         + (certbot_authenticator_args | default([]))
         + (
           item.domains
-          | map('regex_replace', '^(.*)$', '-d=\\1')
+          | map('strformat', '-d=%s')
           | list
         )
       }}
