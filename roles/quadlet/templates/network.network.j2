@@ -52,7 +52,10 @@ Gateway={{ gateway }}
 PodmanArgs={{ arg }}
 {% endfor %}
 
+{% set install_targets = item.wanted_by if item.wanted_by is defined else quadlet_default_wanted_by %}
+{% if install_targets | length > 0 %}
 [Install]
-{% for target in item.wanted_by | default(quadlet_default_wanted_by) -%}
+{% for target in install_targets -%}
 WantedBy={{ target }}
 {% endfor %}
+{% endif %}

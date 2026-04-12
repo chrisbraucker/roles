@@ -38,7 +38,7 @@ Image={{ item.image }}
 CgroupsMode={{ (item.cgroups_mode if item.cgroups_mode is defined else none) | default_if_none_or_empty(quadlet_default_cgroups_mode) }}
 {% endif %}
 {% if item.command is defined -%}
-Command={{ item.command }}
+Exec={{ item.command }}
 {% endif %}
 {% if item.container_user is defined -%}
 User={{ item.container_user }}
@@ -113,7 +113,10 @@ HealthTimeout={{ item.health_timeout }}
 PodmanArgs={{ arg }}
 {% endfor %}
 
+{% set install_targets = item.wanted_by if item.wanted_by is defined else quadlet_default_wanted_by %}
+{% if install_targets | length > 0 %}
 [Install]
-{% for target in item.wanted_by | default(quadlet_default_wanted_by) -%}
+{% for target in install_targets -%}
 WantedBy={{ target }}
 {% endfor %}
+{% endif %}

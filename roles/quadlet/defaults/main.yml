@@ -1,6 +1,7 @@
 ---
 quadlet_unit_dir: '/etc/containers/systemd'
-quadlet_default_state: 'started'
+quadlet_default_state: 'restarted'
+quadlet_network_default_state: 'restarted'
 quadlet_default_enable: true
 quadlet_default_restart: 'on-failure'
 quadlet_default_cgroups_mode: 'no-conmon'
