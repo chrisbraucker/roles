@@ -1,11 +1,11 @@
 server {
     listen {{ nginx_global_https_redirect_http_port }} default_server;
-    {% if nginx_global_https_redirect_http_ipv6 %}
+    {% if nginx_global_https_redirect_http_ipv6 -%}
     listen [::]:{{ nginx_global_https_redirect_http_port }} default_server;
     {% endif %}
     server_name _;
 
-    {% if nginx_certbot_http_01_enabled | bool %}
+    {% if nginx_certbot_http_01_enabled | bool -%}
     location ^~ /.well-known/acme-challenge/ {
         root {{ nginx_certbot_http_01_webroot }};
         default_type text/plain;
@@ -13,5 +13,7 @@ server {
     }
     {% endif %}
 
-    return 308 https://$host$request_uri;
+    location / {
+        return 308 https://$host$request_uri;
+    }
 }

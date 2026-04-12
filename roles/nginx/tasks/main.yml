@@ -5,12 +5,12 @@
       {{
         nginx_default_volumes
         + (
-          [nginx_letsencrypt_dir ~ ':/etc/letsencrypt:Z,ro']
+          [nginx_letsencrypt_dir ~ ':/etc/letsencrypt:z,ro']
           if nginx_mount_letsencrypt | bool
           else []
         )
         + (
-          [nginx_certbot_http_01_webroot ~ ':' ~ nginx_certbot_http_01_webroot ~ ':Z,ro']
+          [nginx_certbot_http_01_webroot ~ ':' ~ nginx_certbot_http_01_webroot ~ ':z,ro']
           if nginx_certbot_http_01_enabled | bool
           else []
         )
@@ -18,8 +18,11 @@
       }}
   vars:
     nginx_default_volumes:
-      - '{{ nginx_config_dir }}:/etc/nginx:Z'
-      - '{{ nginx_html_dir }}:/usr/share/nginx/html:Z'
+      - '{{ (nginx_config_dir, "nginx.conf") | path_join }}:/etc/nginx/nginx.conf:Z'
+      - '{{ nginx_http_config_dir }}:/etc/nginx/http.d:Z'
+      - '{{ nginx_stream_config_dir }}:/etc/nginx/stream.d:Z'
+      - '{{ nginx_include_config_dir }}:/etc/nginx/includes:Z'
+      - '{{ nginx_html_dir }}:/usr/share/nginx/html:z'
       - '{{ nginx_cache_dir }}:/var/cache/nginx:Z'
 
 
@@ -117,7 +120,16 @@
         networks: >-
           {{
             (
-              [nginx_networks[0] ~ ':ip=' ~ nginx_static_edge_ip]
+              [
+                nginx_networks[0]
+                ~ ':ip=' ~ nginx_static_edge_ip
+                ~ ',mac=' ~ (
+                  nginx_static_edge_mac
+                  | default_if_none_or_empty(
+                    nginx_static_edge_ip | ipv4_to_mac(nginx_static_edge_mac_prefix)
+                  )
+                )
+              ]
               if (nginx_static_edge_ip_enabled | bool and nginx_networks | length > 0)
               else [nginx_networks[0]]
             )
@@ -125,7 +137,9 @@
           }}
         env: '{{ nginx_env }}'
         env_files: '{{ nginx_env_files }}'
+        container_user: '{{ nginx_container_user }}'
         volumes: '{{ nginx_quadlet_volumes }}'
+        add_capabilities: '{{ nginx_add_capabilities }}'
         health_cmd: 'CMD-SHELL nginx -t'
         health_interval: '30s'
         health_timeout: '5s'

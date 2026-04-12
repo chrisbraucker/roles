@@ -1,6 +1,6 @@
 {% set server_names = item.server_name if item.server_name is sequence and item.server_name is not string else [item.server_name] %}
 {% set tls_certificate_name = item.tls_certificate_name | default('') %}
-{% if tls_certificate_name | length > 0 %}
+{% if tls_certificate_name | length > 0 -%}
 {% set tls_certificate = item.tls_certificate | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/fullchain.pem') %}
 {% set tls_certificate_key = item.tls_certificate_key | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/privkey.pem') %}
 {% set tls_trusted_certificate = item.tls_trusted_certificate | default(item.tls_certificate_chain | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/chain.pem')) %}
@@ -13,10 +13,11 @@ server {
     {% endif %}
     {% endif %}
     {% if item.listen_https | default(false) %}
-    listen {{ item.listen_https_port | default(443) }} ssl http2;
+    listen {{ item.listen_https_port | default(443) }} ssl;
     {% if item.listen_https_ipv6 | default(true) %}
-    listen [::]:{{ item.listen_https_port | default(443) }} ssl http2;
+    listen [::]:{{ item.listen_https_port | default(443) }} ssl;
     {% endif %}
+    http2 on;
     ssl_certificate {{ tls_certificate if tls_certificate_name | length > 0 else item.tls_certificate }};
     ssl_certificate_key {{ tls_certificate_key if tls_certificate_name | length > 0 else item.tls_certificate_key }};
     {% if item.tls_trusted_certificate is defined or item.tls_certificate_chain is defined or tls_certificate_name | length > 0 %}
@@ -26,8 +27,8 @@ server {
     ssl_stapling on;
     ssl_stapling_verify {{ 'on' if nginx_ssl_stapling_verify else 'off' }};
     resolver {{ nginx_ssl_stapling_resolver | join(' ') }}{% if nginx_ssl_stapling_resolver_valid | length > 0 %} valid={{ nginx_ssl_stapling_resolver_valid }}{% endif %};
-    {% endif %}
-    {% endif %}
+    {% endif -%}
+    {% endif -%}
     server_name {{ server_names | join(' ') }};
 
     {% if item.client_max_body_size is defined %}
@@ -48,28 +49,28 @@ server {
         {% if location.gzip_off | default(false) %}
         gzip off;
         {% endif %}
-        {% if location.proxy_pass is defined %}
+        {% if location.proxy_pass is defined -%}
         proxy_pass {{ location.proxy_pass }};
         proxy_http_version 1.1;
-        {% if location.proxy_buffering is defined %}
+        {% if location.proxy_buffering is defined -%}
         proxy_buffering {{ 'on' if location.proxy_buffering else 'off' }};
         {% endif %}
-        {% if location.proxy_request_buffering is defined %}
+        {% if location.proxy_request_buffering is defined -%}
         proxy_request_buffering {{ 'on' if location.proxy_request_buffering else 'off' }};
         {% endif %}
-        {% if location.proxy_send_timeout is defined %}
+        {% if location.proxy_send_timeout is defined -%}
         proxy_send_timeout {{ location.proxy_send_timeout }};
         {% endif %}
-        {% if location.proxy_read_timeout is defined %}
+        {% if location.proxy_read_timeout is defined -%}
         proxy_read_timeout {{ location.proxy_read_timeout }};
-        {% endif %}
+        {% endif -%}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
-        {% if location.websocket | default(false) %}
+        {% if location.websocket | default(false) -%}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         {% endif %}
@@ -79,13 +80,13 @@ server {
         include {{ include_file }};
         {% endfor %}
         {% endif %}
-        {% if location.extra_config is defined %}
+        {% if location.extra_config is defined -%}
 {{ location.extra_config | indent(8, true) }}
-        {% endif %}
+        {% endif -%}
     }
     {% endfor %}
 
-    {% if item.extra_server_config is defined %}
+    {% if item.extra_server_config is defined -%}
 {{ item.extra_server_config | indent(4, true) }}
     {% endif %}
 }

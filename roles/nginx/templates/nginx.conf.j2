@@ -1,5 +1,7 @@
 # {{ ansible_managed }}
-user nginx;
+{% if nginx_worker_user | length > 0 %}
+user {{ nginx_worker_user }};
+{% endif %}
 worker_processes {{ nginx_worker_processes }};
 
 error_log /dev/stderr warn;

@@ -48,6 +48,20 @@ argument_specs:
         default: '10.89.0.2'
         description: 'Static IP address assigned to nginx on the managed edge network when enabled.'
 
+      nginx_static_edge_mac:
+        type: 'str'
+        default: ''
+        description: >-
+          Optional static MAC address assigned to nginx on the managed edge
+          network when nginx_static_edge_ip_enabled is true. When unset, the
+          role derives a stable locally administered MAC from
+          nginx_static_edge_ip.
+
+      nginx_static_edge_mac_prefix:
+        type: 'str'
+        default: '02:89'
+        description: 'Two-octet locally administered MAC prefix used when deriving nginx_static_edge_mac from nginx_static_edge_ip.'
+
       nginx_edge_subnet:
         type: 'str'
         default: '10.89.0.0/24'
