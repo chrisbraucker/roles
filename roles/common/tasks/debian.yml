@@ -10,15 +10,7 @@
 - name: 'Install packages'
   ansible.builtin.apt:
     pkg:
-      - 'firewalld'
       - 'ca-certificates'
       - 'curl'
       - 'gnupg'
     state: 'latest'
-
-
-- name: 'Remove unused packages'
-  ansible.builtin.apt:
-    pkg:
-      - 'ufw'
-    state: 'absent'

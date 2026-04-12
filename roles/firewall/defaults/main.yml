@@ -1,0 +1,5 @@
+---
+firewall_backend: 'firewalld'
+firewall_zone: 'public'
+firewall_enable_dhcpv6_client: true
+firewall_port_forwards: []

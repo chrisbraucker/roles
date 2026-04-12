@@ -1,0 +1,10 @@
+---
+- name: 'Validate firewall backend'
+  ansible.builtin.assert:
+    that:
+      - 'firewall_backend == "firewalld"'
+    fail_msg: 'Only firewalld is currently supported by the firewall role.'
+
+
+- name: 'Configure firewalld'
+  ansible.builtin.import_tasks: 'firewalld.yml'
