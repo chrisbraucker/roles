@@ -1,0 +1,142 @@
+---
+argument_specs:
+  main:
+    short_description: 'Installs host-local CrowdSec with the nftables firewall bouncer.'
+    options:
+      crowdsec_manage_repo:
+        type: 'bool'
+        default: true
+        description: 'Whether the role should bootstrap the CrowdSec package repository.'
+
+      crowdsec_enable_service:
+        type: 'bool'
+        default: true
+        description: 'Whether the crowdsec engine service should be enabled and started.'
+
+      crowdsec_enable_firewall_bouncer:
+        type: 'bool'
+        default: true
+        description: 'Whether the CrowdSec firewall bouncer service should be enabled and started.'
+
+      crowdsec_log_media:
+        type: 'str'
+        default: 'stdout'
+        description: 'Log destination written to config.yaml.local.'
+
+      crowdsec_log_level:
+        type: 'str'
+        default: 'info'
+        description: 'Common CrowdSec log level written to config.yaml.local.'
+
+      crowdsec_lapi_listen_uri:
+        type: 'str'
+        default: '127.0.0.1:18090'
+        description: 'Listen URI written to the local API override files.'
+
+      crowdsec_lapi_trusted_ips:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Trusted IP list written to config.yaml.local for the local API.'
+
+      crowdsec_firewall_bouncer_supported_decision_types:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Decision types to implement on the firewall level.'
+
+      crowdsec_lapi_prometheus_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the local API Prometheus endpoint is enabled in config.yaml.local.'
+
+      crowdsec_lapi_prometheus_level:
+        type: 'str'
+        default: 'full'
+        description: 'Prometheus level written to config.yaml.local.'
+
+      crowdsec_lapi_prometheus_listen_addr:
+        type: 'str'
+        default: '127.0.0.1'
+        description: 'Prometheus listen address written to config.yaml.local.'
+
+      crowdsec_lapi_prometheus_listen_port:
+        type: 'int'
+        default: 6060
+        description: 'Prometheus listen port written to config.yaml.local.'
+
+      crowdsec_collections:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'crowdsecurity/linux'
+        description: 'Collections installed through cscli after the engine is available.'
+
+      crowdsec_nginx_journald_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether the role should acquire nginx logs from journald using the configured systemd units.'
+
+      crowdsec_nginx_journald_units:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'nginx.service'
+        description: 'Systemd units acquired as nginx logs from journald when crowdsec_nginx_journald_enabled is true.'
+
+      crowdsec_acquisitions:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Additional acquisition snippets rendered into /etc/crowdsec/acquis.d.'
+
+      crowdsec_firewall_bouncer_package:
+        type: 'str'
+        default: 'crowdsec-firewall-bouncer-nftables'
+        description: 'Firewall bouncer package to install for the chosen backend.'
+
+      crowdsec_firewall_bouncer_name:
+        type: 'str'
+        default: 'crowdsec-firewall-bouncer'
+        description: 'Bouncer registration name used with cscli.'
+
+      crowdsec_firewall_bouncer_api_url:
+        type: 'str'
+        default: 'http://127.0.0.1:18090/'
+        description: 'Local API URL consumed by the firewall bouncer.'
+
+      crowdsec_firewall_bouncer_api_key:
+        type: 'str'
+        default: ''
+        description: 'Optional explicit API key for the firewall bouncer. When unset, the role reuses the existing local config key or generates a new one.'
+
+      crowdsec_firewall_bouncer_mode:
+        type: 'str'
+        default: 'nftables'
+        description: 'Firewall bouncer mode written to the local configuration override.'
+
+      crowdsec_firewall_bouncer_update_frequency:
+        type: 'str'
+        default: '10s'
+        description: 'How often the firewall bouncer pulls decisions from the local API.'
+
+      crowdsec_firewall_bouncer_log_level:
+        type: 'str'
+        default: 'info'
+        description: 'Log level used by the firewall bouncer.'
+
+      crowdsec_firewall_bouncer_nftables_ipv4_priority:
+        type: 'int'
+        default: 20
+        description: 'nftables hook priority used for the IPv4 CrowdSec chain. Higher numeric values run later than firewalld defaults.'
+
+      crowdsec_firewall_bouncer_nftables_ipv6_priority:
+        type: 'int'
+        default: 20
+        description: 'nftables hook priority used for the IPv6 CrowdSec chain. Higher numeric values run later than firewalld defaults.'
+
+      crowdsec_firewall_bouncer_nftables_hooks:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'nftables hooks where the CrowdSec bouncer should attach its chains.'

@@ -1,0 +1,227 @@
+---
+- name: 'Bootstrap CrowdSec repository'
+  ansible.builtin.import_tasks: 'repo.yml'
+  when: 'crowdsec_manage_repo | bool'
+
+
+- name: 'Install CrowdSec engine and firewall bouncer'
+  ansible.builtin.package:
+    name:
+      - 'crowdsec'
+      - '{{ crowdsec_firewall_bouncer_package }}'
+    state: 'latest'
+
+
+- name: 'Ensure CrowdSec configuration directories exist'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  loop:
+    - '/etc/crowdsec/acquis.d'
+    - '/etc/crowdsec/bouncers'
+
+
+- name: 'Render CrowdSec config local override'
+  ansible.builtin.template:
+    src: 'config.yaml.local.j2'
+    dest: '/etc/crowdsec/config.yaml.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Render CrowdSec local API credentials override'
+  ansible.builtin.template:
+    src: 'local_api_credentials.yaml.local.j2'
+    dest: '/etc/crowdsec/local_api_credentials.yaml.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Render CrowdSec nginx journald acquisition'
+  ansible.builtin.template:
+    src: 'acquis_nginx_journald.yaml.j2'
+    dest: '/etc/crowdsec/acquis.d/nginx-journald.yaml'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  when: 'crowdsec_nginx_journald_enabled | bool'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Remove CrowdSec nginx journald acquisition when disabled'
+  ansible.builtin.file:
+    path: '/etc/crowdsec/acquis.d/nginx-journald.yaml'
+    state: 'absent'
+  when: 'not crowdsec_nginx_journald_enabled | bool'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Render additional CrowdSec acquisitions'
+  ansible.builtin.template:
+    src: 'acquisition.yaml.j2'
+    dest: '/etc/crowdsec/acquis.d/{{ item.name }}.yaml'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  loop: '{{ crowdsec_acquisitions }}'
+  loop_control:
+    label: '{{ item.name }}'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Enable and start CrowdSec engine'
+  ansible.builtin.systemd_service:
+    name: 'crowdsec'
+    state: '{{ "started" if crowdsec_enable_service else "stopped" }}'
+    enabled: '{{ crowdsec_enable_service }}'
+
+
+- name: 'Install CrowdSec collections'
+  ansible.builtin.command:
+    argv:
+      - 'cscli'
+      - 'collections'
+      - 'install'
+      - '{{ item }}'
+  register: 'crowdsec_collection_install'
+  changed_when: >-
+    'Nothing to do.' not in crowdsec_collection_install.stdout
+    and 'Nothing to do' not in crowdsec_collection_install.stdout
+  loop: '{{ crowdsec_collections }}'
+  loop_control:
+    label: '{{ item }}'
+  when: 'crowdsec_collections | length > 0'
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Check existing CrowdSec firewall bouncer config'
+  ansible.builtin.stat:
+    path: '/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local'
+  register: 'crowdsec_firewall_bouncer_config_stat'
+
+
+- name: 'Read existing CrowdSec firewall bouncer config'
+  ansible.builtin.slurp:
+    path: '/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local'
+  register: 'crowdsec_firewall_bouncer_existing_config'
+  when: 'crowdsec_firewall_bouncer_config_stat.stat.exists'
+
+
+- name: 'Inspect existing CrowdSec firewall bouncer registration'
+  ansible.builtin.command:
+    argv:
+      - 'cscli'
+      - 'bouncers'
+      - 'inspect'
+      - '{{ crowdsec_firewall_bouncer_name }}'
+      - '-o'
+      - 'json'
+  register: 'crowdsec_firewall_bouncer_inspect'
+  changed_when: false
+  failed_when: false
+
+
+- name: 'Derive CrowdSec firewall bouncer API key'
+  ansible.builtin.set_fact:
+    crowdsec_firewall_bouncer_effective_api_key: >-
+      {{
+        crowdsec_firewall_bouncer_api_key
+        if crowdsec_firewall_bouncer_api_key | length > 0
+        else (
+          (
+            crowdsec_firewall_bouncer_existing_config.content
+            | b64decode
+            | regex_search('(?m)^api_key:\\s*(\\S+)\\s*$', '\\1')
+            | default('', true)
+          )
+          if crowdsec_firewall_bouncer_config_stat.stat.exists
+          else ''
+        )
+      }}
+
+
+- name: 'Register CrowdSec firewall bouncer with existing API key'
+  ansible.builtin.command:
+    argv:
+      - 'cscli'
+      - 'bouncers'
+      - 'add'
+      - '{{ crowdsec_firewall_bouncer_name }}'
+      - '--key'
+      - '{{ crowdsec_firewall_bouncer_effective_api_key }}'
+  changed_when: true
+  when:
+    - 'crowdsec_firewall_bouncer_inspect.rc != 0'
+    - 'crowdsec_firewall_bouncer_effective_api_key | length > 0'
+
+
+- name: 'Generate CrowdSec firewall bouncer API key'
+  ansible.builtin.command:
+    argv:
+      - 'cscli'
+      - 'bouncers'
+      - 'add'
+      - '{{ crowdsec_firewall_bouncer_name }}'
+      - '-o'
+      - 'raw'
+  register: 'crowdsec_firewall_bouncer_generated_key'
+  changed_when: true
+  when:
+    - 'crowdsec_firewall_bouncer_inspect.rc != 0'
+    - 'crowdsec_firewall_bouncer_effective_api_key | length == 0'
+
+
+- name: 'Finalize CrowdSec firewall bouncer API key'
+  ansible.builtin.set_fact:
+    crowdsec_firewall_bouncer_effective_api_key: >-
+      {{
+        crowdsec_firewall_bouncer_effective_api_key
+        if crowdsec_firewall_bouncer_effective_api_key | length > 0
+        else crowdsec_firewall_bouncer_generated_key.stdout | trim
+      }}
+
+
+- name: 'Assert CrowdSec firewall bouncer API key is available'
+  ansible.builtin.assert:
+    that:
+      - 'crowdsec_firewall_bouncer_effective_api_key | length > 0'
+    fail_msg: >-
+      Unable to determine a CrowdSec firewall bouncer API key. Provide
+      crowdsec_firewall_bouncer_api_key explicitly or remove the stale bouncer
+      registration so the role can generate a new key.
+
+
+- name: 'Render CrowdSec firewall bouncer local configuration'
+  ansible.builtin.template:
+    src: 'crowdsec-firewall-bouncer.yaml.local.j2'
+    dest: '/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0640'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Restart CrowdSec firewall bouncer'
+
+
+- name: 'Enable and start CrowdSec firewall bouncer'
+  ansible.builtin.systemd_service:
+    name: 'crowdsec-firewall-bouncer'
+    state: '{{ "restarted" if crowdsec_enable_firewall_bouncer else "stopped" }}'
+    enabled: '{{ crowdsec_enable_firewall_bouncer }}'

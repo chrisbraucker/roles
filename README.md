@@ -32,6 +32,12 @@ Deploys certbot renewal as a Quadlet-managed oneshot container plus a systemd ti
 
 [Certbot README](roles/certbot/README.md)
 
+### CrowdSec
+
+Deploys CrowdSec host-locally with the security engine and firewall bouncer.
+
+[CrowdSec README](roles/crowdsec/README.md)
+
 
 ### Nginx
 

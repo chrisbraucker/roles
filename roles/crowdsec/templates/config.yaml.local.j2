@@ -1,0 +1,21 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+common:
+  log_media: {{ crowdsec_log_media }}
+  log_level: {{ crowdsec_log_level }}
+api:
+  server:
+    log_level: {{ crowdsec_log_level }}
+    listen_uri: {{ crowdsec_lapi_listen_uri }}
+{% if crowdsec_lapi_trusted_ips | default([]) | length > 0 %}
+    trusted_ips:
+{% for ip in crowdsec_lapi_trusted_ips %}
+      - {{ ip }}
+{% endfor %}
+{% endif %}
+
+prometheus:
+  enabled: {{ 'true' if crowdsec_lapi_prometheus_enabled else 'false' }}
+  level: {{ crowdsec_lapi_prometheus_level }}
+  listen_addr: {{ crowdsec_lapi_prometheus_listen_addr }}
+  listen_port: {{ crowdsec_lapi_prometheus_listen_port }}

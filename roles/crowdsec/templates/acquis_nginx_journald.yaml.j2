@@ -1,0 +1,9 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+source: journalctl
+journalctl_filter:
+{% for unit in crowdsec_nginx_journald_units %}
+  - "_SYSTEMD_UNIT={{ unit }}"
+{% endfor %}
+labels:
+  type: nginx

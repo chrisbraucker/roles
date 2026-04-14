@@ -1,0 +1,24 @@
+---
+- name: 'Assert CrowdSec repo bootstrap support'
+  ansible.builtin.assert:
+    that:
+      - 'ansible_facts["os_family"] == "RedHat"'
+    fail_msg: >-
+      The crowdsec role currently bootstraps the CrowdSec package repository on
+      RedHat-family hosts only.
+
+
+- name: 'Add CrowdSec package repository'
+  ansible.builtin.copy:
+    src: 'yum-crowdsec.repo'
+    dest: '/etc/yum.repos.d/crowdsec.repo'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'system_conf_t'
+
+
+- name: 'Refresh package metadata'
+  ansible.builtin.dnf:
+    update_cache: true

@@ -1,0 +1,42 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+api_url: {{ crowdsec_firewall_bouncer_api_url }}
+api_key: {{ crowdsec_firewall_bouncer_effective_api_key }}
+mode: {{ crowdsec_firewall_bouncer_mode }}
+update_frequency: {{ crowdsec_firewall_bouncer_update_frequency }}
+log_mode: stdout
+log_level: {{ crowdsec_firewall_bouncer_log_level }}
+disable_ipv6: {{ 'true' if crowdsec_firewall_bouncer_disable_ipv6 else 'false' }}
+deny_action: {{ crowdsec_firewall_bouncer_deny_action }}
+{% if crowdsec_firewall_bouncer_supported_decision_types | default([]) | length > 0 %}
+supported_decisions_types:
+{% for decision in crowdsec_firewall_bouncer_supported_decision_types %}
+  - {{ decision }}
+{% endfor %}
+{% endif %}
+
+nftables:
+  ipv4:
+    enabled: {{ 'true' if crowdsec_firewall_bouncer_nftables_ipv4_enabled else 'false' }}
+    set-only: {{ 'true' if crowdsec_firewall_bouncer_nftables_set_only else 'false' }}
+    table: {{ crowdsec_firewall_bouncer_nftables_ipv4_table }}
+    chain: {{ crowdsec_firewall_bouncer_nftables_ipv4_chain }}
+    priority: {{ crowdsec_firewall_bouncer_nftables_ipv4_priority }}
+  ipv6:
+    enabled: {{ 'true' if crowdsec_firewall_bouncer_nftables_ipv6_enabled else 'false' }}
+    set-only: {{ 'true' if crowdsec_firewall_bouncer_nftables_set_only else 'false' }}
+    table: {{ crowdsec_firewall_bouncer_nftables_ipv6_table }}
+    chain: {{ crowdsec_firewall_bouncer_nftables_ipv6_chain }}
+    priority: {{ crowdsec_firewall_bouncer_nftables_ipv6_priority }}
+
+{% if crowdsec_firewall_bouncer_nftables_hooks | default([]) | length > 0 %}
+nftables_hooks:
+{% for hook in crowdsec_firewall_bouncer_nftables_hooks %}
+  - {{ hook }}
+{% endfor %}
+{% endif %}
+
+prometheus:
+  enabled: {{ 'true' if crowdsec_firewall_bouncer_prometheus_enabled else 'false' }}
+  listen_addr: {{ crowdsec_firewall_bouncer_prometheus_listen_addr }}
+  listen_port: {{ crowdsec_firewall_bouncer_prometheus_listen_port }}
