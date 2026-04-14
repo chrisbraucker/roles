@@ -1,12 +1,6 @@
 ---
-bastion_sshd_2nd_port:
 
 bastion_crowdsec_enabled: false
-
-bastion_sshrc_token: ''
-bastion_sshrc_chatid: ''
-bastion_sshrc_hostsfx: 'default'
-bastion_sshrc_lastlog_params: '--since -24h'
 
 bastion_fail2ban_ignore_ips_default:
   - '127.0.0.1/8'
@@ -21,3 +15,10 @@ bastion_fail2ban_maxmatches: 10
 bastion_fail2ban_maxretry: 3
 bastion_fail2ban_bantime_increment: true
 bastion_fail2ban_sshd_enabled: true
+
+bastion_sshd_2nd_port:
+
+bastion_sshrc_token: ''
+bastion_sshrc_chatid: ''
+bastion_sshrc_hostsfx: 'default'
+bastion_sshrc_lastlog_params: '--since -24h'

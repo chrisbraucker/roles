@@ -1,5 +1,8 @@
 {% set server_names = item.server_name if item.server_name is sequence and item.server_name is not string else [item.server_name] %}
 {% set tls_certificate_name = item.tls_certificate_name | default('') %}
+{% set use_default_limits = item.use_default_limits | default(nginx_http_site_use_default_limits) %}
+{% set server_limit_req = item.limit_req | default(nginx_http_site_default_limit_req if use_default_limits else []) %}
+{% set server_limit_conn = item.limit_conn | default(nginx_http_site_default_limit_conn if use_default_limits else []) %}
 {% if tls_certificate_name | length > 0 -%}
 {% set tls_certificate = item.tls_certificate | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/fullchain.pem') %}
 {% set tls_certificate_key = item.tls_certificate_key | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/privkey.pem') %}
@@ -43,12 +46,24 @@ server {
     {% if item.hsts | default(nginx_http_site_hsts_default) %}
     add_header Strict-Transport-Security "{{ item.hsts_header_value | default(nginx_http_site_hsts_header_value) }}" always;
     {% endif %}
+    {% for limit in server_limit_req -%}
+    limit_req zone={{ limit.zone }}{% if limit.burst is defined %} burst={{ limit.burst }}{% endif %}{% if limit.delay is defined %} delay={{ limit.delay }}{% elif limit.nodelay | default(false) %} nodelay{% endif %};
+    {% endfor %}
+    {% for limit in server_limit_conn -%}
+    limit_conn {{ limit.zone }} {{ limit.count }};
+    {% endfor %}
 
     {% for location in item.locations | default([{'path': '/', 'proxy_pass': item.upstream, 'websocket': item.websocket | default(false)}]) %}
     location {{ location.path | default('/') }} {
         {% if location.gzip_off | default(false) %}
         gzip off;
         {% endif %}
+        {% for limit in location.limit_req | default([]) -%}
+        limit_req zone={{ limit.zone }}{% if limit.burst is defined %} burst={{ limit.burst }}{% endif %}{% if limit.delay is defined %} delay={{ limit.delay }}{% elif limit.nodelay | default(false) %} nodelay{% endif %};
+        {% endfor %}
+        {% for limit in location.limit_conn | default([]) -%}
+        limit_conn {{ limit.zone }} {{ limit.count }};
+        {% endfor %}
         {% if location.proxy_pass is defined -%}
         proxy_pass {{ location.proxy_pass }};
         proxy_http_version 1.1;

@@ -123,6 +123,45 @@ argument_specs:
         default: ''
         description: 'Optional resolver validity window appended to the OCSP resolver configuration.'
 
+      nginx_limit_req_status:
+        type: 'int'
+        default: 429
+        description: 'HTTP status returned when a request rate limit is exceeded.'
+
+      nginx_limit_req_log_level:
+        type: 'str'
+        default: 'warn'
+        description: 'Log level used by nginx when request rate limiting triggers.'
+
+      nginx_limit_req_zones:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - name: 'perip_req'
+            key: '$binary_remote_addr'
+            size: '10m'
+            rate: '15r/s'
+        description: 'Global request-rate limit zones rendered into the nginx http block.'
+
+      nginx_limit_conn_status:
+        type: 'int'
+        default: 429
+        description: 'HTTP status returned when a connection limit is exceeded.'
+
+      nginx_limit_conn_log_level:
+        type: 'str'
+        default: 'warn'
+        description: 'Log level used by nginx when connection limiting triggers.'
+
+      nginx_limit_conn_zones:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - name: 'perip_conn'
+            key: '$binary_remote_addr'
+            size: '10m'
+        description: 'Global connection-limit zones rendered into the nginx http block.'
+
       nginx_global_https_redirect:
         type: 'bool'
         default: false
@@ -182,6 +221,27 @@ argument_specs:
         type: 'str'
         default: 'max-age=31536000; includeSubDomains'
         description: 'Default Strict-Transport-Security header value used when a site enables HSTS.'
+
+      nginx_http_site_use_default_limits:
+        type: 'bool'
+        default: true
+        description: 'Whether HTTP sites should apply the role default request and connection limits unless overridden per site.'
+
+      nginx_http_site_default_limit_req:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - zone: 'perip_req'
+            burst: 20
+        description: 'Default server-level request-rate limits applied to HTTP sites when nginx_http_site_use_default_limits is true.'
+
+      nginx_http_site_default_limit_conn:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - zone: 'perip_conn'
+            count: 20
+        description: 'Default server-level connection limits applied to HTTP sites when nginx_http_site_use_default_limits is true.'
 
       nginx_mount_letsencrypt:
         type: 'bool'

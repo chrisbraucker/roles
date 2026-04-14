@@ -32,6 +32,20 @@ http {
     server_tokens {{ 'on' if nginx_server_tokens else 'off' }};
     ssl_session_cache {{ nginx_ssl_session_cache }};
     ssl_session_timeout {{ nginx_ssl_session_timeout }};
+    {% if nginx_limit_req_zones | length > 0 %}
+    limit_req_status {{ nginx_limit_req_status }};
+    limit_req_log_level {{ nginx_limit_req_log_level }};
+    {% for zone in nginx_limit_req_zones %}
+    limit_req_zone {{ zone.key }} zone={{ zone.name }}:{{ zone.size }} rate={{ zone.rate }}{% if zone.sync | default(false) %} sync{% endif %};
+    {% endfor %}
+    {% endif %}
+    {% if nginx_limit_conn_zones | length > 0 %}
+    limit_conn_status {{ nginx_limit_conn_status }};
+    limit_conn_log_level {{ nginx_limit_conn_log_level }};
+    {% for zone in nginx_limit_conn_zones %}
+    limit_conn_zone {{ zone.key }} zone={{ zone.name }}:{{ zone.size }};
+    {% endfor %}
+    {% endif %}
 
     server_names_hash_bucket_size 128;
     client_body_buffer_size       128k;
