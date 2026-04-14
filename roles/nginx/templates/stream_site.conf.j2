@@ -1,3 +1,5 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
 {% if item.upstream_servers is defined %}
 upstream {{ item.name }}_upstream {
     {% for server in item.upstream_servers %}

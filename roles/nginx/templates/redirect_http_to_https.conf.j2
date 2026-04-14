@@ -1,8 +1,10 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
 server {
     listen {{ nginx_global_https_redirect_http_port }} default_server;
     {% if nginx_global_https_redirect_http_ipv6 -%}
     listen [::]:{{ nginx_global_https_redirect_http_port }} default_server;
-    {% endif %}
+    {% endif -%}
     server_name _;
 
     {% if nginx_certbot_http_01_enabled | bool -%}
@@ -11,7 +13,7 @@ server {
         default_type text/plain;
         try_files $uri =404;
     }
-    {% endif %}
+    {%- endif %}
 
     location / {
         return 308 https://$host$request_uri;

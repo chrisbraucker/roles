@@ -1,122 +1,123 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
 Description={{ item.description | default(item.name) }}
-{% for unit in item.unit_requires | default([]) -%}
+{% for unit in item.unit_requires | default([]) %}
 Requires={{ unit }}
 {% endfor %}
 Wants=network-online.target
 After=network-online.target
-{% for unit in item.unit_wants | default([]) -%}
+{% for unit in item.unit_wants | default([]) %}
 Wants={{ unit }}
 {% endfor %}
-{% for unit in item.unit_after | default([]) -%}
+{% for unit in item.unit_after | default([]) %}
 After={{ unit }}
 {% endfor %}
-{% for unit in item.unit_on_success | default([]) -%}
+{% for unit in item.unit_on_success | default([]) %}
 OnSuccess={{ unit }}
 {% endfor %}
 
 [Service]
 Restart={{ (item.restart if item.restart is defined else none) | default_if_none_or_empty(quadlet_default_restart) }}
-{% if item.timeout_start is defined -%}
+{% if item.timeout_start is defined %}
 TimeoutStartSec={{ item.timeout_start }}
 {% endif %}
-{% if item.service_type is defined -%}
+{% if item.service_type is defined %}
 Type={{ item.service_type }}
 {% endif %}
-{% if item.remain_after_exit is defined -%}
+{% if item.remain_after_exit is defined %}
 RemainAfterExit={{ 'yes' if item.remain_after_exit else 'no' }}
 {% endif %}
-{% if item.timeout_stop is defined -%}
+{% if item.timeout_stop is defined %}
 TimeoutStopSec={{ item.timeout_stop }}
 {% endif %}
 
 [Container]
 ContainerName={{ (item.container_name if item.container_name is defined else none) | default_if_none_or_empty('systemd-' ~ item.name) }}
 Image={{ item.image }}
-{% if item.cgroups_mode is defined or quadlet_default_cgroups_mode | length > 0 -%}
+{% if item.cgroups_mode is defined or quadlet_default_cgroups_mode | length > 0 %}
 CgroupsMode={{ (item.cgroups_mode if item.cgroups_mode is defined else none) | default_if_none_or_empty(quadlet_default_cgroups_mode) }}
 {% endif %}
-{% if item.command is defined -%}
+{% if item.command is defined %}
 Exec={{ item.command }}
 {% endif %}
-{% if item.container_user is defined -%}
+{% if item.container_user is defined %}
 User={{ item.container_user }}
 {% endif %}
-{% if item.userns is defined -%}
+{% if item.userns is defined %}
 UserNS={{ item.userns }}
 {% endif %}
-{% if item.workdir is defined -%}
+{% if item.workdir is defined %}
 WorkingDir={{ item.workdir }}
 {% endif %}
-{% if item.timezone is defined -%}
+{% if item.timezone is defined %}
 Timezone={{ item.timezone }}
 {% endif %}
 NoNewPrivileges={{ 'true' if (item.no_new_privileges | default(quadlet_default_no_new_privileges)) else 'false' }}
 ReadOnly={{ 'true' if (item.read_only | default(quadlet_default_read_only)) else 'false' }}
 ReadOnlyTmpfs={{ 'true' if (item.read_only_tmpfs | default(quadlet_default_read_only_tmpfs)) else 'false' }}
-{% if item.notify is defined -%}
+{% if item.notify is defined %}
 Notify={{ 'true' if item.notify is sameas true else 'false' if item.notify is sameas false else item.notify }}
 {% endif %}
-{% for env_key, env_val in (item.env | default({})).items() -%}
+{% for env_key, env_val in (item.env | default({})).items() %}
 Environment={{ env_key }}={{ env_val }}
 {% endfor %}
-{% for env_file in item.env_files | default([]) -%}
+{% for env_file in item.env_files | default([]) %}
 EnvironmentFile={{ env_file }}
 {% endfor %}
-{% for tmpfs in item.tmpfs | default([]) -%}
+{% for tmpfs in item.tmpfs | default([]) %}
 Tmpfs={{ tmpfs }}
 {% endfor %}
-{% for volume in item.volumes | default([]) -%}
+{% for volume in item.volumes | default([]) %}
 Volume={{ volume }}
 {% endfor %}
-{% for port in item.ports | default([]) -%}
+{% for port in item.ports | default([]) %}
 PublishPort={{ port }}
 {% endfor %}
-{% for net in item.networks | default([]) -%}
+{% for net in item.networks | default([]) %}
 Network={{ net }}
 {% endfor %}
-{% for device in item.devices | default([]) -%}
+{% for device in item.devices | default([]) %}
 Device={{ device }}
 {% endfor %}
-{% for cap in item.drop_capabilities | default(quadlet_default_drop_capabilities) -%}
+{% for cap in item.drop_capabilities | default(quadlet_default_drop_capabilities) %}
 DropCapability={{ cap }}
 {% endfor %}
-{% for cap in item.add_capabilities | default([]) -%}
+{% for cap in item.add_capabilities | default([]) %}
 AddCapability={{ cap }}
 {% endfor %}
-{% if item.mask is defined -%}
+{% if item.mask is defined %}
 Mask={{ item.mask }}
 {% endif %}
-{% for secret in item.secrets | default([]) -%}
+{% for secret in item.secrets | default([]) %}
 Secret={{ secret }}
 {% endfor %}
-{% for label_key, label_val in (item.labels | default({})).items() -%}
+{% for label_key, label_val in (item.labels | default({})).items() %}
 Label={{ label_key }}={{ label_val }}
 {% endfor %}
-{% if item.health_cmd is defined -%}
+{% if item.health_cmd is defined %}
 HealthCmd={{ item.health_cmd }}
 {% endif %}
-{% if item.health_interval is defined -%}
+{% if item.health_interval is defined %}
 HealthInterval={{ item.health_interval }}
 {% endif %}
-{% if item.health_retries is defined -%}
+{% if item.health_retries is defined %}
 HealthRetries={{ item.health_retries }}
 {% endif %}
-{% if item.health_start_period is defined -%}
+{% if item.health_start_period is defined %}
 HealthStartPeriod={{ item.health_start_period }}
 {% endif %}
-{% if item.health_timeout is defined -%}
+{% if item.health_timeout is defined %}
 HealthTimeout={{ item.health_timeout }}
 {% endif %}
-{% for arg in item.extra_args | default([]) -%}
+{% for arg in item.extra_args | default([]) %}
 PodmanArgs={{ arg }}
 {% endfor %}
 
 {% set install_targets = item.wanted_by if item.wanted_by is defined else quadlet_default_wanted_by %}
 {% if install_targets | length > 0 %}
 [Install]
-{% for target in install_targets -%}
+{% for target in install_targets %}
 WantedBy={{ target }}
 {% endfor %}
 {% endif %}

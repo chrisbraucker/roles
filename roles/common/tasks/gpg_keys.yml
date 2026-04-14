@@ -1,4 +1,15 @@
 ---
+- name: 'Ensure GPG path'
+  ansible.builtin.file:
+    path: '{{ common_gpg_cache_dir }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    seuser: 'system_u'
+    setype: 'var_t'
+
+
 - name: 'Download key'
   ansible.builtin.get_url:
     url: '{{ gpg.url }}'

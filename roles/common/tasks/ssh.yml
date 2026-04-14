@@ -23,7 +23,7 @@
 
 - name: 'Add secondary SSH config.d'
   ansible.builtin.template:
-    src: 'sshd.conf'
+    src: 'sshd.conf.j2'
     dest: '/etc/ssh/sshd_config.d/50-sshd.conf'
     owner: 'root'
     group: 'root'

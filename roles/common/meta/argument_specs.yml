@@ -46,11 +46,6 @@ argument_specs:
         default: ''
         description: 'Optional SystemMaxUse limit for persistent journald storage.'
 
-      common_gpg_cache_dir:
-        type: 'str'
-        default: '/var/cache/gpg'
-        description: 'Cache directory used by the shared GPG helper task.'
-
   gpg_keys:
     short_description: 'Downloads and trusts repository GPG keys for rpm and enabled dnf repos.'
     options:

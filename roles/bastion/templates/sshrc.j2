@@ -1,4 +1,7 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
 #!/bin/sh -
+# {{ ansible_managed }}
+
 remoteip=$(echo $SSH_CONNECTION | cut -d' ' -f 1)
 if last --ip --hostlast {{ bastion_sshrc_lastlog_params }} | grep $remoteip 2>&1 > /dev/null; then
     exit 0

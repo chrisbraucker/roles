@@ -28,7 +28,7 @@
 
 - name: 'Add secondary SSH port'
   ansible.builtin.template:
-    src: 'sshd-secondary-port.conf'
+    src: 'sshd-secondary-port.conf.j2'
     dest: '/etc/ssh/sshd_config.d/50-sshd-secondary-port.conf'
     owner: 'root'
     group: 'root'

@@ -9,14 +9,3 @@
 
 - name: 'Run distro-dependent setup'
   ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
-
-
-- name: 'Create GPG cache'
-  ansible.builtin.file:
-    dest: '{{ common_gpg_cache_dir }}'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-    seuser: 'system_u'
-    setype: 'var_t'

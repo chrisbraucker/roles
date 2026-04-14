@@ -1,4 +1,7 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
 #!/bin/sh
+# {{ ansible_managed }}
+
 set -eu
 
 {% if nginx_runtime_gid is defined and nginx_runtime_gid is not none and (nginx_runtime_gid | string | length > 0) %}
