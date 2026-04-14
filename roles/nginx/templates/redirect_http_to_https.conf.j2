@@ -6,6 +6,12 @@ server {
     listen [::]:{{ nginx_global_https_redirect_http_port }} default_server;
     {% endif -%}
     server_name _;
+    {% for limit in nginx_global_https_redirect_limit_req | default([]) %}
+    limit_req zone={{ limit.zone }}{% if limit.burst is defined %} burst={{ limit.burst }}{% endif %}{% if limit.delay is defined %} delay={{ limit.delay }}{% elif limit.nodelay | default(false) %} nodelay{% endif %};
+    {% endfor %}
+    {% for limit in nginx_global_https_redirect_limit_conn | default([]) %}
+    limit_conn {{ limit.zone }} {{ limit.count }};
+    {% endfor %}
 
     {% if nginx_certbot_http_01_enabled | bool -%}
     location ^~ /.well-known/acme-challenge/ {

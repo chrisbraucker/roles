@@ -43,6 +43,8 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 - `nginx_http_site_use_default_limits`
 - `nginx_http_site_default_limit_req`
 - `nginx_http_site_default_limit_conn`
+- `nginx_global_https_redirect_limit_req`
+- `nginx_global_https_redirect_limit_conn`
 
 
 ## Static Edge IP Behavior
@@ -68,6 +70,7 @@ This avoids manual MAC bookkeeping while keeping the L2 identity stable across r
 - per-site `hsts: true` enables HSTS using `nginx_http_site_hsts_header_value`
 - by default, HTTP sites inherit server-level request-rate and connection limits from `nginx_http_site_default_limit_req` and `nginx_http_site_default_limit_conn`
 - set `use_default_limits: false` on a site to opt out, or define `limit_req` / `limit_conn` explicitly per site
+- the global HTTP redirect server uses `nginx_global_https_redirect_limit_req` and `nginx_global_https_redirect_limit_conn`, which default to the same baseline as normal HTTP sites
 - server-level `limit_req` entries support:
   - `zone`
   - optional `burst`

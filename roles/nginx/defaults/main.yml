@@ -72,7 +72,7 @@ nginx_limit_req_zones:
   - name: 'perip_req'
     key: '$binary_remote_addr'
     size: '10m'
-    rate: '10r/s'
+    rate: '15r/s'
 nginx_limit_conn_status: 429
 nginx_limit_conn_log_level: 'warn'
 nginx_limit_conn_zones:
@@ -85,7 +85,7 @@ nginx_http_site_hsts_header_value: 'max-age=31536000; includeSubDomains'
 nginx_http_site_use_default_limits: true
 nginx_http_site_default_limit_req:
   - zone: 'perip_req'
-    burst: 20
+    burst: 30
 nginx_http_site_default_limit_conn:
   - zone: 'perip_conn'
     count: 20
@@ -93,6 +93,8 @@ nginx_http_site_default_limit_conn:
 nginx_global_https_redirect: false
 nginx_global_https_redirect_http_port: 80
 nginx_global_https_redirect_http_ipv6: true
+nginx_global_https_redirect_limit_req: '{{ nginx_http_site_default_limit_req }}'
+nginx_global_https_redirect_limit_conn: '{{ nginx_http_site_default_limit_conn }}'
 
 nginx_http_sites: []
 nginx_stream_sites: []

@@ -177,6 +177,22 @@ argument_specs:
         default: true
         description: 'Whether the global HTTPS redirect server should also listen on IPv6.'
 
+      nginx_global_https_redirect_limit_req:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - zone: 'perip_req'
+            burst: 30
+        description: 'Server-level request-rate limits applied to the global HTTP-to-HTTPS redirect server.'
+
+      nginx_global_https_redirect_limit_conn:
+        type: 'list'
+        elements: 'dict'
+        default:
+          - zone: 'perip_conn'
+            count: 20
+        description: 'Server-level connection limits applied to the global HTTP-to-HTTPS redirect server.'
+
   http_site:
     short_description: 'Renders nginx HTTP site definitions and related HTTP snippets.'
     options:
@@ -232,7 +248,7 @@ argument_specs:
         elements: 'dict'
         default:
           - zone: 'perip_req'
-            burst: 20
+            burst: 30
         description: 'Default server-level request-rate limits applied to HTTP sites when nginx_http_site_use_default_limits is true.'
 
       nginx_http_site_default_limit_conn:
