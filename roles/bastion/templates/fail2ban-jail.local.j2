@@ -3,6 +3,7 @@ bantime     = {{ bastion_fail2ban_bantime }}
 findtime    = {{ bastion_fail2ban_findtime }}
 maxmatches  = {{ bastion_fail2ban_maxmatches }}
 maxretry    = {{ bastion_fail2ban_maxretry }}
+backend     = {{ bastion_fail2ban_backend }}
 
 bantime.increment = {{ 'true' if bastion_fail2ban_bantime_increment else 'false' }}
 

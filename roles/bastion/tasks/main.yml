@@ -35,6 +35,7 @@
       - 'fail2ban'
       - 'python3-inotify'
     state: 'latest'
+  when: 'bastion_fail2ban | default(false)'
   tags:
     - 'fail2ban'
 
@@ -49,6 +50,7 @@
     seuser: 'system_u'
     setype: etc_t
   notify: 'Restart Fail2Ban'
+  when: 'bastion_fail2ban | default(false)'
   tags:
     - 'fail2ban'
 
@@ -58,31 +60,6 @@
     name: 'fail2ban.service'
     state: 'started'
     enabled: true
+  when: 'bastion_fail2ban | default(false)'
   tags:
     - 'fail2ban'
-
-
-- name: 'Add CrowdSec repo'
-  ansible.builtin.import_tasks: 'crowdsec_repo.yml'
-  when: 'bastion_crowdsec_enabled | bool'
-  tags:
-    - 'crowdsec'
-
-
-- name: 'Install CrowdSec nftables firewall bouncer'
-  ansible.builtin.dnf:
-    pkg: 'crowdsec-firewall-bouncer-nftables'
-    state: 'latest'
-  when: 'bastion_crowdsec_enabled | bool'
-  tags:
-    - 'crowdsec'
-
-
-- name: 'Enable CrowdSec bouncer'
-  ansible.builtin.systemd:
-    name: 'crowdsec-firewall-bouncer'
-    state: 'started'
-    enabled: true
-  when: 'bastion_crowdsec_enabled | bool'
-  tags:
-    - 'crowdsec'

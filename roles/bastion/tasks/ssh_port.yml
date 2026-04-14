@@ -37,7 +37,7 @@
     setype: 'etc_t'
     validate: 'sshd -t -f %s'
   notify: 'Reload sshd'
-  when: 'bastion_sshd_2nd_port'
+  when: 'bastion_sshd_2nd_port is not none and bastion_sshd_2nd_port > 0'
 
 
 - name: 'Remove secondary SSH port drop-in when disabled'
@@ -80,7 +80,7 @@
   register: 'bastion_semanage_port'
   changed_when: 'bastion_semanage_port.stdout != "EXISTS"'
   when:
-    - 'bastion_sshd_2nd_port'
+    - 'bastion_sshd_2nd_port is not none and bastion_sshd_2nd_port > 0'
     - 'ansible_facts.selinux is defined'
     - "ansible_facts.selinux.status == 'enabled' and ansible_facts.selinux.mode == 'enforcing'"
 

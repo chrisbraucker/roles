@@ -1,7 +1,5 @@
 ---
-
-bastion_crowdsec_enabled: false
-
+bastion_fail2ban: true
 bastion_fail2ban_ignore_ips_default:
   - '127.0.0.1/8'
   - '::1'
@@ -15,6 +13,7 @@ bastion_fail2ban_maxmatches: 10
 bastion_fail2ban_maxretry: 3
 bastion_fail2ban_bantime_increment: true
 bastion_fail2ban_sshd_enabled: true
+bastion_fail2ban_backend: 'systemd'
 
 bastion_sshd_2nd_port:
 
