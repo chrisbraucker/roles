@@ -5,12 +5,14 @@ crowdsec_enable_firewall_bouncer: true
 
 crowdsec_log_media: 'stdout'
 crowdsec_log_level: 'info'
+
 crowdsec_lapi_listen_uri: '127.0.0.1:18090'
 crowdsec_lapi_trusted_ips: []
+
 crowdsec_lapi_prometheus_enabled: true
 crowdsec_lapi_prometheus_level: 'full'
 crowdsec_lapi_prometheus_listen_addr: '127.0.0.1'
-crowdsec_lapi_prometheus_listen_port: 6060
+crowdsec_lapi_prometheus_listen_port: 60601
 
 crowdsec_collections:
   - 'crowdsecurity/linux'
@@ -23,17 +25,21 @@ crowdsec_acquisitions: []
 
 crowdsec_firewall_bouncer_package: 'crowdsec-firewall-bouncer-nftables'
 crowdsec_firewall_bouncer_name: 'crowdsec-firewall-bouncer'
-crowdsec_firewall_bouncer_api_url: 'http://127.0.0.1:18090/'
+
+crowdsec_firewall_bouncer_api_url: ''
 crowdsec_firewall_bouncer_api_key: ''
+
 crowdsec_firewall_bouncer_mode: 'nftables'
 crowdsec_firewall_bouncer_update_frequency: '10s'
 crowdsec_firewall_bouncer_log_level: 'info'
 crowdsec_firewall_bouncer_disable_ipv6: false
 crowdsec_firewall_bouncer_deny_action: 'DROP'
 crowdsec_firewall_bouncer_supported_decision_types: []
+
 crowdsec_firewall_bouncer_prometheus_enabled: true
 crowdsec_firewall_bouncer_prometheus_listen_addr: '127.0.0.1'
-crowdsec_firewall_bouncer_prometheus_listen_port: 60601
+crowdsec_firewall_bouncer_prometheus_listen_port: 60602
+
 crowdsec_firewall_bouncer_nftables_ipv4_enabled: true
 crowdsec_firewall_bouncer_nftables_ipv6_enabled: true
 crowdsec_firewall_bouncer_nftables_set_only: false
@@ -44,3 +50,6 @@ crowdsec_firewall_bouncer_nftables_ipv6_table: 'crowdsec6'
 crowdsec_firewall_bouncer_nftables_ipv6_chain: 'crowdsec6-chain'
 crowdsec_firewall_bouncer_nftables_ipv6_priority: 20
 crowdsec_firewall_bouncer_nftables_hooks: []
+
+crowdsec_trusted_ips: []
+crowdsec_trusted_cidrs: []

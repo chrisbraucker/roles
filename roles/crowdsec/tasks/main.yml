@@ -24,6 +24,33 @@
   loop:
     - '/etc/crowdsec/acquis.d'
     - '/etc/crowdsec/bouncers'
+    - '/etc/crowdsec/parsers/s02-enrich'
+
+
+- name: 'Derive CrowdSec effective local API URL'
+  ansible.builtin.set_fact:
+    crowdsec_lapi_effective_url: >-
+      {{
+        (
+          crowdsec_lapi_listen_uri
+          if '://' in crowdsec_lapi_listen_uri
+          else 'http://' ~ crowdsec_lapi_listen_uri
+        )
+        | regex_replace('/?$', '/')
+      }}
+
+
+- name: 'Derive CrowdSec effective firewall bouncer API URL'
+  ansible.builtin.set_fact:
+    crowdsec_firewall_bouncer_effective_api_url: >-
+      {{
+        (
+          crowdsec_firewall_bouncer_api_url
+          if crowdsec_firewall_bouncer_api_url | length > 0
+          else crowdsec_lapi_effective_url
+        )
+        | regex_replace('/?$', '/')
+      }}
 
 
 - name: 'Render CrowdSec config local override'
@@ -71,6 +98,31 @@
   notify: 'Restart CrowdSec'
 
 
+- name: 'Render CrowdSec trusted parser whitelist'
+  ansible.builtin.template:
+    src: 'trusted-whitelist.yaml.j2'
+    dest: '/etc/crowdsec/parsers/s02-enrich/00-trusted-whitelist.yaml'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  when: >-
+    crowdsec_trusted_ips | length > 0
+    or crowdsec_trusted_cidrs | length > 0
+  notify: 'Restart CrowdSec'
+
+
+- name: 'Remove CrowdSec trusted parser whitelist when empty'
+  ansible.builtin.file:
+    path: '/etc/crowdsec/parsers/s02-enrich/00-trusted-whitelist.yaml'
+    state: 'absent'
+  when: >-
+    crowdsec_trusted_ips | length == 0
+    and crowdsec_trusted_cidrs | length == 0
+  notify: 'Restart CrowdSec'
+
+
 - name: 'Render additional CrowdSec acquisitions'
   ansible.builtin.template:
     src: 'acquisition.yaml.j2'
@@ -104,11 +156,23 @@
   changed_when: >-
     'Nothing to do.' not in crowdsec_collection_install.stdout
     and 'Nothing to do' not in crowdsec_collection_install.stdout
-  loop: '{{ crowdsec_collections }}'
+  loop: '{{ crowdsec_effective_collections }}'
   loop_control:
     label: '{{ item }}'
-  when: 'crowdsec_collections | length > 0'
+  when: 'crowdsec_effective_collections | length > 0'
   notify: 'Restart CrowdSec'
+  vars:
+    crowdsec_effective_collections: >-
+      {{
+        (
+          crowdsec_collections
+          + (
+            ['crowdsecurity/nginx']
+            if crowdsec_nginx_journald_enabled | bool
+            else []
+          )
+        ) | unique
+      }}
 
 
 - name: 'Check existing CrowdSec firewall bouncer config'

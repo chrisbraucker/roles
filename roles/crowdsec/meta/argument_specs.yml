@@ -39,6 +39,18 @@ argument_specs:
         default: []
         description: 'Trusted IP list written to config.yaml.local for the local API.'
 
+      crowdsec_trusted_ips:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Trusted source IPs rendered into a parser-stage CrowdSec whitelist.'
+
+      crowdsec_trusted_cidrs:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Trusted source CIDRs rendered into a parser-stage CrowdSec whitelist.'
+
       crowdsec_firewall_bouncer_supported_decision_types:
         type: 'list'
         elements: 'str'
@@ -102,8 +114,8 @@ argument_specs:
 
       crowdsec_firewall_bouncer_api_url:
         type: 'str'
-        default: 'http://127.0.0.1:18090/'
-        description: 'Local API URL consumed by the firewall bouncer.'
+        default: ''
+        description: 'Optional explicit local API URL consumed by the firewall bouncer. When unset, it is derived from crowdsec_lapi_listen_uri.'
 
       crowdsec_firewall_bouncer_api_key:
         type: 'str'

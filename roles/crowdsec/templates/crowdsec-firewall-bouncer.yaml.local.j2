@@ -1,6 +1,6 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
-api_url: {{ crowdsec_firewall_bouncer_api_url }}
+api_url: {{ crowdsec_firewall_bouncer_effective_api_url }}
 api_key: {{ crowdsec_firewall_bouncer_effective_api_key }}
 mode: {{ crowdsec_firewall_bouncer_mode }}
 update_frequency: {{ crowdsec_firewall_bouncer_update_frequency }}

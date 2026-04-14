@@ -24,6 +24,8 @@ This is the pragmatic single-host deployment model. It is the right first step b
 - `crowdsec_log_level`
 - `crowdsec_lapi_listen_uri`
 - `crowdsec_lapi_trusted_ips`
+- `crowdsec_trusted_ips`
+- `crowdsec_trusted_cidrs`
 - `crowdsec_lapi_prometheus_enabled`
 - `crowdsec_lapi_prometheus_level`
 - `crowdsec_lapi_prometheus_listen_addr`
@@ -47,6 +49,9 @@ This is the pragmatic single-host deployment model. It is the right first step b
 - the role currently bootstraps the CrowdSec package repository on RedHat-family hosts only
 - the role renders `config.yaml.local` and `local_api_credentials.yaml.local` overrides for the local API and logging behavior
 - the firewall bouncer uses a `.yaml.local` override file under `/etc/crowdsec/bouncers/`
+- if `crowdsec_firewall_bouncer_api_url` is unset, the role derives it from `crowdsec_lapi_listen_uri`
 - if an API key is not provided explicitly, the role reuses the key from an existing local override or generates a new one with `cscli`
 - nginx integration currently assumes journald acquisition if you enable `crowdsec_nginx_journald_enabled`
+- when `crowdsec_nginx_journald_enabled` is true, the role also installs the `crowdsecurity/nginx` collection automatically
+- `crowdsec_trusted_ips` and `crowdsec_trusted_cidrs` render a parser-stage whitelist under `/etc/crowdsec/parsers/s02-enrich/`, which is useful for VPN egress, probes, and trusted admin ranges
 - the role defaults the CrowdSec nftables chain priority to `20`, so firewalld can enforce host exposure policy first and CrowdSec can apply reputation-based drops afterwards

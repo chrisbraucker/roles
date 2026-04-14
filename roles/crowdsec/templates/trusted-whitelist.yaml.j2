@@ -1,0 +1,18 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+name: trusted-whitelist
+description: Whitelist trusted ingress sources before CrowdSec scenarios run
+whitelist:
+  reason: trusted ingress sources
+{% if crowdsec_trusted_ips | length > 0 %}
+  ip:
+{% for ip in crowdsec_trusted_ips %}
+    - "{{ ip }}"
+{% endfor %}
+{% endif %}
+{% if crowdsec_trusted_cidrs | length > 0 %}
+  cidr:
+{% for cidr in crowdsec_trusted_cidrs %}
+    - "{{ cidr }}"
+{% endfor %}
+{% endif %}
