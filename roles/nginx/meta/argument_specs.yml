@@ -21,9 +21,7 @@ argument_specs:
       nginx_publish_ports:
         type: 'list'
         elements: 'str'
-        default:
-          - '80:80/tcp'
-          - '443:443/tcp'
+        default: []
         description: 'Host ports published by the nginx container.'
 
       nginx_manage_edge_network:
