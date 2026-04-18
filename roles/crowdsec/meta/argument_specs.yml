@@ -139,12 +139,12 @@ argument_specs:
 
       crowdsec_firewall_bouncer_nftables_ipv4_priority:
         type: 'int'
-        default: 20
+        default: 30
         description: 'nftables hook priority used for the IPv4 CrowdSec chain. Higher numeric values run later than firewalld defaults.'
 
       crowdsec_firewall_bouncer_nftables_ipv6_priority:
         type: 'int'
-        default: 20
+        default: 30
         description: 'nftables hook priority used for the IPv6 CrowdSec chain. Higher numeric values run later than firewalld defaults.'
 
       crowdsec_firewall_bouncer_nftables_hooks:

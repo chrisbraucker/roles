@@ -7,7 +7,7 @@ Efficient, boring, and just works.
 
 ### Bastion
 
-Hardens hosts that are exposed to the elements with firewall, fail2ban and others.
+Hardens bastion hosts with SSH-oriented policy and notification helpers.
 
 [Bastion README](roles/bastion/README.md)
 
@@ -24,6 +24,13 @@ Configures defaults for debian and almalinux-based distros.
 Installs and manages the host firewall baseline via firewalld.
 
 [Firewall README](roles/firewall/README.md)
+
+
+### Fail2Ban
+
+Deploys Fail2Ban host-locally with nftables-backed jails, primarily for nginx via journald.
+
+[Fail2Ban README](roles/fail2ban/README.md)
 
 
 ### Certbot

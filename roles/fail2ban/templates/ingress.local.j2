@@ -1,0 +1,56 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[DEFAULT]
+allowipv6 = {{ fail2ban_ipv6 }}
+bantime = {{ fail2ban_bantime }}
+findtime = {{ fail2ban_findtime }}
+maxmatches = {{ fail2ban_maxmatches }}
+maxretry = {{ fail2ban_maxretry }}
+backend = {{ fail2ban_backend }}
+usedns = {{ fail2ban_usedns }}
+bantime.increment = {{ 'true' if fail2ban_bantime_increment else 'false' }}
+ignoreip = {{ (fail2ban_ignore_ips_default + fail2ban_ignore_ips) | join(' ') }}
+banaction = {{ fail2ban_banaction }}
+action = %(banaction)s[blocktype="{{ fail2ban_nftables_blocktype }}", table="{{ fail2ban_nftables_table }}", chain="{{ fail2ban_nftables_chain }}", chain_type="{{ fail2ban_nftables_chain_type }}", chain_hook="{{ fail2ban_nftables_chain_hook }}", chain_priority="{{ fail2ban_nftables_chain_priority }}", port="%(port)s", protocol="%(protocol)s"]
+
+{% if fail2ban_sshd_enabled %}
+[sshd]
+enabled = true
+mode = {{ fail2ban_sshd_mode }}
+{% endif %}
+
+{% if fail2ban_nginx_enabled and fail2ban_nginx_http_auth_enabled %}
+[nginx-http-auth]
+enabled = true
+mode = {{ fail2ban_nginx_http_auth_mode }}
+port = http,https
+journalmatch = {{ fail2ban_nginx_journalmatch }}
+{% endif %}
+
+{% if fail2ban_nginx_enabled and fail2ban_nginx_limit_req_enabled %}
+[nginx-limit-req]
+enabled = true
+port = http,https
+journalmatch = {{ fail2ban_nginx_journalmatch }}
+{% endif %}
+
+{% if fail2ban_nginx_enabled and fail2ban_nginx_botsearch_enabled %}
+[nginx-botsearch]
+enabled = true
+port = http,https
+journalmatch = {{ fail2ban_nginx_journalmatch }}
+{% endif %}
+
+{% if fail2ban_nginx_enabled and fail2ban_nginx_bad_request_enabled %}
+[nginx-bad-request]
+enabled = true
+port = http,https
+journalmatch = {{ fail2ban_nginx_journalmatch }}
+{% endif %}
+
+{% if fail2ban_nginx_enabled and fail2ban_nginx_forbidden_enabled %}
+[nginx-forbidden]
+enabled = true
+port = http,https
+journalmatch = {{ fail2ban_nginx_journalmatch }}
+{% endif %}

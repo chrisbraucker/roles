@@ -45,10 +45,10 @@ crowdsec_firewall_bouncer_nftables_ipv6_enabled: true
 crowdsec_firewall_bouncer_nftables_set_only: false
 crowdsec_firewall_bouncer_nftables_ipv4_table: 'crowdsec'
 crowdsec_firewall_bouncer_nftables_ipv4_chain: 'crowdsec-chain'
-crowdsec_firewall_bouncer_nftables_ipv4_priority: 20
+crowdsec_firewall_bouncer_nftables_ipv4_priority: 30
 crowdsec_firewall_bouncer_nftables_ipv6_table: 'crowdsec6'
 crowdsec_firewall_bouncer_nftables_ipv6_chain: 'crowdsec6-chain'
-crowdsec_firewall_bouncer_nftables_ipv6_priority: 20
+crowdsec_firewall_bouncer_nftables_ipv6_priority: 30
 crowdsec_firewall_bouncer_nftables_hooks: []
 
 crowdsec_trusted_ips: []

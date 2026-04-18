@@ -1,0 +1,158 @@
+---
+argument_specs:
+  main:
+    short_description: 'Installs Fail2Ban host-locally with nftables-backed jails for nginx and optional sshd.'
+    options:
+      fail2ban_enable_service:
+        type: 'bool'
+        default: true
+        description: 'Whether the Fail2Ban service should be enabled and started.'
+
+      fail2ban_packages:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'fail2ban'
+        description: 'Fail2Ban packages installed by the role.'
+
+      fail2ban_ignore_ips_default:
+        type: 'list'
+        elements: 'str'
+        default:
+          - '127.0.0.1/8'
+          - '::1'
+          - '10.0.0.0/8'
+          - '172.16.0.0/12'
+          - '192.168.0.0/16'
+        description: 'Baseline trusted IPs and CIDRs excluded from banning.'
+
+      fail2ban_ignore_ips:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional trusted IPs and CIDRs excluded from banning.'
+
+      fail2ban_ipv6:
+        type: 'bool'
+        default: true
+        description: 'If IPv6 support should be enabled.'
+
+      fail2ban_bantime:
+        type: 'str'
+        default: '2h'
+        description: 'Initial ban duration applied by enabled jails.'
+
+      fail2ban_findtime:
+        type: 'str'
+        default: '4h'
+        description: 'Window in which repeated failures count toward a ban.'
+
+      fail2ban_maxmatches:
+        type: 'int'
+        default: 10
+        description: 'Maximum number of matching log lines stored per ticket.'
+
+      fail2ban_maxretry:
+        type: 'int'
+        default: 3
+        description: 'Number of failures before a source is banned.'
+
+      fail2ban_bantime_increment:
+        type: 'bool'
+        default: true
+        description: 'Whether repeated offenders should receive increasing ban times.'
+
+      fail2ban_backend:
+        type: 'str'
+        default: 'systemd'
+        description: 'Fail2Ban backend used to read logs; journald-backed nginx expects systemd.'
+
+      fail2ban_usedns:
+        type: 'str'
+        default: 'no'
+        description: 'Whether Fail2Ban should trust or resolve hostnames found in logs.'
+
+      fail2ban_banaction:
+        type: 'str'
+        default: 'nftables-allports'
+        description: 'Fail2Ban banaction used for all rendered jails.'
+
+      fail2ban_nftables_table:
+        type: 'str'
+        default: 'fail2ban-ingress'
+        description: 'nftables table used by the Fail2Ban banaction.'
+
+      fail2ban_nftables_chain:
+        type: 'str'
+        default: 'fail2ban-ingress'
+        description: 'nftables chain used by the Fail2Ban banaction.'
+
+      fail2ban_nftables_chain_type:
+        type: 'str'
+        default: 'filter'
+        description: 'nftables chain type used by the Fail2Ban banaction.'
+
+      fail2ban_nftables_chain_hook:
+        type: 'str'
+        default: 'input'
+        description: 'nftables hook where the Fail2Ban banaction attaches its chain.'
+
+      fail2ban_nftables_chain_priority:
+        type: 'int'
+        default: 20
+        description: 'nftables hook priority used by Fail2Ban. Higher than firewalld defaults and lower than the CrowdSec defaults in this repo.'
+
+      fail2ban_nftables_blocktype:
+        type: 'str'
+        default: 'drop'
+        description: 'nftables terminal action used for banned sources.'
+
+      fail2ban_sshd_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether the sshd jail should be rendered.'
+
+      fail2ban_sshd_mode:
+        type: 'str'
+        default: 'normal'
+        description: 'Mode passed to the sshd filter when the sshd jail is enabled.'
+
+      fail2ban_nginx_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether nginx-oriented jails should be rendered.'
+
+      fail2ban_nginx_journalmatch:
+        type: 'str'
+        default: '_SYSTEMD_UNIT=nginx.service'
+        description: 'journald match expression used by all nginx-oriented jails.'
+
+      fail2ban_nginx_http_auth_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether the nginx-http-auth jail should be enabled.'
+
+      fail2ban_nginx_http_auth_mode:
+        type: 'str'
+        default: 'normal'
+        description: 'Mode passed to the nginx-http-auth filter.'
+
+      fail2ban_nginx_limit_req_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the nginx-limit-req jail should be enabled.'
+
+      fail2ban_nginx_botsearch_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the nginx-botsearch jail should be enabled.'
+
+      fail2ban_nginx_bad_request_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the nginx-bad-request jail should be enabled.'
+
+      fail2ban_nginx_forbidden_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether the nginx-forbidden jail should be enabled.'

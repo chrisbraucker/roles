@@ -1,0 +1,24 @@
+---
+- name: 'Install Fail2Ban'
+  ansible.builtin.package:
+    name: '{{ fail2ban_packages }}'
+    state: 'latest'
+
+
+- name: 'Render Fail2Ban ingress jail configuration'
+  ansible.builtin.template:
+    src: 'ingress.local.j2'
+    dest: '/etc/fail2ban/jail.d/ingress.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Restart Fail2Ban'
+
+
+- name: 'Enable and start Fail2Ban'
+  ansible.builtin.systemd_service:
+    name: 'fail2ban.service'
+    state: '{{ "started" if fail2ban_enable_service else "stopped" }}'
+    enabled: '{{ fail2ban_enable_service }}'

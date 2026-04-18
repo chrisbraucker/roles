@@ -1,0 +1,41 @@
+---
+fail2ban_enable_service: true
+fail2ban_packages:
+  - 'fail2ban'
+
+fail2ban_ignore_ips_default:
+  - '127.0.0.1/8'
+  - '::1'
+  - '10.0.0.0/8'
+  - '172.16.0.0/12'
+  - '192.168.0.0/16'
+fail2ban_ignore_ips: []
+
+fail2ban_ipv6: true
+fail2ban_bantime: '2h'
+fail2ban_findtime: '4h'
+fail2ban_maxmatches: 10
+fail2ban_maxretry: 3
+fail2ban_bantime_increment: true
+fail2ban_backend: 'systemd'
+fail2ban_usedns: 'no'
+
+fail2ban_banaction: 'nftables-allports'
+fail2ban_nftables_table: 'fail2ban-ingress'
+fail2ban_nftables_chain: 'fail2ban-ingress'
+fail2ban_nftables_chain_type: 'filter'
+fail2ban_nftables_chain_hook: 'input'
+fail2ban_nftables_chain_priority: 20
+fail2ban_nftables_blocktype: 'drop'
+
+fail2ban_sshd_enabled: false
+fail2ban_sshd_mode: 'normal'
+
+fail2ban_nginx_enabled: true
+fail2ban_nginx_journalmatch: '_SYSTEMD_UNIT=nginx.service'
+fail2ban_nginx_http_auth_enabled: false
+fail2ban_nginx_http_auth_mode: 'normal'
+fail2ban_nginx_limit_req_enabled: true
+fail2ban_nginx_botsearch_enabled: true
+fail2ban_nginx_bad_request_enabled: true
+fail2ban_nginx_forbidden_enabled: false

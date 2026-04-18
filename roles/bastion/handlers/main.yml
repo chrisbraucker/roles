@@ -3,9 +3,3 @@
   ansible.builtin.systemd:
     name: 'sshd.service'
     state: 'reloaded'
-
-
-- name: 'Restart Fail2Ban'
-  ansible.builtin.systemd:
-    name: 'fail2ban.service'
-    state: 'restarted'

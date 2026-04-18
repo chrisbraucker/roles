@@ -54,4 +54,4 @@ This is the pragmatic single-host deployment model. It is the right first step b
 - nginx integration currently assumes journald acquisition if you enable `crowdsec_nginx_journald_enabled`
 - when `crowdsec_nginx_journald_enabled` is true, the role also installs the `crowdsecurity/nginx` collection automatically
 - `crowdsec_trusted_ips` and `crowdsec_trusted_cidrs` render a parser-stage whitelist under `/etc/crowdsec/parsers/s02-enrich/`, which is useful for VPN egress, probes, and trusted admin ranges
-- the role defaults the CrowdSec nftables chain priority to `20`, so firewalld can enforce host exposure policy first and CrowdSec can apply reputation-based drops afterwards
+- the role defaults the CrowdSec nftables chain priority to `30`, so firewalld can enforce host exposure policy first and CrowdSec can apply reputation-based drops afterwards
