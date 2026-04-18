@@ -1,0 +1,142 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys PostgreSQL as a Quadlet-managed container with persistent host storage.'
+    options:
+      postgres_base_dir:
+        type: 'str'
+        description: 'Base host directory for PostgreSQL state.'
+        default: '/opt/containers/postgres'
+
+      postgres_data_dir:
+        type: 'str'
+        description: 'Host directory mounted as the PostgreSQL data directory.'
+        default: '/opt/containers/postgres/data'
+
+      postgres_image:
+        type: 'str'
+        description: 'Container image used for PostgreSQL.'
+        default: 'docker.io/library/postgres:17'
+
+      postgres_service_name:
+        type: 'str'
+        description: 'Quadlet and systemd service name for the PostgreSQL container.'
+        default: 'postgres'
+
+      postgres_publish_ports:
+        type: 'list'
+        elements: 'str'
+        description: 'Host ports published by the PostgreSQL container.'
+        default: []
+
+      postgres_networks:
+        type: 'list'
+        elements: 'str'
+        description: 'Quadlet networks attached to the PostgreSQL container.'
+        default: []
+
+      postgres_superuser_name:
+        type: 'str'
+        description: 'Initial PostgreSQL superuser name bootstrapped by the image.'
+        default: 'postgres'
+
+      postgres_database_name:
+        type: 'str'
+        description: 'Initial database name bootstrapped by the image.'
+        default: 'postgres'
+
+      postgres_superuser_password_length:
+        type: 'int'
+        description: 'Length of the generated superuser password when bootstrap generation is used.'
+        default: 48
+
+      postgres_superuser_password:
+        type: 'str'
+        description: >-
+          PostgreSQL superuser password supplied explicitly through inventory or
+          a secrets file. Required on reruns once the Podman secret already
+          exists, unless the secret is being rotated out-of-band.
+
+      postgres_secret_force_recreate:
+        type: 'bool'
+        description: >-
+          Whether the PostgreSQL Podman secret should be removed and recreated.
+          Requires postgres_superuser_password and is intended for explicit
+          rotation flows.
+        default: false
+
+      postgres_secret_name:
+        type: 'str'
+        description: 'Podman secret name used to expose the PostgreSQL superuser password.'
+        default: 'postgres-superuser-password'
+
+      postgres_secret_target:
+        type: 'str'
+        description: 'Filename used when mounting the Podman secret into the container.'
+        default: 'postgres-superuser-password'
+
+      postgres_secret_driver:
+        type: 'str'
+        description: 'Podman secret driver used to store the PostgreSQL superuser password on the target host.'
+        default: 'file'
+
+      postgres_local_password_dir:
+        type: 'str'
+        description: 'Control-host directory used to archive the generated PostgreSQL superuser password during bootstrap.'
+        default: '~/.local/share/orchard/postgres'
+
+      postgres_local_password_file:
+        type: 'str'
+        description: 'Control-host file used to archive the generated PostgreSQL superuser password during bootstrap.'
+
+  secret:
+    short_description: 'Ensures or rotates the PostgreSQL Podman secret used for the superuser password.'
+    options:
+      postgres_service_name:
+        type: 'str'
+        description: 'Quadlet and systemd service name for the PostgreSQL container.'
+        default: 'postgres'
+
+      postgres_superuser_password_length:
+        type: 'int'
+        description: 'Length of the generated superuser password when bootstrap generation is used.'
+        default: 48
+
+      postgres_superuser_password:
+        type: 'str'
+        description: >-
+          PostgreSQL superuser password supplied explicitly through inventory or
+          a secrets file. Required for explicit secret rotation and for reruns
+          once the Podman secret already exists.
+
+      postgres_secret_force_recreate:
+        type: 'bool'
+        description: >-
+          Whether the PostgreSQL Podman secret should be removed and recreated.
+          Requires postgres_superuser_password and is intended for explicit
+          rotation flows.
+        default: false
+
+      postgres_secret_name:
+        type: 'str'
+        description: 'Podman secret name used to expose the PostgreSQL superuser password.'
+        default: 'postgres-superuser-password'
+
+      postgres_secret_target:
+        type: 'str'
+        description: 'Filename used when mounting the Podman secret into the container.'
+        default: 'postgres-superuser-password'
+
+      postgres_secret_driver:
+        type: 'str'
+        description: 'Podman secret driver used to store the PostgreSQL superuser password on the target host.'
+        default: 'file'
+
+      postgres_local_password_dir:
+        type: 'str'
+        description: 'Control-host directory used to archive the generated PostgreSQL superuser password during bootstrap.'
+        default: '~/.local/share/orchard/postgres'
+
+      postgres_local_password_file:
+        type: 'str'
+        description: 'Control-host file used to archive the generated PostgreSQL superuser password during bootstrap.'

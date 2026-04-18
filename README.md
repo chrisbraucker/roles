@@ -61,6 +61,14 @@ Additionally provides helpers to enable rootless container execution beyond sess
 [Podman README](roles/podman/README.md)
 
 
+### Postgres
+
+Deploys PostgreSQL as a Quadlet-managed container with host-mounted storage and
+Podman-secret-based superuser bootstrap.
+
+[Postgres README](roles/postgres/README.md)
+
+
 ### Quadlet
 
 Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.

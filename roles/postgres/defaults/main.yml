@@ -1,0 +1,41 @@
+---
+postgres_base_dir: '{{ (podman_containers_root | default("/opt/containers"), "postgres") | path_join }}'
+postgres_data_dir: '{{ (postgres_base_dir, "data") | path_join }}'
+
+postgres_config_owner: 'root'
+postgres_config_group: 'root'
+postgres_config_dir_mode: '0755'
+postgres_data_dir_mode: '0700'
+
+postgres_image: 'docker.io/library/postgres:17'
+postgres_service_name: 'postgres'
+postgres_container_name:
+postgres_state:
+postgres_enable:
+postgres_restart:
+postgres_timeout_start: '60s'
+postgres_timeout_stop: '30s'
+postgres_publish_ports: []
+postgres_networks: []
+postgres_env: {}
+postgres_env_files: []
+postgres_extra_volumes: []
+postgres_extra_quadlet_args: []
+
+postgres_superuser_name: 'postgres'
+postgres_database_name: 'postgres'
+postgres_superuser_password_length: 48
+postgres_secret_force_recreate: false
+postgres_secret_name: '{{ postgres_service_name }}-superuser-password'
+postgres_secret_target: 'postgres-superuser-password'
+postgres_secret_driver: 'file'
+
+postgres_local_password_dir: '{{ lookup("ansible.builtin.env", "HOME") ~ "/.local/share/orchard/postgres" }}'
+postgres_local_password_file: >-
+  {{
+    (
+      postgres_local_password_dir,
+      inventory_hostname ~ '-' ~ postgres_service_name ~ '-' ~ postgres_superuser_name ~ '.password'
+    )
+    | path_join
+  }}

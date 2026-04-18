@@ -1,0 +1,83 @@
+---
+- name: 'Validate postgres container configuration'
+  ansible.builtin.assert:
+    that:
+      - 'postgres_image | length > 0'
+      - 'postgres_service_name | length > 0'
+      - 'postgres_superuser_name | length > 0'
+      - 'postgres_database_name | length > 0'
+      - 'postgres_superuser_password_length | int >= 24'
+      - 'postgres_secret_name | length > 0'
+      - 'postgres_secret_target | length > 0'
+      - 'postgres_secret_driver | length > 0'
+    fail_msg: >-
+      PostgreSQL requires image, service name, superuser name, database name,
+      and Podman secret settings. Password length must be at least 24
+      characters.
+
+
+- name: 'Ensure postgres host directories exist'
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: 'directory'
+    owner: '{{ postgres_config_owner }}'
+    group: '{{ postgres_config_group }}'
+    mode: '{{ item.mode | default(postgres_config_dir_mode) }}'
+  loop:
+    - path: '{{ postgres_base_dir }}'
+    - path: '{{ postgres_data_dir }}'
+      mode: '{{ postgres_data_dir_mode }}'
+  loop_control:
+    label: '{{ item.path }}'
+
+
+- name: 'Ensure postgres Podman secret exists'
+  ansible.builtin.import_tasks: 'secret.yml'
+
+
+- name: 'Assemble postgres quadlet volumes'
+  ansible.builtin.set_fact:
+    postgres_quadlet_volumes: '{{ postgres_default_volumes + postgres_extra_volumes }}'
+  vars:
+    postgres_default_volumes:
+      - '{{ postgres_data_dir }}:/var/lib/postgresql/data:Z'
+
+
+- name: 'Deploy postgres through quadlet'
+  ansible.builtin.include_role:
+    name: 'quadlet'
+  vars:
+    quadlet_services:
+      - name: '{{ postgres_service_name }}'
+        description: 'PostgreSQL database'
+        image: '{{ postgres_image }}'
+        container_name: '{{ postgres_container_name }}'
+        restart: '{{ postgres_restart }}'
+        timeout_start: '{{ postgres_timeout_start }}'
+        timeout_stop: '{{ postgres_timeout_stop }}'
+        state: '{{ postgres_state }}'
+        enable: '{{ postgres_enable }}'
+        ports: '{{ postgres_publish_ports }}'
+        networks: '{{ postgres_networks }}'
+        env: >-
+          {{
+            {
+              'POSTGRES_USER': postgres_superuser_name,
+              'POSTGRES_DB': postgres_database_name,
+              'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
+            }
+            | combine(postgres_env)
+          }}
+        env_files: '{{ postgres_env_files }}'
+        volumes: '{{ postgres_quadlet_volumes }}'
+        secrets:
+          - '{{ postgres_secret_name }},target={{ postgres_secret_target }}'
+        read_only: false
+        read_only_tmpfs: false
+        health_cmd: >-
+          CMD-SHELL pg_isready -U {{ postgres_superuser_name }} -d {{ postgres_database_name }} || exit 1
+        health_interval: '30s'
+        health_timeout: '5s'
+        health_retries: 5
+        health_start_period: '20s'
+        extra_args: '{{ postgres_extra_quadlet_args }}'
