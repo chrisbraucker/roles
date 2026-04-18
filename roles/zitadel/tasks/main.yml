@@ -1,0 +1,71 @@
+---
+- name: 'Prepare zitadel runtime assets'
+  ansible.builtin.import_tasks: 'prepare.yml'
+
+
+- name: 'Run zitadel init phase'
+  ansible.builtin.import_tasks: 'init.yml'
+  vars:
+    zitadel_skip_prepare: true
+
+
+- name: 'Run zitadel setup phase'
+  ansible.builtin.import_tasks: 'setup.yml'
+  vars:
+    zitadel_skip_prepare: true
+
+
+- name: 'Deploy zitadel runtime through quadlet'
+  ansible.builtin.include_role:
+    name: 'quadlet'
+  vars:
+    quadlet_services:
+      - name: '{{ zitadel_service_name }}'
+        description: 'ZITADEL identity service'
+        image: '{{ zitadel_image }}'
+        container_name: '{{ zitadel_container_name }}'
+        command: >-
+          start
+          --masterkeyFile {{ zitadel_masterkey_secret_container_path }}
+          --tlsMode {{ zitadel_tls_mode }}
+          --config /etc/zitadel/config.yaml
+          --config /etc/zitadel/runtime-secrets.yaml
+        restart: '{{ zitadel_restart }}'
+        timeout_start: '{{ zitadel_timeout_start }}'
+        timeout_stop: '{{ zitadel_timeout_stop }}'
+        state: '{{ zitadel_state }}'
+        enable: '{{ zitadel_enable }}'
+        ports: '{{ zitadel_publish_ports }}'
+        networks: '{{ zitadel_networks }}'
+        unit_requires: '{{ zitadel_unit_requires }}'
+        unit_after: '{{ zitadel_unit_after }}'
+        env: '{{ zitadel_env }}'
+        env_files: '{{ zitadel_env_files }}'
+        volumes: '{{ zitadel_quadlet_volumes }}'
+        secrets:
+          - '{{ zitadel_masterkey_secret_name }},target={{ zitadel_masterkey_secret_target }}'
+        read_only: false
+        read_only_tmpfs: false
+        health_cmd: >-
+          CMD-SHELL /app/zitadel ready
+          --masterkeyFile {{ zitadel_masterkey_secret_container_path }}
+          --tlsMode {{ zitadel_tls_mode }}
+          --config /etc/zitadel/config.yaml
+          --config /etc/zitadel/runtime-secrets.yaml
+          || exit 1
+        health_interval: '30s'
+        health_timeout: '5s'
+        health_retries: 5
+        health_start_period: '40s'
+        extra_args: '{{ zitadel_extra_quadlet_args }}'
+
+
+- name: 'Flush zitadel handlers'
+  ansible.builtin.meta: flush_handlers
+
+
+- name: 'Deploy zitadel login UI'
+  ansible.builtin.import_tasks: 'login.yml'
+  vars:
+    zitadel_skip_prepare: true
+  when: 'zitadel_login_enabled | bool'

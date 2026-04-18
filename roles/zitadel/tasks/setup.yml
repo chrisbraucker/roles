@@ -1,0 +1,79 @@
+---
+- name: 'Prepare zitadel runtime assets for setup'
+  ansible.builtin.import_tasks: 'prepare.yml'
+  when: 'not (zitadel_skip_prepare | default(false) | bool)'
+
+
+- name: 'Check zitadel init marker before setup'
+  ansible.builtin.stat:
+    path: '{{ zitadel_init_marker_file }}'
+  register: 'zitadel_init_marker_stat'
+
+
+- name: 'Require zitadel init before setup'
+  ansible.builtin.fail:
+    msg: >-
+      The ZITADEL init phase has not completed yet. Run the role main entrypoint
+      or tasks_from=init.yml before running setup.
+  when: 'not zitadel_init_marker_stat.stat.exists'
+
+
+- name: 'Check zitadel setup marker'
+  ansible.builtin.stat:
+    path: '{{ zitadel_setup_marker_file }}'
+  register: 'zitadel_setup_marker_stat'
+
+
+- name: 'Run zitadel setup phase'
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'podman',
+          'run',
+          '--rm',
+          '--name',
+          zitadel_service_name ~ '-setup',
+          '--volume',
+          zitadel_config_dir ~ ':/etc/zitadel:Z,ro',
+          '--volume',
+          zitadel_data_dir ~ ':/var/lib/zitadel:Z',
+        ]
+        + zitadel_podman_run_network_args
+        + [
+          '--secret',
+          zitadel_masterkey_secret_name ~ ',target=' ~ zitadel_masterkey_secret_target,
+          zitadel_image,
+          'setup',
+          '--masterkeyFile',
+          zitadel_masterkey_secret_container_path,
+          '--tlsMode',
+          zitadel_tls_mode,
+          '--init-projections=' ~ ('true' if zitadel_setup_init_projections else 'false'),
+          '--config',
+          '/etc/zitadel/config.yaml',
+          '--config',
+          '/etc/zitadel/runtime-secrets.yaml',
+          '--steps',
+          '/etc/zitadel/init-steps.yaml'
+        ]
+      }}
+  register: 'zitadel_setup_result'
+  changed_when: true
+  when: 'not zitadel_setup_marker_stat.stat.exists'
+  async: '{{ zitadel_setup_timeout }}'
+  poll: 5
+  no_log: true
+
+
+- name: 'Write zitadel setup marker'
+  ansible.builtin.copy:
+    dest: '{{ zitadel_setup_marker_file }}'
+    content: |
+      image={{ zitadel_image }}
+      revision={{ zitadel_setup_revision }}
+      completed=true
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  when: 'not zitadel_setup_marker_stat.stat.exists'

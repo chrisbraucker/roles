@@ -1,0 +1,23 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+FirstInstance:
+{% if zitadel_login_enabled | bool %}
+  LoginClientPatPath: '{{ zitadel_login_client_pat_container_path }}'
+{% endif %}
+  Org:
+    Human:
+      Username: '{{ zitadel_firstinstance_org_human_username }}'
+      Password: '{{ zitadel_firstinstance_org_human_password }}'
+{% if zitadel_login_enabled | bool %}
+    LoginClient:
+      Machine:
+        Username: '{{ zitadel_firstinstance_loginclient_machine_username }}'
+        Name: '{{ zitadel_firstinstance_loginclient_machine_name }}'
+      Pat:
+        ExpirationDate: '{{ zitadel_firstinstance_loginclient_pat_expiration_date }}'
+DefaultInstance:
+  Features:
+    LoginV2:
+      Required: true
+      BaseURI: '{{ zitadel_login_base_uri }}'
+{% endif %}

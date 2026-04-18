@@ -1,0 +1,14 @@
+---
+- name: 'Check for rendered zitadel quadlet unit'
+  listen: 'Restart zitadel'
+  ansible.builtin.stat:
+    path: '/etc/containers/systemd/{{ zitadel_service_name }}.container'
+  register: 'zitadel_quadlet_unit_stat'
+
+
+- name: 'Restart zitadel'
+  listen: 'Restart zitadel'
+  ansible.builtin.systemd_service:
+    name: '{{ zitadel_service_name }}.service'
+    state: 'restarted'
+  when: 'zitadel_quadlet_unit_stat.stat.exists'

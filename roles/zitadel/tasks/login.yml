@@ -1,0 +1,43 @@
+---
+- name: 'Prepare zitadel runtime assets for login'
+  ansible.builtin.import_tasks: 'prepare.yml'
+  when: 'not (zitadel_skip_prepare | default(false) | bool)'
+
+
+- name: 'Deploy zitadel-login through quadlet'
+  ansible.builtin.include_role:
+    name: 'quadlet'
+  vars:
+    quadlet_services:
+      - name: '{{ zitadel_login_service_name }}'
+        description: 'ZITADEL Login V2 UI'
+        image: '{{ zitadel_login_image }}'
+        container_name: '{{ zitadel_login_container_name }}'
+        restart: '{{ zitadel_login_restart }}'
+        timeout_start: '{{ zitadel_login_timeout_start }}'
+        timeout_stop: '{{ zitadel_login_timeout_stop }}'
+        state: '{{ zitadel_login_state }}'
+        enable: '{{ zitadel_login_enable }}'
+        ports: '{{ zitadel_login_publish_ports }}'
+        networks: '{{ zitadel_login_networks }}'
+        unit_requires: '{{ [zitadel_service_name ~ ".service"] }}'
+        unit_after: '{{ [zitadel_service_name ~ ".service"] }}'
+        env: >-
+          {{
+            {
+              'ZITADEL_API_URL': zitadel_login_api_url,
+              'NEXT_PUBLIC_BASE_PATH': zitadel_login_base_path,
+              'ZITADEL_SERVICE_USER_TOKEN_FILE': zitadel_login_client_pat_container_path,
+              'CUSTOM_REQUEST_HEADERS': zitadel_login_custom_request_headers
+            }
+            | combine(zitadel_login_env)
+          }}
+        env_files: '{{ zitadel_login_env_files }}'
+        volumes: >-
+          {{
+            [zitadel_data_dir ~ ':' ~ (zitadel_login_client_pat_container_path | dirname) ~ ':Z,ro']
+            + zitadel_login_extra_volumes
+          }}
+        read_only: false
+        read_only_tmpfs: false
+        extra_args: '{{ zitadel_login_extra_quadlet_args }}'

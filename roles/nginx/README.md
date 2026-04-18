@@ -85,6 +85,12 @@ This avoids manual MAC bookkeeping while keeping the L2 identity stable across r
   - `proxy_send_timeout`
   - `proxy_read_timeout`
   - `gzip_off`
+- per-location gRPC controls support:
+  - `grpc_pass`
+  - optional `grpc_set_headers`
+  - optional `grpc_connect_timeout`
+  - optional `grpc_send_timeout`
+  - optional `grpc_read_timeout`
 - per-location `limit_req` and `limit_conn` use the same option shapes as the server-level directives above
 
 
@@ -138,4 +144,4 @@ These zones are then referenced by the server-level and location-level `limit_re
 ## Notes
 
 - the global HTTP redirect server also hosts the certbot HTTP-01 challenge path so HTTPS-only vhosts do not create a bootstrap problem
-- if you rely on static ingress IP forwarding from the host, prefer the role’s stable-MAC behavior over manual neighbor-cache flushing
+- if you rely on static ingress IP forwarding from the host, prefer the role's stable-MAC behavior over manual neighbor-cache flushing

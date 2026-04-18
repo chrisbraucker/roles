@@ -1,0 +1,273 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys ZITADEL as a Quadlet-managed container backed by PostgreSQL.'
+    options:
+      zitadel_base_dir:
+        type: 'str'
+        default: '/opt/containers/zitadel'
+        description: 'Base host directory for ZITADEL configuration and runtime data.'
+
+      zitadel_state_dir:
+        type: 'str'
+        default: '/opt/containers/zitadel/state'
+        description: 'Host directory used for Ansible-managed init and setup marker files.'
+
+      zitadel_image:
+        type: 'str'
+        default: 'ghcr.io/zitadel/zitadel:stable'
+        description: 'Container image used for ZITADEL.'
+
+      zitadel_service_name:
+        type: 'str'
+        default: 'zitadel'
+        description: 'Quadlet and systemd service name for the ZITADEL container.'
+
+      zitadel_publish_ports:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Host ports published by the ZITADEL container.'
+
+      zitadel_networks:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Quadlet networks attached to the ZITADEL container.'
+
+      zitadel_init_timeout:
+        type: 'int'
+        default: 300
+        description: 'Timeout in seconds for the synchronous ZITADEL init phase.'
+
+      zitadel_setup_timeout:
+        type: 'int'
+        default: 600
+        description: 'Timeout in seconds for the synchronous ZITADEL setup phase.'
+
+      zitadel_setup_init_projections:
+        type: 'bool'
+        default: true
+        description: 'Whether the ZITADEL setup phase should initialize projections before runtime starts.'
+
+      zitadel_external_domain:
+        type: 'str'
+        default: ''
+        description: 'Public external domain clients use to reach ZITADEL.'
+
+      zitadel_external_port:
+        type: 'int'
+        default: 443
+        description: 'Public port advertised by ZITADEL.'
+
+      zitadel_external_secure:
+        type: 'bool'
+        default: true
+        description: 'Whether ZITADEL should advertise HTTPS externally.'
+
+      zitadel_tls_enabled:
+        type: 'bool'
+        default: false
+        description: 'Whether ZITADEL itself terminates TLS.'
+
+      zitadel_tls_mode:
+        type: 'str'
+        default: 'external'
+        description: 'TLS mode passed to the ZITADEL CLI.'
+
+      zitadel_database_host:
+        type: 'str'
+        default: 'postgres'
+        description: 'PostgreSQL host used by ZITADEL.'
+
+      zitadel_database_port:
+        type: 'int'
+        default: 5432
+        description: 'PostgreSQL port used by ZITADEL.'
+
+      zitadel_database_name:
+        type: 'str'
+        default: 'zitadel'
+        description: 'PostgreSQL database name used by ZITADEL.'
+
+      zitadel_database_ssl_mode:
+        type: 'str'
+        default: 'disable'
+        description: 'SSL mode used for ZITADEL PostgreSQL connections.'
+
+      zitadel_database_admin_existing_database:
+        type: 'str'
+        default: ''
+        description: 'Optional existing database used by the admin connection when database/user provisioning is skipped.'
+
+      zitadel_database_user_username:
+        type: 'str'
+        default: 'zitadel'
+        description: 'PostgreSQL application user used by ZITADEL.'
+
+      zitadel_database_user_password:
+        type: 'str'
+        default: ''
+        description: 'Password for the PostgreSQL application user used by ZITADEL.'
+
+      zitadel_database_admin_username:
+        type: 'str'
+        default: 'postgres'
+        description: 'PostgreSQL admin user used during ZITADEL initialization.'
+
+      zitadel_database_admin_password:
+        type: 'str'
+        default: ''
+        description: 'Password for the PostgreSQL admin user used during ZITADEL initialization.'
+
+      zitadel_firstinstance_org_human_username:
+        type: 'str'
+        default: 'root'
+        description: 'Username for the first human administrator created by ZITADEL.'
+
+      zitadel_firstinstance_org_human_password:
+        type: 'str'
+        default: ''
+        description: 'Password for the first human administrator created by ZITADEL.'
+
+      zitadel_masterkey:
+        type: 'str'
+        default: ''
+        description: '32-byte masterkey used by ZITADEL to encrypt generated keys.'
+
+      zitadel_masterkey_secret_name:
+        type: 'str'
+        default: 'zitadel-masterkey'
+        description: 'Podman secret name used for the ZITADEL masterkey.'
+
+      zitadel_masterkey_secret_target:
+        type: 'str'
+        default: 'zitadel-masterkey'
+        description: 'Filename used when mounting the Podman masterkey secret into the container.'
+
+      zitadel_masterkey_secret_driver:
+        type: 'str'
+        default: 'file'
+        description: 'Podman secret driver used for the ZITADEL masterkey.'
+
+      zitadel_login_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the self-hosted Login V2 UI should be deployed alongside ZITADEL.'
+
+      zitadel_login_image:
+        type: 'str'
+        default: 'ghcr.io/zitadel/zitadel-login:latest'
+        description: 'Container image used for the self-hosted ZITADEL login UI.'
+
+      zitadel_login_service_name:
+        type: 'str'
+        default: 'zitadel-login'
+        description: 'Quadlet and systemd service name for the ZITADEL login UI container.'
+
+      zitadel_login_publish_ports:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Host ports published by the ZITADEL login UI container.'
+
+      zitadel_login_networks:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Quadlet networks attached to the ZITADEL login UI container.'
+
+      zitadel_login_base_path:
+        type: 'str'
+        default: '/ui/v2/login'
+        description: 'Base path under which the self-hosted Login V2 UI is served.'
+
+      zitadel_login_base_uri:
+        type: 'str'
+        default: ''
+        description: 'External base URI of the self-hosted Login V2 UI used to enable Login V2 on the instance.'
+
+      zitadel_login_api_url:
+        type: 'str'
+        default: ''
+        description: 'Internal API URL the login UI uses to reach the ZITADEL API.'
+
+      zitadel_login_custom_request_headers:
+        type: 'str'
+        default: ''
+        description: 'Custom request headers passed to the login UI, for example the forwarded Host header.'
+
+      zitadel_login_client_pat_container_path:
+        type: 'str'
+        default: '/var/lib/zitadel/login-client.pat'
+        description: 'Shared container path where ZITADEL writes the login-client PAT and the login UI reads it.'
+
+      zitadel_firstinstance_loginclient_machine_username:
+        type: 'str'
+        default: 'login-client'
+        description: 'Username for the machine user created with IAM_LOGIN_CLIENT permissions.'
+
+      zitadel_firstinstance_loginclient_machine_name:
+        type: 'str'
+        default: 'Automatically Initialized instance Login Client'
+        description: 'Display name for the machine user created with IAM_LOGIN_CLIENT permissions.'
+
+      zitadel_firstinstance_loginclient_pat_expiration_date:
+        type: 'str'
+        default: '2029-01-01T00:00:00Z'
+        description: 'Expiration date for the login-client PAT written during first-instance setup.'
+
+  init:
+    short_description: 'Runs the synchronous ZITADEL init phase through podman.'
+    options:
+      zitadel_image:
+        type: 'str'
+        default: 'ghcr.io/zitadel/zitadel:stable'
+        description: 'Container image used for ZITADEL.'
+
+      zitadel_networks:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Podman networks attached to the ephemeral init container.'
+
+      zitadel_init_timeout:
+        type: 'int'
+        default: 300
+        description: 'Timeout in seconds for the synchronous ZITADEL init phase.'
+
+      zitadel_init_marker_file:
+        type: 'str'
+        description: 'Marker file written after the ZITADEL init phase completes successfully.'
+
+  setup:
+    short_description: 'Runs the synchronous ZITADEL setup phase through podman.'
+    options:
+      zitadel_image:
+        type: 'str'
+        default: 'ghcr.io/zitadel/zitadel:stable'
+        description: 'Container image used for ZITADEL.'
+
+      zitadel_networks:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Podman networks attached to the ephemeral setup container.'
+
+      zitadel_setup_timeout:
+        type: 'int'
+        default: 600
+        description: 'Timeout in seconds for the synchronous ZITADEL setup phase.'
+
+      zitadel_setup_init_projections:
+        type: 'bool'
+        default: true
+        description: 'Whether the ZITADEL setup phase should initialize projections before runtime starts.'
+
+      zitadel_setup_revision:
+        type: 'str'
+        description: 'Revision token used to decide whether setup must run again.'
+
+      zitadel_setup_marker_file:
+        type: 'str'
+        description: 'Marker file written after the ZITADEL setup phase completes successfully for the current revision.'

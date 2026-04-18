@@ -11,7 +11,7 @@
 {% set tls_trusted_certificate = item.tls_trusted_certificate | default(item.tls_certificate_chain | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/chain.pem')) %}
 {% endif %}
 server {
-    {% if item.listen_http | default(true) %}
+    {% if item.listen_http | default(false) %}
     listen {{ item.listen_http_port | default(80) }};
     {% if item.listen_http_ipv6 | default(true) %}
     listen [::]:{{ item.listen_http_port | default(80) }};
@@ -90,6 +90,27 @@ server {
         {% if location.websocket | default(false) %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
+        {% endif %}
+        {% endif %}
+        {% if location.grpc_pass is defined %}
+        grpc_pass {{ location.grpc_pass }};
+        {% for header_name, header_value in ({
+          'Host': '$host',
+          'X-Forwarded-Proto': '$scheme',
+          'X-Forwarded-For': '$proxy_add_x_forwarded_for',
+          'X-Forwarded-Host': '$host',
+          'X-Forwarded-Port': '$server_port'
+        } | combine(location.grpc_set_headers | default({}))).items() %}
+        grpc_set_header {{ header_name }} {{ header_value }};
+        {% endfor %}
+        {% if location.grpc_read_timeout is defined %}
+        grpc_read_timeout {{ location.grpc_read_timeout }};
+        {% endif %}
+        {% if location.grpc_send_timeout is defined %}
+        grpc_send_timeout {{ location.grpc_send_timeout }};
+        {% endif %}
+        {% if location.grpc_connect_timeout is defined %}
+        grpc_connect_timeout {{ location.grpc_connect_timeout }};
         {% endif %}
         {% endif %}
         {% if location.include_files is defined %}

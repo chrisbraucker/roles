@@ -69,6 +69,14 @@ Podman-secret-based superuser bootstrap.
 [Postgres README](roles/postgres/README.md)
 
 
+### Zitadel
+
+Deploys ZITADEL as a Quadlet-managed service backed by PostgreSQL and intended
+to sit behind an HTTP/2-capable reverse proxy such as nginx.
+
+[Zitadel README](roles/zitadel/README.md)
+
+
 ### Quadlet
 
 Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.

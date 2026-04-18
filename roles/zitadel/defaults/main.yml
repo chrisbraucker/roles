@@ -1,0 +1,109 @@
+---
+zitadel_base_dir: '{{ (podman_containers_root | default("/opt/containers"), "zitadel") | path_join }}'
+zitadel_config_dir: '{{ (zitadel_base_dir, "config") | path_join }}'
+zitadel_data_dir: '{{ (zitadel_base_dir, "data") | path_join }}'
+zitadel_state_dir: '{{ (zitadel_base_dir, "state") | path_join }}'
+zitadel_init_marker_file: '{{ (zitadel_state_dir, "init.done") | path_join }}'
+zitadel_setup_revision: '{{ zitadel_image }}'
+zitadel_setup_marker_file: >-
+  {{
+    (
+      zitadel_state_dir,
+      'setup-' ~ (zitadel_setup_revision | hash('sha1')) ~ '.done'
+    )
+    | path_join
+  }}
+
+zitadel_config_owner: 'root'
+zitadel_config_group: 'root'
+zitadel_config_dir_mode: '0755'
+zitadel_config_file_mode: '0600'
+zitadel_data_dir_mode: '0755'
+zitadel_state_dir_mode: '0755'
+
+zitadel_image: 'ghcr.io/zitadel/zitadel:stable'
+zitadel_service_name: 'zitadel'
+zitadel_container_name:
+zitadel_state:
+zitadel_enable:
+zitadel_restart:
+zitadel_timeout_start: '120s'
+zitadel_timeout_stop: '30s'
+zitadel_publish_ports: []
+zitadel_networks: []
+zitadel_env: {}
+zitadel_env_files: []
+zitadel_extra_volumes: []
+zitadel_extra_quadlet_args: []
+zitadel_unit_requires: []
+zitadel_unit_after: []
+zitadel_init_timeout: 300
+zitadel_setup_timeout: 600
+zitadel_setup_init_projections: true
+
+zitadel_log_level: 'info'
+zitadel_listen_port: 8080
+zitadel_external_domain: ''
+zitadel_external_port: 443
+zitadel_external_secure: true
+zitadel_tls_enabled: false
+zitadel_tls_mode: 'external'
+
+zitadel_database_host: 'postgres'
+zitadel_database_port: 5432
+zitadel_database_name: 'zitadel'
+zitadel_database_ssl_mode: 'disable'
+zitadel_database_admin_existing_database: ''
+zitadel_database_user_username: 'zitadel'
+zitadel_database_user_password: ''
+zitadel_database_admin_username: 'postgres'
+zitadel_database_admin_password: ''
+
+zitadel_firstinstance_org_human_username: 'root'
+zitadel_firstinstance_org_human_password: ''
+
+zitadel_masterkey: ''
+zitadel_masterkey_secret_name: '{{ zitadel_service_name }}-masterkey'
+zitadel_masterkey_secret_target: 'zitadel-masterkey'
+zitadel_masterkey_secret_driver: 'file'
+zitadel_masterkey_secret_container_path: '/run/secrets/{{ zitadel_masterkey_secret_target }}'
+
+zitadel_public_config_file: '{{ (zitadel_config_dir, "config.yaml") | path_join }}'
+zitadel_init_secret_config_file: '{{ (zitadel_config_dir, "init-secrets.yaml") | path_join }}'
+zitadel_runtime_secret_config_file: '{{ (zitadel_config_dir, "runtime-secrets.yaml") | path_join }}'
+zitadel_init_steps_file: '{{ (zitadel_config_dir, "init-steps.yaml") | path_join }}'
+
+zitadel_login_enabled: true
+zitadel_login_image: 'ghcr.io/zitadel/zitadel-login:latest'
+zitadel_login_service_name: '{{ zitadel_service_name }}-login'
+zitadel_login_container_name:
+zitadel_login_state:
+zitadel_login_enable:
+zitadel_login_restart:
+zitadel_login_timeout_start: '60s'
+zitadel_login_timeout_stop: '30s'
+zitadel_login_publish_ports: []
+zitadel_login_networks: '{{ zitadel_networks }}'
+zitadel_login_env: {}
+zitadel_login_env_files: []
+zitadel_login_extra_volumes: []
+zitadel_login_extra_quadlet_args: []
+zitadel_login_base_path: '/ui/v2/login'
+zitadel_login_base_uri: >-
+  {{
+    ('https://' if zitadel_external_secure else 'http://')
+    ~ zitadel_external_domain
+    ~ zitadel_login_base_path
+  }}
+zitadel_login_api_url: >-
+  {{
+    ('https://' if zitadel_tls_enabled else 'http://')
+    ~ zitadel_service_name
+    ~ ':'
+    ~ (zitadel_listen_port | string)
+  }}
+zitadel_login_custom_request_headers: 'Host:{{ zitadel_external_domain }}'
+zitadel_login_client_pat_container_path: '/var/lib/zitadel/login-client.pat'
+zitadel_firstinstance_loginclient_machine_username: 'login-client'
+zitadel_firstinstance_loginclient_machine_name: 'Automatically Initialized instance Login Client'
+zitadel_firstinstance_loginclient_pat_expiration_date: '2029-01-01T00:00:00Z'

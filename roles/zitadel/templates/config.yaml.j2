@@ -1,0 +1,24 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+Log:
+  Level: '{{ zitadel_log_level }}'
+Port: {{ zitadel_listen_port }}
+ExternalDomain: '{{ zitadel_external_domain }}'
+ExternalPort: {{ zitadel_external_port }}
+ExternalSecure: {{ 'true' if zitadel_external_secure else 'false' }}
+TLS:
+  Enabled: {{ 'true' if zitadel_tls_enabled else 'false' }}
+Database:
+  postgres:
+    Host: '{{ zitadel_database_host }}'
+    Port: {{ zitadel_database_port }}
+    Database: '{{ zitadel_database_name }}'
+    User:
+      SSL:
+        Mode: '{{ zitadel_database_ssl_mode }}'
+    Admin:
+      SSL:
+        Mode: '{{ zitadel_database_ssl_mode }}'
+{% if zitadel_database_admin_existing_database | length > 0 %}
+      ExistingDatabase: '{{ zitadel_database_admin_existing_database }}'
+{% endif %}

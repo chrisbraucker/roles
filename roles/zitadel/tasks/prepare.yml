@@ -1,0 +1,141 @@
+---
+- name: 'Validate zitadel configuration'
+  ansible.builtin.assert:
+    that:
+      - 'zitadel_image | length > 0'
+      - 'zitadel_service_name | length > 0'
+      - 'zitadel_external_domain | length > 0'
+      - 'zitadel_tls_mode in ["disabled", "external", "enabled"]'
+      - 'zitadel_database_host | length > 0'
+      - 'zitadel_database_name | length > 0'
+      - 'zitadel_database_user_username | length > 0'
+      - 'zitadel_database_user_password | length > 0'
+      - 'zitadel_database_admin_username | length > 0'
+      - 'zitadel_database_admin_password | length > 0'
+      - 'zitadel_firstinstance_org_human_username | length > 0'
+      - 'zitadel_firstinstance_org_human_password | length > 0'
+      - 'zitadel_masterkey | length == 32'
+      - 'zitadel_masterkey_secret_name | length > 0'
+      - 'zitadel_masterkey_secret_target | length > 0'
+      - 'zitadel_masterkey_secret_driver | length > 0'
+      - 'zitadel_init_timeout | int > 0'
+      - 'zitadel_setup_timeout | int > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_image | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_service_name | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_base_path | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_base_uri | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_api_url | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_login_client_pat_container_path | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_machine_username | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_machine_name | length > 0'
+      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_pat_expiration_date | length > 0'
+    fail_msg: >-
+      ZITADEL requires explicit external domain, PostgreSQL connectivity,
+      first-instance administrator credentials, and a 32-byte masterkey.
+
+
+- name: 'Ensure zitadel host directories exist'
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: 'directory'
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ item.mode | default(zitadel_config_dir_mode) }}'
+  loop:
+    - path: '{{ zitadel_base_dir }}'
+    - path: '{{ zitadel_config_dir }}'
+    - path: '{{ zitadel_data_dir }}'
+      mode: '{{ zitadel_data_dir_mode }}'
+    - path: '{{ zitadel_state_dir }}'
+      mode: '{{ zitadel_state_dir_mode }}'
+  loop_control:
+    label: '{{ item.path }}'
+
+
+- name: 'Check zitadel masterkey Podman secret on target host'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'inspect'
+      - '{{ zitadel_masterkey_secret_name }}'
+  register: 'zitadel_masterkey_secret_inspect'
+  changed_when: false
+  failed_when: false
+
+
+- name: 'Create zitadel masterkey Podman secret when absent'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'create'
+      - '--driver'
+      - '{{ zitadel_masterkey_secret_driver }}'
+      - '{{ zitadel_masterkey_secret_name }}'
+      - '-'
+    stdin: '{{ zitadel_masterkey }}'
+  when: 'zitadel_masterkey_secret_inspect.rc != 0'
+  changed_when: true
+  no_log: true
+
+
+- name: 'Render zitadel public configuration'
+  ansible.builtin.template:
+    src: 'config.yaml.j2'
+    dest: '{{ zitadel_public_config_file }}'
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  notify: 'Restart zitadel'
+
+
+- name: 'Render zitadel init secret configuration'
+  ansible.builtin.template:
+    src: 'init-secrets.yaml.j2'
+    dest: '{{ zitadel_init_secret_config_file }}'
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  no_log: true
+
+
+- name: 'Render zitadel runtime secret configuration'
+  ansible.builtin.template:
+    src: 'runtime-secrets.yaml.j2'
+    dest: '{{ zitadel_runtime_secret_config_file }}'
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  no_log: true
+  notify: 'Restart zitadel'
+
+
+- name: 'Render zitadel initialization steps'
+  ansible.builtin.template:
+    src: 'init-steps.yaml.j2'
+    dest: '{{ zitadel_init_steps_file }}'
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  no_log: true
+
+
+- name: 'Assemble zitadel quadlet volumes'
+  ansible.builtin.set_fact:
+    zitadel_quadlet_volumes: '{{ zitadel_default_volumes + zitadel_extra_volumes }}'
+  vars:
+    zitadel_default_volumes:
+      - '{{ zitadel_config_dir }}:/etc/zitadel:Z,ro'
+      - '{{ zitadel_data_dir }}:/var/lib/zitadel:Z'
+
+
+- name: 'Assemble zitadel podman run network args'
+  ansible.builtin.set_fact:
+    zitadel_podman_run_network_args: >-
+      {{
+        zitadel_networks
+        | map('regex_replace', '\\.network$', '')
+        | map('strformat', '--network=%s')
+        | list
+      }}

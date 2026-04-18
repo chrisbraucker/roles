@@ -1,0 +1,55 @@
+---
+- name: 'Prepare zitadel runtime assets for init'
+  ansible.builtin.import_tasks: 'prepare.yml'
+  when: 'not (zitadel_skip_prepare | default(false) | bool)'
+
+
+- name: 'Check zitadel init marker'
+  ansible.builtin.stat:
+    path: '{{ zitadel_init_marker_file }}'
+  register: 'zitadel_init_marker_stat'
+
+
+- name: 'Run zitadel init phase'
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'podman',
+          'run',
+          '--rm',
+          '--name',
+          zitadel_service_name ~ '-init',
+          '--volume',
+          zitadel_config_dir ~ ':/etc/zitadel:Z,ro',
+          '--volume',
+          zitadel_data_dir ~ ':/var/lib/zitadel:Z',
+        ]
+        + zitadel_podman_run_network_args
+        + [
+          zitadel_image,
+          'init',
+          '--config',
+          '/etc/zitadel/config.yaml',
+          '--config',
+          '/etc/zitadel/init-secrets.yaml'
+        ]
+      }}
+  register: 'zitadel_init_result'
+  changed_when: true
+  when: 'not zitadel_init_marker_stat.stat.exists'
+  async: '{{ zitadel_init_timeout }}'
+  poll: 5
+  no_log: true
+
+
+- name: 'Write zitadel init marker'
+  ansible.builtin.copy:
+    dest: '{{ zitadel_init_marker_file }}'
+    content: |
+      image={{ zitadel_image }}
+      completed=true
+    owner: '{{ zitadel_config_owner }}'
+    group: '{{ zitadel_config_group }}'
+    mode: '{{ zitadel_config_file_mode }}'
+  when: 'not zitadel_init_marker_stat.stat.exists'
