@@ -7,3 +7,6 @@ inventory
 venv
 .venv
 __pycache__
+
+# Playbook data
+/out/

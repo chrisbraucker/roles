@@ -1,0 +1,295 @@
+---
+- name: 'Validate postgres bootstrap configuration'
+  ansible.builtin.assert:
+    that:
+      - 'postgres_service_name | length > 0'
+      - 'postgres_image | length > 0'
+      - 'postgres_superuser_name | length > 0'
+      - 'postgres_database_name | length > 0'
+      - 'postgres_superuser_password_length | int >= 24'
+      - 'postgres_secret_name | length > 0'
+      - 'postgres_secret_target | length > 0'
+      - 'postgres_secret_driver | length > 0'
+      - 'postgres_bootstrap_container_name | length > 0'
+      - 'postgres_bootstrap_wait_retries | int > 0'
+      - 'postgres_bootstrap_wait_delay | int > 0'
+    fail_msg: >-
+      PostgreSQL bootstrap requires service name, image, bootstrap container
+      name, superuser settings, and Podman secret settings. Password length
+      must be at least 24 characters.
+
+
+- name: 'Check whether postgres data directory is already initialized'
+  ansible.builtin.stat:
+    path: '{{ (postgres_data_dir, "PG_VERSION") | path_join }}'
+  register: 'postgres_pg_version_stat'
+
+
+- name: 'Set postgres bootstrap requirement fact'
+  ansible.builtin.set_fact:
+    postgres_bootstrap_required: '{{ not postgres_pg_version_stat.stat.exists }}'
+
+
+- name: 'Inspect postgres data directory contents before bootstrap'
+  ansible.builtin.find:
+    paths: '{{ postgres_data_dir }}'
+    file_type: 'any'
+    hidden: true
+    recurse: false
+  register: 'postgres_data_dir_listing'
+  when: 'postgres_bootstrap_required | bool'
+
+
+- name: 'Reject suspicious partially initialized postgres data directory'
+  ansible.builtin.fail:
+    msg: >-
+      PostgreSQL data directory {{ postgres_data_dir }} is not initialized
+      because PG_VERSION is absent, but it is not empty either. Refusing to run
+      bootstrap against a suspicious partial state.
+  when:
+    - 'postgres_bootstrap_required | bool'
+    - 'postgres_data_dir_listing.matched | int > 0'
+
+
+- name: 'Check postgres Podman secret on target host'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'inspect'
+      - '{{ postgres_secret_name }}'
+  register: 'postgres_secret_inspect'
+  changed_when: false
+  failed_when: false
+
+
+- name: 'Ensure local postgres password archive directory exists for bootstrap generation'
+  ansible.builtin.file:
+    path: '{{ postgres_local_password_dir }}'
+    state: 'directory'
+    mode: '0700'
+  delegate_to: 'localhost'
+  become: false
+  when:
+    - 'postgres_bootstrap_required | bool'
+    - 'postgres_superuser_password is not defined or postgres_superuser_password | length == 0'
+
+
+- name: 'Remove stale postgres bootstrap completion marker before bootstrap'
+  ansible.builtin.file:
+    path: '{{ postgres_bootstrap_marker_file }}'
+    state: 'absent'
+  when: 'postgres_bootstrap_required | bool'
+
+
+- name: 'Render postgres bootstrap completion script'
+  ansible.builtin.copy:
+    src: 'bootstrap-complete.sh'
+    dest: '{{ (postgres_bootstrap_init_dir, postgres_bootstrap_marker_script_name) | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  when: 'postgres_bootstrap_required | bool'
+
+
+- name: 'Use provided postgres superuser password for bootstrap'
+  ansible.builtin.set_fact:
+    postgres_effective_superuser_password: '{{ postgres_superuser_password }}'
+  when:
+    - 'postgres_bootstrap_required | bool'
+    - 'postgres_superuser_password is defined'
+    - 'postgres_superuser_password | length > 0'
+  no_log: true
+
+
+- name: 'Generate and archive postgres superuser password for bootstrap'
+  ansible.builtin.set_fact:
+    postgres_effective_superuser_password: >-
+      {{
+        lookup(
+          'ansible.builtin.password',
+          postgres_local_password_file,
+          length=postgres_superuser_password_length,
+          chars=['ascii_letters', 'digits']
+        )
+      }}
+  when:
+    - 'postgres_bootstrap_required | bool'
+    - 'postgres_superuser_password is not defined or postgres_superuser_password | length == 0'
+  no_log: true
+
+
+- name: 'Remove stale postgres bootstrap container before bootstrap'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'rm'
+      - '--force'
+      - '{{ postgres_bootstrap_container_name }}'
+  register: 'postgres_bootstrap_container_remove'
+  changed_when: 'postgres_bootstrap_container_remove.rc == 0'
+  failed_when: false
+  when: 'postgres_bootstrap_required | bool'
+  no_log: true
+
+
+- name: 'Remove stale postgres bootstrap secret before bootstrap'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'rm'
+      - '{{ postgres_secret_name }}'
+  register: 'postgres_bootstrap_secret_remove'
+  changed_when: 'postgres_bootstrap_secret_remove.rc == 0'
+  failed_when: false
+  when:
+    - 'postgres_bootstrap_required | bool'
+    - 'postgres_secret_inspect.rc == 0'
+  no_log: true
+
+
+- name: 'Create postgres Podman secret for bootstrap'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'create'
+      - '--driver'
+      - '{{ postgres_secret_driver }}'
+      - '{{ postgres_secret_name }}'
+      - '-'
+    stdin: '{{ postgres_effective_superuser_password }}'
+  changed_when: true
+  when: 'postgres_bootstrap_required | bool'
+  no_log: true
+
+
+- name: 'Run postgres bootstrap container'
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'podman',
+          'run',
+          '--detach',
+          '--name',
+          postgres_bootstrap_container_name,
+          '--secret',
+          postgres_secret_name ~ ',target=' ~ postgres_secret_target
+        ]
+        + postgres_bootstrap_volume_args
+        + postgres_bootstrap_env_args
+        + postgres_bootstrap_env_file_args
+        + [postgres_image]
+      }}
+  changed_when: true
+  when: 'postgres_bootstrap_required | bool'
+  vars:
+    postgres_bootstrap_volumes: >-
+      {{
+        [
+          postgres_data_dir ~ ':/var/lib/postgresql/data:Z',
+          postgres_bootstrap_dir ~ ':/bootstrap:Z',
+          postgres_bootstrap_init_dir ~ ':/docker-entrypoint-initdb.d:Z,ro'
+        ] + postgres_extra_volumes
+      }}
+    postgres_bootstrap_env: >-
+      {{
+        {
+          'POSTGRES_USER': postgres_superuser_name,
+          'POSTGRES_DB': postgres_database_name,
+          'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
+        }
+        | combine(postgres_env)
+      }}
+    postgres_bootstrap_volume_args: >-
+      {%- set args = [] -%}
+      {%- for volume in postgres_bootstrap_volumes -%}
+      {%-   set _ = args.extend(['--volume', volume]) -%}
+      {%- endfor -%}
+      {{- args -}}
+    postgres_bootstrap_env_args: >-
+      {%- set args = [] -%}
+      {%- for item in postgres_bootstrap_env | dict2items -%}
+      {%-   set _ = args.extend(['--env', item.key ~ '=' ~ (item.value | string)]) -%}
+      {%- endfor -%}
+      {{- args -}}
+    postgres_bootstrap_env_file_args: >-
+      {%- set args = [] -%}
+      {%- for env_file in postgres_env_files -%}
+      {%-   set _ = args.extend(['--env-file', env_file]) -%}
+      {%- endfor -%}
+      {{- args -}}
+
+
+- name: 'Wait for postgres bootstrap completion marker'
+  ansible.builtin.stat:
+    path: '{{ postgres_bootstrap_marker_file }}'
+  register: 'postgres_bootstrap_marker_stat'
+  until: 'postgres_bootstrap_marker_stat.stat.exists'
+  retries: '{{ postgres_bootstrap_wait_retries }}'
+  delay: '{{ postgres_bootstrap_wait_delay }}'
+  when: 'postgres_bootstrap_required | bool'
+
+
+- name: 'Stop postgres bootstrap container after successful initialization'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'stop'
+      - '{{ postgres_bootstrap_container_name }}'
+  changed_when: true
+  when: 'postgres_bootstrap_required | bool'
+  no_log: true
+
+
+- name: 'Remove postgres bootstrap container after successful initialization'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'rm'
+      - '--force'
+      - '{{ postgres_bootstrap_container_name }}'
+  changed_when: true
+  when: 'postgres_bootstrap_required | bool'
+  no_log: true
+
+
+- name: 'Remove postgres bootstrap secret after successful initialization'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'rm'
+      - '{{ postgres_secret_name }}'
+  changed_when: true
+  when: 'postgres_bootstrap_required | bool'
+  no_log: true
+
+
+- name: 'Remove postgres bootstrap completion marker after successful initialization'
+  ansible.builtin.file:
+    path: '{{ postgres_bootstrap_marker_file }}'
+    state: 'absent'
+  when: 'postgres_bootstrap_required | bool'
+
+
+- name: 'Re-check postgres data directory after bootstrap'
+  ansible.builtin.stat:
+    path: '{{ (postgres_data_dir, "PG_VERSION") | path_join }}'
+  register: 'postgres_pg_version_after_bootstrap_stat'
+
+
+- name: 'Assert postgres bootstrap completed successfully'
+  ansible.builtin.assert:
+    that:
+      - 'postgres_pg_version_after_bootstrap_stat.stat.exists'
+    fail_msg: >-
+      PostgreSQL bootstrap did not produce PG_VERSION under
+      {{ postgres_data_dir }}.
+
+
+- name: 'Set postgres bootstrap requirement fact after bootstrap'
+  ansible.builtin.set_fact:
+    postgres_bootstrap_required: false

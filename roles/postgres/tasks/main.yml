@@ -27,12 +27,14 @@
     - path: '{{ postgres_base_dir }}'
     - path: '{{ postgres_data_dir }}'
       mode: '{{ postgres_data_dir_mode }}'
+    - path: '{{ postgres_bootstrap_dir }}'
+    - path: '{{ postgres_bootstrap_init_dir }}'
   loop_control:
     label: '{{ item.path }}'
 
 
-- name: 'Ensure postgres Podman secret exists'
-  ansible.builtin.import_tasks: 'secret.yml'
+- name: 'Bootstrap postgres data directory when needed'
+  ansible.builtin.import_tasks: 'bootstrap.yml'
 
 
 - name: 'Assemble postgres quadlet volumes'
@@ -63,15 +65,25 @@
           {{
             {
               'POSTGRES_USER': postgres_superuser_name,
-              'POSTGRES_DB': postgres_database_name,
-              'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
+              'POSTGRES_DB': postgres_database_name
             }
+            | combine(
+              {
+                'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
+              }
+              if postgres_bootstrap_required | bool
+              else {}
+            )
             | combine(postgres_env)
           }}
         env_files: '{{ postgres_env_files }}'
         volumes: '{{ postgres_quadlet_volumes }}'
-        secrets:
-          - '{{ postgres_secret_name }},target={{ postgres_secret_target }}'
+        secrets: >-
+          {{
+            [postgres_secret_name ~ ',target=' ~ postgres_secret_target]
+            if postgres_bootstrap_required | bool
+            else []
+          }}
         read_only: false
         read_only_tmpfs: false
         health_cmd: >-
@@ -81,3 +93,33 @@
         health_retries: 5
         health_start_period: '20s'
         extra_args: '{{ postgres_extra_quadlet_args }}'
+
+
+- name: 'Remove stale postgres bootstrap secret after steady-state unit is rendered'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'secret'
+      - 'rm'
+      - '{{ postgres_secret_name }}'
+  register: 'postgres_stale_secret_remove'
+  changed_when: 'postgres_stale_secret_remove.rc == 0'
+  failed_when: false
+  when:
+    - 'not postgres_bootstrap_required | bool'
+    - 'postgres_secret_inspect.rc == 0'
+  no_log: true
+
+
+- name: 'Remove stale postgres bootstrap container after steady-state unit is rendered'
+  ansible.builtin.command:
+    argv:
+      - 'podman'
+      - 'rm'
+      - '--force'
+      - '{{ postgres_bootstrap_container_name }}'
+  register: 'postgres_stale_bootstrap_container_remove'
+  changed_when: 'postgres_stale_bootstrap_container_remove.rc == 0'
+  failed_when: false
+  when: 'not postgres_bootstrap_required | bool'
+  no_log: true

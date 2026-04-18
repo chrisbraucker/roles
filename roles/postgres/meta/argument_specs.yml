@@ -13,6 +13,41 @@ argument_specs:
         description: 'Host directory mounted as the PostgreSQL data directory.'
         default: '/opt/containers/postgres/data'
 
+      postgres_config_owner:
+        type: 'str'
+        description: 'Owner used for host directories managed by the role.'
+        default: 'root'
+
+      postgres_config_group:
+        type: 'str'
+        description: 'Group used for host directories managed by the role.'
+        default: 'root'
+
+      postgres_config_dir_mode:
+        type: 'str'
+        description: 'Default mode used for host directories managed by the role.'
+        default: '0755'
+
+      postgres_data_dir_mode:
+        type: 'str'
+        description: 'Mode used for the PostgreSQL data directory.'
+        default: '0700'
+
+      postgres_bootstrap_dir:
+        type: 'str'
+        description: 'Host directory used for bootstrap state and init scripts.'
+        default: '/opt/containers/postgres/bootstrap'
+
+      postgres_bootstrap_init_dir:
+        type: 'str'
+        description: 'Host directory mounted into /docker-entrypoint-initdb.d during bootstrap.'
+        default: '/opt/containers/postgres/bootstrap/initdb.d'
+
+      postgres_bootstrap_marker_file:
+        type: 'str'
+        description: 'Host marker file written by the bootstrap init script when initialization completes.'
+        default: '/opt/containers/postgres/bootstrap/complete'
+
       postgres_image:
         type: 'str'
         description: 'Container image used for PostgreSQL.'
@@ -22,6 +57,10 @@ argument_specs:
         type: 'str'
         description: 'Quadlet and systemd service name for the PostgreSQL container.'
         default: 'postgres'
+
+      postgres_container_name:
+        type: 'str'
+        description: 'Optional explicit container name for the PostgreSQL workload.'
 
       postgres_publish_ports:
         type: 'list'
@@ -34,6 +73,51 @@ argument_specs:
         elements: 'str'
         description: 'Quadlet networks attached to the PostgreSQL container.'
         default: []
+
+      postgres_state:
+        type: 'str'
+        description: 'Desired systemd service state for the PostgreSQL workload.'
+
+      postgres_enable:
+        type: 'bool'
+        description: 'Whether the PostgreSQL systemd service should be enabled.'
+
+      postgres_restart:
+        type: 'str'
+        description: 'Restart policy passed through to the Quadlet service definition.'
+
+      postgres_timeout_start:
+        type: 'str'
+        description: 'Systemd start timeout used by the PostgreSQL service.'
+        default: '60s'
+
+      postgres_timeout_stop:
+        type: 'str'
+        description: 'Systemd stop timeout used by the PostgreSQL service.'
+        default: '30s'
+
+      postgres_env:
+        type: 'dict'
+        default: {}
+        description: 'Additional environment variables passed into the steady-state PostgreSQL container.'
+
+      postgres_env_files:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional environment files passed into the steady-state PostgreSQL container.'
+
+      postgres_extra_volumes:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional volumes mounted into both bootstrap and steady-state PostgreSQL containers.'
+
+      postgres_extra_quadlet_args:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional Quadlet arguments appended to the steady-state PostgreSQL service.'
 
       postgres_superuser_name:
         type: 'str'
@@ -54,16 +138,8 @@ argument_specs:
         type: 'str'
         description: >-
           PostgreSQL superuser password supplied explicitly through inventory or
-          a secrets file. Required on reruns once the Podman secret already
-          exists, unless the secret is being rotated out-of-band.
-
-      postgres_secret_force_recreate:
-        type: 'bool'
-        description: >-
-          Whether the PostgreSQL Podman secret should be removed and recreated.
-          Requires postgres_superuser_password and is intended for explicit
-          rotation flows.
-        default: false
+          a secrets file. Used for bootstrap when the data directory is still
+          uninitialized.
 
       postgres_secret_name:
         type: 'str'
@@ -80,22 +156,94 @@ argument_specs:
         description: 'Podman secret driver used to store the PostgreSQL superuser password on the target host.'
         default: 'file'
 
+      postgres_bootstrap_container_name:
+        type: 'str'
+        description: 'Temporary container name used for one-shot PostgreSQL bootstrap.'
+        default: 'postgres-bootstrap'
+
+      postgres_bootstrap_wait_retries:
+        type: 'int'
+        description: 'How many times the role polls bootstrap logs for successful initialization.'
+        default: 60
+
+      postgres_bootstrap_wait_delay:
+        type: 'int'
+        description: 'Delay in seconds between bootstrap completion checks.'
+        default: 2
+
+      postgres_bootstrap_marker_script_name:
+        type: 'str'
+        description: 'Filename of the managed init script that writes the bootstrap completion marker.'
+        default: '999-bootstrap-complete.sh'
+
       postgres_local_password_dir:
         type: 'str'
         description: 'Control-host directory used to archive the generated PostgreSQL superuser password during bootstrap.'
-        default: '~/.local/share/orchard/postgres'
+        default: './out/postgres'
 
       postgres_local_password_file:
         type: 'str'
         description: 'Control-host file used to archive the generated PostgreSQL superuser password during bootstrap.'
 
-  secret:
-    short_description: 'Ensures or rotates the PostgreSQL Podman secret used for the superuser password.'
+  bootstrap:
+    short_description: 'Bootstraps the PostgreSQL data directory with a temporary one-shot container when uninitialized.'
     options:
       postgres_service_name:
         type: 'str'
         description: 'Quadlet and systemd service name for the PostgreSQL container.'
         default: 'postgres'
+
+      postgres_image:
+        type: 'str'
+        description: 'Container image used for PostgreSQL bootstrap.'
+        default: 'docker.io/library/postgres:17'
+
+      postgres_data_dir:
+        type: 'str'
+        description: 'Host directory mounted as the PostgreSQL data directory.'
+        default: '/opt/containers/postgres/data'
+
+      postgres_bootstrap_dir:
+        type: 'str'
+        description: 'Host directory used for bootstrap state and init scripts.'
+        default: '/opt/containers/postgres/bootstrap'
+
+      postgres_bootstrap_init_dir:
+        type: 'str'
+        description: 'Host directory mounted into /docker-entrypoint-initdb.d during bootstrap.'
+        default: '/opt/containers/postgres/bootstrap/initdb.d'
+
+      postgres_bootstrap_marker_file:
+        type: 'str'
+        description: 'Host marker file written by the bootstrap init script when initialization completes.'
+        default: '/opt/containers/postgres/bootstrap/complete'
+
+      postgres_superuser_name:
+        type: 'str'
+        description: 'Initial PostgreSQL superuser name bootstrapped by the image.'
+        default: 'postgres'
+
+      postgres_database_name:
+        type: 'str'
+        description: 'Initial database name bootstrapped by the image.'
+        default: 'postgres'
+
+      postgres_env:
+        type: 'dict'
+        default: {}
+        description: 'Additional environment variables passed into the bootstrap container.'
+
+      postgres_env_files:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional environment files passed into the bootstrap container.'
+
+      postgres_extra_volumes:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Additional volumes mounted into the bootstrap container.'
 
       postgres_superuser_password_length:
         type: 'int'
@@ -106,16 +254,8 @@ argument_specs:
         type: 'str'
         description: >-
           PostgreSQL superuser password supplied explicitly through inventory or
-          a secrets file. Required for explicit secret rotation and for reruns
-          once the Podman secret already exists.
-
-      postgres_secret_force_recreate:
-        type: 'bool'
-        description: >-
-          Whether the PostgreSQL Podman secret should be removed and recreated.
-          Requires postgres_superuser_password and is intended for explicit
-          rotation flows.
-        default: false
+          a secrets file. Used for bootstrap when the data directory is still
+          uninitialized.
 
       postgres_secret_name:
         type: 'str'
@@ -132,10 +272,30 @@ argument_specs:
         description: 'Podman secret driver used to store the PostgreSQL superuser password on the target host.'
         default: 'file'
 
+      postgres_bootstrap_container_name:
+        type: 'str'
+        description: 'Temporary container name used for one-shot PostgreSQL bootstrap.'
+        default: 'postgres-bootstrap'
+
+      postgres_bootstrap_wait_retries:
+        type: 'int'
+        description: 'How many times the role polls bootstrap logs for successful initialization.'
+        default: 60
+
+      postgres_bootstrap_wait_delay:
+        type: 'int'
+        description: 'Delay in seconds between bootstrap completion checks.'
+        default: 2
+
+      postgres_bootstrap_marker_script_name:
+        type: 'str'
+        description: 'Filename of the managed init script that writes the bootstrap completion marker.'
+        default: '999-bootstrap-complete.sh'
+
       postgres_local_password_dir:
         type: 'str'
         description: 'Control-host directory used to archive the generated PostgreSQL superuser password during bootstrap.'
-        default: '~/.local/share/orchard/postgres'
+        default: './out/postgres'
 
       postgres_local_password_file:
         type: 'str'
