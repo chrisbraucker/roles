@@ -1,26 +1,16 @@
 ---
-- name: 'Install firewalld on dnf-based hosts'
-  ansible.builtin.dnf:
+- name: 'Install firewalld'
+  ansible.builtin.package:
     name:
       - 'firewalld'
     state: 'latest'
-  when: 'ansible_facts["pkg_mgr"] == "dnf"'
-
-
-- name: 'Install firewalld on apt-based hosts'
-  ansible.builtin.apt:
-    name:
-      - 'firewalld'
-    state: 'latest'
-  when: 'ansible_facts["pkg_mgr"] == "apt"'
 
 
 - name: 'Remove ufw on apt-based hosts'
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name:
       - 'ufw'
     state: 'absent'
-  when: 'ansible_facts["pkg_mgr"] == "apt"'
 
 
 # see https://bugzilla.redhat.com/show_bug.cgi?id=1729287#c3 for reasoning
@@ -38,7 +28,7 @@
 
 
 - name: 'Enable and start firewalld'
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: 'firewalld.service'
     enabled: true
     state: 'started'

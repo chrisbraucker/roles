@@ -1,54 +1,24 @@
 ---
-- name: 'On dnf-based distros'
-  when: 'ansible_facts["pkg_mgr"] == "dnf"'
-  block:
-
-    - name: 'Remove other containerization tech'
-      ansible.builtin.dnf:
-        pkg:
-          - 'docker'
-          - 'docker-client'
-          - 'docker-client-latest'
-          - 'docker-common'
-          - 'docker-latest'
-          - 'docker-latest-logrotate'
-          - 'docker-engine'
-          - 'docker.io'
-          - 'containerd'
-          - 'runc'
-        state: 'absent'
+- name: 'Remove other containerization tech'
+  ansible.builtin.package:
+    pkg:
+      - 'docker'
+      - 'docker-client'
+      - 'docker-client-latest'
+      - 'docker-common'
+      - 'docker-latest'
+      - 'docker-latest-logrotate'
+      - 'docker-engine'
+      - 'docker.io'
+      - 'containerd'
+      - 'runc'
+    state: 'absent'
 
 
-    - name: 'Install podman'
-      ansible.builtin.dnf:
-        name:
-          - 'podman'
-
-
-- name: 'On apt-based distros'
-  when: 'ansible_facts["pkg_mgr"] == "apt"'
-  block:
-
-    - name: 'Remove other containerization tech'
-      ansible.builtin.apt:
-        name:
-          - 'docker'
-          - 'docker-client'
-          - 'docker-client-latest'
-          - 'docker-common'
-          - 'docker-latest'
-          - 'docker-latest-logrotate'
-          - 'docker-engine'
-          - 'docker.io'
-          - 'containerd'
-          - 'runc'
-        state: 'absent'
-
-
-    - name: 'Install podman'
-      ansible.builtin.apt:
-        name:
-          - 'podman'
+- name: 'Install podman'
+  ansible.builtin.package:
+    name:
+      - 'podman'
 
 
 - name: 'Ensure default containers service user exists'
