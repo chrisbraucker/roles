@@ -5,12 +5,13 @@ postgres_bootstrap_dir: '{{ (postgres_base_dir, "bootstrap") | path_join }}'
 postgres_bootstrap_init_dir: '{{ (postgres_bootstrap_dir, "initdb.d") | path_join }}'
 postgres_bootstrap_marker_file: '{{ (postgres_bootstrap_dir, "complete") | path_join }}'
 
-postgres_config_owner: 'root'
-postgres_config_group: 'root'
+postgres_container_user: 70
+postgres_container_group: 70
 postgres_config_dir_mode: '0755'
 postgres_data_dir_mode: '0700'
 
-postgres_image: 'docker.io/library/postgres:17'
+postgres_version: 18
+postgres_image: 'docker.io/library/postgres:18'
 postgres_service_name: 'postgres'
 postgres_container_name:
 postgres_state:

@@ -1,4 +1,5 @@
 #!/bin/sh
 set -eu
 
-touch /orchard-bootstrap/complete
+echo "Bootstrap complete."
+touch /bootstrap/complete

@@ -21,7 +21,7 @@
 
 - name: 'Check whether postgres data directory is already initialized'
   ansible.builtin.stat:
-    path: '{{ (postgres_data_dir, "PG_VERSION") | path_join }}'
+    path: '{{ (postgres_data_dir, (postgres_version | string), "docker", "PG_VERSION") | path_join }}'
   register: 'postgres_pg_version_stat'
 
 
@@ -189,7 +189,7 @@
     postgres_bootstrap_volumes: >-
       {{
         [
-          postgres_data_dir ~ ':/var/lib/postgresql/data:Z',
+          postgres_data_dir ~ ':/var/lib/postgresql/:Z',
           postgres_bootstrap_dir ~ ':/bootstrap:Z',
           postgres_bootstrap_init_dir ~ ':/docker-entrypoint-initdb.d:Z,ro'
         ] + postgres_extra_volumes
@@ -277,7 +277,7 @@
 
 - name: 'Re-check postgres data directory after bootstrap'
   ansible.builtin.stat:
-    path: '{{ (postgres_data_dir, "PG_VERSION") | path_join }}'
+    path: '{{ (postgres_data_dir, (postgres_version | string), "docker", "PG_VERSION") | path_join }}'
   register: 'postgres_pg_version_after_bootstrap_stat'
 
 
