@@ -7,6 +7,7 @@ Generic role for rendering Podman Quadlet units and managing the generated syste
 - `.container` units
 - `.network` units
 - generated systemd service enablement and state management
+- standalone task entrypoints for networks and services
 
 ## Default Hardening Baseline
 
@@ -51,3 +52,5 @@ Network units support:
 
 - this role is the primitive rendering layer; app or infrastructure roles should prefer passing structured data into it rather than copying templates
 - if a higher-level role wants to expose a Quadlet knob while inheriting the primitive default, leave the higher-level variable empty and let the Quadlet layer apply its fallback
+- `tasks/main.yml` composes `tasks/networks.yml` and `tasks/services.yml`
+- use `tasks_from: networks.yml` when network units need to exist before dependent containers are deployed
