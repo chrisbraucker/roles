@@ -1,20 +1,4 @@
 ---
-- name: 'Prepare zitadel runtime assets'
-  ansible.builtin.import_tasks: 'prepare.yml'
-
-
-- name: 'Run zitadel init phase'
-  ansible.builtin.import_tasks: 'init.yml'
-  vars:
-    zitadel_skip_prepare: true
-
-
-- name: 'Run zitadel setup phase'
-  ansible.builtin.import_tasks: 'setup.yml'
-  vars:
-    zitadel_skip_prepare: true
-
-
 - name: 'Deploy zitadel runtime through quadlet'
   ansible.builtin.include_role:
     name: 'quadlet'
@@ -24,6 +8,7 @@
         description: 'ZITADEL identity service'
         image: '{{ zitadel_image }}'
         container_name: '{{ zitadel_container_name }}'
+        container_user: '{{ zitadel_container_user ~ ":" ~ zitadel_container_group }}'
         command: >-
           start
           --masterkeyFile {{ zitadel_masterkey_secret_container_path }}
@@ -48,8 +33,6 @@
         read_only_tmpfs: false
         health_cmd: >-
           CMD-SHELL /app/zitadel ready
-          --masterkeyFile {{ zitadel_masterkey_secret_container_path }}
-          --tlsMode {{ zitadel_tls_mode }}
           --config /etc/zitadel/config.yaml
           --config /etc/zitadel/runtime-secrets.yaml
           || exit 1

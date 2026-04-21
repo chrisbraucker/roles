@@ -14,8 +14,8 @@ zitadel_setup_marker_file: >-
     | path_join
   }}
 
-zitadel_config_owner: 'root'
-zitadel_config_group: 'root'
+zitadel_container_user: '80'
+zitadel_container_group: '80'
 zitadel_config_dir_mode: '0755'
 zitadel_config_file_mode: '0600'
 zitadel_data_dir_mode: '0755'
@@ -98,7 +98,7 @@ zitadel_login_base_uri: >-
 zitadel_login_api_url: >-
   {{
     ('https://' if zitadel_tls_enabled else 'http://')
-    ~ zitadel_service_name
+    ~ 'systemd-' ~ zitadel_service_name
     ~ ':'
     ~ (zitadel_listen_port | string)
   }}

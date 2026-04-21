@@ -38,6 +38,8 @@
           zitadel_config_dir ~ ':/etc/zitadel:Z,ro',
           '--volume',
           zitadel_data_dir ~ ':/var/lib/zitadel:Z',
+          '--user',
+          zitadel_container_user ~ ":" ~ zitadel_container_group,
         ]
         + zitadel_podman_run_network_args
         + [
@@ -63,7 +65,6 @@
   when: 'not zitadel_setup_marker_stat.stat.exists'
   async: '{{ zitadel_setup_timeout }}'
   poll: 5
-  no_log: true
 
 
 - name: 'Write zitadel setup marker'
@@ -73,7 +74,7 @@
       image={{ zitadel_image }}
       revision={{ zitadel_setup_revision }}
       completed=true
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ zitadel_container_user }}'
+    group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   when: 'not zitadel_setup_marker_stat.stat.exists'

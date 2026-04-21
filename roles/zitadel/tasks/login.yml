@@ -13,6 +13,7 @@
         description: 'ZITADEL Login V2 UI'
         image: '{{ zitadel_login_image }}'
         container_name: '{{ zitadel_login_container_name }}'
+        container_user: '{{ zitadel_container_user ~ ":" ~ zitadel_container_group }}'
         restart: '{{ zitadel_login_restart }}'
         timeout_start: '{{ zitadel_login_timeout_start }}'
         timeout_stop: '{{ zitadel_login_timeout_stop }}'

@@ -12,8 +12,8 @@
       - 'zitadel_database_user_password | length > 0'
       - 'zitadel_database_admin_username | length > 0'
       - 'zitadel_database_admin_password | length > 0'
-      - 'zitadel_firstinstance_org_human_username | length > 0'
-      - 'zitadel_firstinstance_org_human_password | length > 0'
+      - 'zitadel_firstinstance_org_admin_username | length > 0'
+      - 'zitadel_firstinstance_org_admin_password | length > 0'
       - 'zitadel_masterkey | length == 32'
       - 'zitadel_masterkey_secret_name | length > 0'
       - 'zitadel_masterkey_secret_target | length > 0'
@@ -38,11 +38,13 @@
   ansible.builtin.file:
     path: '{{ item.path }}'
     state: 'directory'
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ item.owner | default(zitadel_container_user) }}'
+    group: '{{ item.group | default(zitadel_container_group) }}'
     mode: '{{ item.mode | default(zitadel_config_dir_mode) }}'
   loop:
     - path: '{{ zitadel_base_dir }}'
+      owner: 'root'
+      group: 'root'
     - path: '{{ zitadel_config_dir }}'
     - path: '{{ zitadel_data_dir }}'
       mode: '{{ zitadel_data_dir_mode }}'
@@ -75,6 +77,7 @@
       - '{{ zitadel_masterkey_secret_name }}'
       - '-'
     stdin: '{{ zitadel_masterkey }}'
+    stdin_add_newline: false
   when: 'zitadel_masterkey_secret_inspect.rc != 0'
   changed_when: true
   no_log: true
@@ -84,8 +87,8 @@
   ansible.builtin.template:
     src: 'config.yaml.j2'
     dest: '{{ zitadel_public_config_file }}'
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ zitadel_container_user }}'
+    group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   notify: 'Restart zitadel'
 
@@ -94,8 +97,8 @@
   ansible.builtin.template:
     src: 'init-secrets.yaml.j2'
     dest: '{{ zitadel_init_secret_config_file }}'
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ zitadel_container_user }}'
+    group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   no_log: true
 
@@ -104,8 +107,8 @@
   ansible.builtin.template:
     src: 'runtime-secrets.yaml.j2'
     dest: '{{ zitadel_runtime_secret_config_file }}'
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ zitadel_container_user }}'
+    group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   no_log: true
   notify: 'Restart zitadel'
@@ -115,8 +118,8 @@
   ansible.builtin.template:
     src: 'init-steps.yaml.j2'
     dest: '{{ zitadel_init_steps_file }}'
-    owner: '{{ zitadel_config_owner }}'
-    group: '{{ zitadel_config_group }}'
+    owner: '{{ zitadel_container_user }}'
+    group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   no_log: true
 
@@ -127,7 +130,7 @@
   vars:
     zitadel_default_volumes:
       - '{{ zitadel_config_dir }}:/etc/zitadel:Z,ro'
-      - '{{ zitadel_data_dir }}:/var/lib/zitadel:Z'
+      - '{{ zitadel_data_dir }}:/var/lib/zitadel:z'
 
 
 - name: 'Assemble zitadel podman run network args'
@@ -135,7 +138,6 @@
     zitadel_podman_run_network_args: >-
       {{
         zitadel_networks
-        | map('regex_replace', '\\.network$', '')
         | map('strformat', '--network=%s')
         | list
       }}

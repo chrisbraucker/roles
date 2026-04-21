@@ -40,8 +40,8 @@ PostgreSQL.
 - `zitadel_database_user_password`
 - `zitadel_database_admin_username`
 - `zitadel_database_admin_password`
-- `zitadel_firstinstance_org_human_username`
-- `zitadel_firstinstance_org_human_password`
+- `zitadel_firstinstance_org_admin_username`
+- `zitadel_firstinstance_org_admin_password`
 - `zitadel_masterkey`
 - `zitadel_login_enabled`
 - `zitadel_login_image`
