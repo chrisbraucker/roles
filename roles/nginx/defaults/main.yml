@@ -31,7 +31,7 @@ nginx_timeout_start: '30s'
 nginx_timeout_stop: '15s'
 nginx_publish_ports: []
 nginx_networks:
-  - 'edge.network'
+  - 'edge'
 nginx_add_capabilities:
   - 'NET_BIND_SERVICE'
 nginx_extra_volumes: []

@@ -14,4 +14,4 @@ for root in "{{ certbot_config_dir }}/live" "{{ certbot_config_dir }}/archive"; 
 done
 {% endif %}
 
-exec /usr/bin/systemctl reload {{ certbot_reload_service_name }}
+exec /usr/bin/systemctl restart {{ certbot_reload_service_name }}
