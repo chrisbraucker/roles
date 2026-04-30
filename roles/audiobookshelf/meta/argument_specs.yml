@@ -1,0 +1,60 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys Audiobookshelf as a native Quadlet-managed Podman service.'
+    options:
+      audiobookshelf_quadlet_unit_dir:
+        type: 'str'
+        default: '/etc/containers/systemd'
+        description: 'System-level Quadlet unit directory where the Audiobookshelf unit is rendered.'
+
+      audiobookshelf_root:
+        type: 'str'
+        default: '/opt/containers/audiobookshelf'
+        description: 'Root directory for Audiobookshelf host storage.'
+
+      audiobookshelf_image:
+        type: 'str'
+        default: 'ghcr.io/advplyr/audiobookshelf'
+        description: 'Container image repository used for Audiobookshelf.'
+
+      audiobookshelf_ref:
+        type: 'str'
+        default: 'latest'
+        description: 'Image version used for Audiobookshelf.'
+
+      audiobookshelf_container_uid:
+        type: 'int'
+        default: 150
+        description: 'Numeric UID used to run the Audiobookshelf container process.'
+
+      audiobookshelf_container_gid:
+        type: 'int'
+        default: 150
+        description: 'Numeric GID used to run the Audiobookshelf container process.'
+
+      audiobookshelf_port:
+        type: 'int'
+        description: 'Optional port Audiobookshelf listens on inside the container. When unset, the image default is used.'
+
+      audiobookshelf_networks:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'edge.network:alias=audiobookshelf'
+        description: 'Quadlet network entries attached to the container.'
+
+      audiobookshelf_state:
+        type: 'str'
+        default: 'started'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
+        description: 'Desired systemd service state.'
+
+      audiobookshelf_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the Audiobookshelf service should be enabled.'

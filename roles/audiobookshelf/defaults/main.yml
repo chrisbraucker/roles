@@ -1,0 +1,14 @@
+---
+audiobookshelf_quadlet_unit_dir: '{{ podman_quadlet_unit_dir | default("/etc/containers/systemd") }}'
+audiobookshelf_root: '{{ (podman_containers_root | default("/opt/containers"), "audiobookshelf") | path_join }}'
+
+audiobookshelf_container_uid: 150
+audiobookshelf_container_gid: 150
+
+audiobookshelf_image: 'ghcr.io/advplyr/audiobookshelf'
+audiobookshelf_ref: 'latest'
+audiobookshelf_port:
+audiobookshelf_networks:
+  - 'edge.network:alias=audiobookshelf'
+audiobookshelf_state: 'started'
+audiobookshelf_enabled: true

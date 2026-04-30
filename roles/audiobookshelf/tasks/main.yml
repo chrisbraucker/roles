@@ -1,0 +1,65 @@
+---
+- name: 'Validate Audiobookshelf configuration'
+  ansible.builtin.assert:
+    that:
+      - 'audiobookshelf_quadlet_unit_dir | length > 0'
+      - 'audiobookshelf_root | length > 0'
+      - 'audiobookshelf_image | length > 0'
+      - 'audiobookshelf_ref | length > 0'
+      - 'audiobookshelf_container_uid | int >= 0'
+      - 'audiobookshelf_container_gid | int >= 0'
+      - 'audiobookshelf_port is none or audiobookshelf_port | int > 0'
+      - 'audiobookshelf_networks | length > 0'
+    fail_msg: >-
+      Audiobookshelf requires a storage root, image repository/ref, runtime
+      UID/GID, at least one Quadlet network, and Quadlet unit directory. If set,
+      the container port must be positive.
+
+
+- name: 'Ensure Audiobookshelf host directories exist'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'directory'
+    owner: '{{ audiobookshelf_container_uid | string }}'
+    group: '{{ audiobookshelf_container_gid | string }}'
+    mode: '0755'
+  loop:
+    - '{{ audiobookshelf_root }}'
+    - '{{ (audiobookshelf_root, "audiobooks") | path_join }}'
+    - '{{ (audiobookshelf_root, "config") | path_join }}'
+    - '{{ (audiobookshelf_root, "metadata") | path_join }}'
+
+
+- name: 'Ensure Quadlet unit directory exists'
+  ansible.builtin.file:
+    path: '{{ audiobookshelf_quadlet_unit_dir }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+
+- name: 'Render Audiobookshelf Quadlet unit'
+  ansible.builtin.template:
+    src: 'audiobookshelf.container.j2'
+    dest: '{{ (audiobookshelf_quadlet_unit_dir, "audiobookshelf.container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'audiobookshelf_quadlet_unit'
+
+
+- name: 'Manage Audiobookshelf service'
+  ansible.builtin.systemd_service:
+    name: 'audiobookshelf.service'
+    enabled: '{{ audiobookshelf_enabled }}'
+    state: >-
+      {{
+        'restarted'
+        if (
+          audiobookshelf_quadlet_unit.changed
+          and audiobookshelf_state in ['started', 'restarted']
+        )
+        else audiobookshelf_state
+      }}
+    daemon_reload: '{{ audiobookshelf_quadlet_unit.changed }}'

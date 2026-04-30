@@ -1,0 +1,30 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=Quadlet audiobookshelf service, v{{ audiobookshelf_ref }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart=on-failure
+
+[Container]
+Image={{ audiobookshelf_image }}:{{ audiobookshelf_ref }}
+User={{ audiobookshelf_container_uid }}:{{ audiobookshelf_container_gid }}
+CgroupsMode=no-conmon
+NoNewPrivileges=true
+ReadOnly=true
+ReadOnlyTmpfs=true
+{% if audiobookshelf_port is not none %}
+Environment=PORT={{ audiobookshelf_port }}
+{% endif %}
+Volume={{ (audiobookshelf_root, "audiobooks") | path_join }}:/audiobooks:Z
+Volume={{ (audiobookshelf_root, "config") | path_join }}:/config:Z
+Volume={{ (audiobookshelf_root, "metadata") | path_join }}:/metadata:Z
+{% for network in audiobookshelf_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+
+[Install]
+WantedBy=multi-user.target

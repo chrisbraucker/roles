@@ -12,6 +12,13 @@ Hardens bastion hosts with SSH-oriented policy and notification helpers.
 [Bastion README](roles/bastion/README.md)
 
 
+### Audiobookshelf
+
+Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
+
+[Audiobookshelf README](roles/audiobookshelf/README.md)
+
+
 ### Common
 
 Configures defaults for debian and almalinux-based distros.
