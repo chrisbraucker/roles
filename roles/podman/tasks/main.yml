@@ -21,46 +21,6 @@
       - 'podman'
 
 
-- name: 'Ensure default containers service user exists'
-  ansible.builtin.user:
-    name: '{{ podman_containers_user }}'
-    comment: 'Podman service user for user namespacing'
-    system: true
-    shell: '/usr/sbin/nologin'
-    create_home: false
-
-
-- name: 'Ensure subuid mapping for containers user'
-  ansible.builtin.lineinfile:
-    path: '/etc/subuid'
-    regexp: '^{{ podman_containers_user }}:'
-    line: '{{ podman_containers_user }}:{{ podman_subuid_start }}:{{ podman_subuid_count }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-    create: true
-
-
-- name: 'Ensure subgid mapping for containers user'
-  ansible.builtin.lineinfile:
-    path: '/etc/subgid'
-    regexp: '^{{ podman_containers_user }}:'
-    line: '{{ podman_containers_user }}:{{ podman_subgid_start }}:{{ podman_subgid_count }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-    create: true
-
-
-- name: 'Ensure default containers root exists'
-  ansible.builtin.file:
-    path: '{{ podman_containers_root }}'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-
-
 - name: 'Enable rootless compat for ping and port binding'
   ansible.builtin.copy:
     src: 'sysctl.d-99-containers.conf'
@@ -83,3 +43,7 @@
     cacheable: true
   tags:
     - 'fact'
+
+
+- name: 'Prepare host for Quadlet-managed Podman workloads'
+  ansible.builtin.import_tasks: 'quadlet.yml'

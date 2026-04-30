@@ -1,6 +1,7 @@
 ---
 podman_containers_user: 'containers'
 podman_containers_root: '/opt/containers'
+podman_quadlet_unit_dir: '/etc/containers/systemd'
 podman_subuid_start: 1048576
 podman_subuid_count: 131072
 podman_subgid_start: 1048576
