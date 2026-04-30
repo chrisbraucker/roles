@@ -30,15 +30,6 @@
     - '{{ (audiobookshelf_root, "metadata") | path_join }}'
 
 
-- name: 'Ensure Quadlet unit directory exists'
-  ansible.builtin.file:
-    path: '{{ audiobookshelf_quadlet_unit_dir }}'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-
-
 - name: 'Render Audiobookshelf Quadlet unit'
   ansible.builtin.template:
     src: 'audiobookshelf.container.j2'

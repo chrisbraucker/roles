@@ -3,17 +3,17 @@
   ansible.builtin.assert:
     that:
       - 'postgres_image | length > 0'
+      - 'postgres_ref | length > 0'
       - 'postgres_service_name | length > 0'
+      - 'postgres_quadlet_unit_dir | length > 0'
       - 'postgres_superuser_name | length > 0'
-      - 'postgres_database_name | length > 0'
       - 'postgres_superuser_password_length | int >= 24'
       - 'postgres_secret_name | length > 0'
       - 'postgres_secret_target | length > 0'
       - 'postgres_secret_driver | length > 0'
     fail_msg: >-
-      PostgreSQL requires image, service name, superuser name, database name,
-      and Podman secret settings. Password length must be at least 24
-      characters.
+      PostgreSQL requires image, service name, superuser name, and Podman
+      secret settings. Password length must be at least 24 characters.
 
 
 - name: 'Ensure postgres host directories exist'
@@ -60,63 +60,22 @@
     label: '{{ item.path }}'
 
 
-- name: 'Assemble postgres quadlet volumes'
-  ansible.builtin.set_fact:
-    postgres_quadlet_volumes: '{{ postgres_default_volumes + postgres_extra_volumes }}'
-  vars:
-    postgres_default_volumes:
-      - '{{ postgres_data_dir }}:/var/lib/postgresql/:Z'
+- name: 'Render postgres quadlet unit'
+  ansible.builtin.template:
+    src: 'postgres.container.j2'
+    dest: '{{ (postgres_quadlet_unit_dir, postgres_service_name ~ ".container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'postgres_quadlet_unit'
 
 
-- name: 'Deploy postgres through quadlet'
-  ansible.builtin.include_role:
-    name: 'quadlet'
-  vars:
-    quadlet_services:
-      - name: '{{ postgres_service_name }}'
-        description: 'PostgreSQL database'
-        image: '{{ postgres_image }}'
-        container_name: '{{ postgres_container_name }}'
-        restart: '{{ postgres_restart }}'
-        timeout_start: '{{ postgres_timeout_start }}'
-        timeout_stop: '{{ postgres_timeout_stop }}'
-        state: '{{ postgres_state }}'
-        enable: '{{ postgres_enable }}'
-        ports: '{{ postgres_publish_ports }}'
-        networks: '{{ postgres_networks }}'
-        container_user: '{{ postgres_container_user ~ ":" ~ postgres_container_group }}'
-        env: >-
-          {{
-            {
-              'POSTGRES_USER': postgres_superuser_name,
-              'POSTGRES_DB': postgres_database_name
-            }
-            | combine(
-              {
-                'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
-              }
-              if postgres_bootstrap_required | bool
-              else {}
-            )
-            | combine(postgres_env)
-          }}
-        env_files: '{{ postgres_env_files }}'
-        volumes: '{{ postgres_quadlet_volumes }}'
-        secrets: >-
-          {{
-            [postgres_secret_name ~ ',target=' ~ postgres_secret_target]
-            if postgres_bootstrap_required | bool
-            else []
-          }}
-        read_only: false
-        read_only_tmpfs: false
-        health_cmd: >-
-          CMD-SHELL pg_isready -U {{ postgres_superuser_name }} -d {{ postgres_database_name }} || exit 1
-        health_interval: '30s'
-        health_timeout: '5s'
-        health_retries: 5
-        health_start_period: '20s'
-        extra_args: '{{ postgres_extra_quadlet_args }}'
+- name: 'Manage postgres service'
+  ansible.builtin.systemd_service:
+    name: '{{ postgres_service_name }}.service'
+    enabled: '{{ postgres_enable }}'
+    state: '{{ postgres_state }}'
+    daemon_reload: '{{ postgres_quadlet_unit.changed }}'
 
 
 - name: 'Remove stale postgres bootstrap secret after steady-state unit is rendered'

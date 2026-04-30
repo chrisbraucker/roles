@@ -27,12 +27,15 @@ host storage and one-time superuser bootstrap.
 - `postgres_bootstrap_dir`
 - `postgres_bootstrap_init_dir`
 - `postgres_bootstrap_marker_file`
+- `postgres_quadlet_unit_dir`
+- `postgres_container_user`
+- `postgres_container_group`
+- `postgres_version`
 - `postgres_image`
+- `postgres_ref`
 - `postgres_service_name`
-- `postgres_publish_ports`
 - `postgres_networks`
 - `postgres_superuser_name`
-- `postgres_database_name`
 - `postgres_secret_name`
 - `postgres_secret_target`
 - `postgres_secret_driver`
@@ -47,9 +50,12 @@ host storage and one-time superuser bootstrap.
 
 ## Notes
 
-- this first-cut role does not manage TLS
-- once `{{ postgres_data_dir }}/PG_VERSION` exists, the role no longer mounts or
-  requires the bootstrap Podman secret on ordinary reruns
+- this role does not manage TLS
+- this role does not install Podman or prepare the Quadlet unit directory; apply
+  the `podman` role first
+- once `{{ postgres_data_dir }}/{{ postgres_version }}/docker/PG_VERSION`
+  exists, the role no longer mounts or requires the bootstrap Podman secret on
+  ordinary reruns
 - bootstrap uses the upstream image initialization flow intentionally; the role
   does not reimplement `initdb`
 - bootstrap completion is signaled by a managed init script writing a marker
@@ -59,3 +65,6 @@ host storage and one-time superuser bootstrap.
 - the default Podman secret driver is `file`; this keeps the container runtime
   cleaner than a manual bind mount, but it is not a replacement for a dedicated
   secret manager
+- this role renders its own native Quadlet container unit and does not manage
+  Quadlet network units; pass existing network attachments through
+  `postgres_networks`

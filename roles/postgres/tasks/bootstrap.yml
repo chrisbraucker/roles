@@ -4,8 +4,8 @@
     that:
       - 'postgres_service_name | length > 0'
       - 'postgres_image | length > 0'
+      - 'postgres_ref | length > 0'
       - 'postgres_superuser_name | length > 0'
-      - 'postgres_database_name | length > 0'
       - 'postgres_superuser_password_length | int >= 24'
       - 'postgres_secret_name | length > 0'
       - 'postgres_secret_target | length > 0'
@@ -15,8 +15,8 @@
       - 'postgres_bootstrap_wait_delay | int > 0'
     fail_msg: >-
       PostgreSQL bootstrap requires service name, image, bootstrap container
-      name, superuser settings, and Podman secret settings. Password length
-      must be at least 24 characters.
+      name, superuser settings, and Podman secret settings. Password length must
+      be at least 24 characters.
 
 
 - name: 'Check whether postgres data directory is already initialized'
@@ -180,8 +180,7 @@
         ]
         + postgres_bootstrap_volume_args
         + postgres_bootstrap_env_args
-        + postgres_bootstrap_env_file_args
-        + [postgres_image]
+        + [postgres_image ~ ':' ~ postgres_ref]
       }}
   changed_when: true
   when: 'postgres_bootstrap_required | bool'
@@ -192,16 +191,14 @@
           postgres_data_dir ~ ':/var/lib/postgresql/:Z',
           postgres_bootstrap_dir ~ ':/bootstrap:Z',
           postgres_bootstrap_init_dir ~ ':/docker-entrypoint-initdb.d:Z,ro'
-        ] + postgres_extra_volumes
+        ]
       }}
     postgres_bootstrap_env: >-
       {{
         {
           'POSTGRES_USER': postgres_superuser_name,
-          'POSTGRES_DB': postgres_database_name,
           'POSTGRES_PASSWORD_FILE': '/run/secrets/' ~ postgres_secret_target
         }
-        | combine(postgres_env)
       }}
     postgres_bootstrap_volume_args: >-
       {%- set args = [] -%}
@@ -213,12 +210,6 @@
       {%- set args = [] -%}
       {%- for item in postgres_bootstrap_env | dict2items -%}
       {%-   set _ = args.extend(['--env', item.key ~ '=' ~ (item.value | string)]) -%}
-      {%- endfor -%}
-      {{- args -}}
-    postgres_bootstrap_env_file_args: >-
-      {%- set args = [] -%}
-      {%- for env_file in postgres_env_files -%}
-      {%-   set _ = args.extend(['--env-file', env_file]) -%}
       {%- endfor -%}
       {{- args -}}
 

@@ -43,6 +43,7 @@ Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
 
 ## Notes
 
-- this role does not install Podman; apply the `podman` role first
+- this role does not install Podman or prepare the Quadlet unit directory; apply
+  the `podman` role first
 - this role intentionally renders a native Quadlet template instead of routing
   through the generic `quadlet` role

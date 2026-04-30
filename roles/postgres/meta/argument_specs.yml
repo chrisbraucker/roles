@@ -13,16 +13,6 @@ argument_specs:
         description: 'Host directory mounted as the PostgreSQL data directory.'
         default: '/opt/containers/postgres/data'
 
-      postgres_config_owner:
-        type: 'str'
-        description: 'Owner used for host directories managed by the role.'
-        default: 'root'
-
-      postgres_config_group:
-        type: 'str'
-        description: 'Group used for host directories managed by the role.'
-        default: 'root'
-
       postgres_config_dir_mode:
         type: 'str'
         description: 'Default mode used for host directories managed by the role.'
@@ -48,25 +38,40 @@ argument_specs:
         description: 'Host marker file written by the bootstrap init script when initialization completes.'
         default: '/opt/containers/postgres/bootstrap/complete'
 
+      postgres_quadlet_unit_dir:
+        type: 'str'
+        description: 'System-level Quadlet unit directory where the PostgreSQL unit is rendered.'
+        default: '/etc/containers/systemd'
+
+      postgres_container_user:
+        type: 'int'
+        description: 'Numeric UID used to own PostgreSQL runtime directories and run the container.'
+        default: 70
+
+      postgres_container_group:
+        type: 'int'
+        description: 'Numeric GID used to own PostgreSQL runtime directories and run the container.'
+        default: 70
+
+      postgres_version:
+        type: 'int'
+        description: 'PostgreSQL major version used to locate the initialized PG_VERSION marker.'
+        default: 18
+
       postgres_image:
         type: 'str'
-        description: 'Container image used for PostgreSQL.'
-        default: 'docker.io/library/postgres:17'
+        description: 'Container image repository used for PostgreSQL.'
+        default: 'docker.io/library/postgres'
+
+      postgres_ref:
+        type: 'str'
+        description: 'Container image version used for PostgreSQL.'
+        default: '18'
 
       postgres_service_name:
         type: 'str'
         description: 'Quadlet and systemd service name for the PostgreSQL container.'
         default: 'postgres'
-
-      postgres_container_name:
-        type: 'str'
-        description: 'Optional explicit container name for the PostgreSQL workload.'
-
-      postgres_publish_ports:
-        type: 'list'
-        elements: 'str'
-        description: 'Host ports published by the PostgreSQL container.'
-        default: []
 
       postgres_networks:
         type: 'list'
@@ -77,14 +82,22 @@ argument_specs:
       postgres_state:
         type: 'str'
         description: 'Desired systemd service state for the PostgreSQL workload.'
+        default: 'restarted'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
 
       postgres_enable:
         type: 'bool'
         description: 'Whether the PostgreSQL systemd service should be enabled.'
+        default: true
 
       postgres_restart:
         type: 'str'
         description: 'Restart policy passed through to the Quadlet service definition.'
+        default: 'on-failure'
 
       postgres_timeout_start:
         type: 'str'
@@ -96,37 +109,9 @@ argument_specs:
         description: 'Systemd stop timeout used by the PostgreSQL service.'
         default: '30s'
 
-      postgres_env:
-        type: 'dict'
-        default: {}
-        description: 'Additional environment variables passed into the steady-state PostgreSQL container.'
-
-      postgres_env_files:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Additional environment files passed into the steady-state PostgreSQL container.'
-
-      postgres_extra_volumes:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Additional volumes mounted into both bootstrap and steady-state PostgreSQL containers.'
-
-      postgres_extra_quadlet_args:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Additional Quadlet arguments appended to the steady-state PostgreSQL service.'
-
       postgres_superuser_name:
         type: 'str'
         description: 'Initial PostgreSQL superuser name bootstrapped by the image.'
-        default: 'postgres'
-
-      postgres_database_name:
-        type: 'str'
-        description: 'Initial database name bootstrapped by the image.'
         default: 'postgres'
 
       postgres_superuser_password_length:
@@ -163,7 +148,7 @@ argument_specs:
 
       postgres_bootstrap_wait_retries:
         type: 'int'
-        description: 'How many times the role polls bootstrap logs for successful initialization.'
+        description: 'How many times the role polls for the bootstrap completion marker.'
         default: 60
 
       postgres_bootstrap_wait_delay:
@@ -193,10 +178,20 @@ argument_specs:
         description: 'Quadlet and systemd service name for the PostgreSQL container.'
         default: 'postgres'
 
+      postgres_version:
+        type: 'int'
+        description: 'PostgreSQL major version used to locate the initialized PG_VERSION marker.'
+        default: 18
+
       postgres_image:
         type: 'str'
-        description: 'Container image used for PostgreSQL bootstrap.'
-        default: 'docker.io/library/postgres:17'
+        description: 'Container image repository used for PostgreSQL bootstrap.'
+        default: 'docker.io/library/postgres'
+
+      postgres_ref:
+        type: 'str'
+        description: 'Container image version used for PostgreSQL bootstrap.'
+        default: '18'
 
       postgres_data_dir:
         type: 'str'
@@ -222,28 +217,6 @@ argument_specs:
         type: 'str'
         description: 'Initial PostgreSQL superuser name bootstrapped by the image.'
         default: 'postgres'
-
-      postgres_database_name:
-        type: 'str'
-        description: 'Initial database name bootstrapped by the image.'
-        default: 'postgres'
-
-      postgres_env:
-        type: 'dict'
-        default: {}
-        description: 'Additional environment variables passed into the bootstrap container.'
-
-      postgres_env_files:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Additional environment files passed into the bootstrap container.'
-
-      postgres_extra_volumes:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Additional volumes mounted into the bootstrap container.'
 
       postgres_superuser_password_length:
         type: 'int'
@@ -279,7 +252,7 @@ argument_specs:
 
       postgres_bootstrap_wait_retries:
         type: 'int'
-        description: 'How many times the role polls bootstrap logs for successful initialization.'
+        description: 'How many times the role polls for the bootstrap completion marker.'
         default: 60
 
       postgres_bootstrap_wait_delay:

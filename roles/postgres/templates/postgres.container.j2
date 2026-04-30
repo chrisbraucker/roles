@@ -1,0 +1,33 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=PostgreSQL database, v{{ postgres_ref }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart={{ postgres_restart }}
+TimeoutStartSec={{ postgres_timeout_start }}
+TimeoutStopSec={{ postgres_timeout_stop }}
+
+[Container]
+Image={{ postgres_image }}:{{ postgres_ref }}
+CgroupsMode=no-conmon
+User={{ postgres_container_user }}:{{ postgres_container_group }}
+NoNewPrivileges=true
+ReadOnly=true
+ReadOnlyTmpfs=false
+Environment=POSTGRES_USER={{ postgres_superuser_name }}
+Volume={{ postgres_data_dir }}:/var/lib/postgresql/:Z
+{% for network in postgres_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+HealthCmd=CMD-SHELL pg_isready -U {{ postgres_superuser_name }} || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=5
+HealthStartPeriod=20s
+
+[Install]
+WantedBy=multi-user.target
