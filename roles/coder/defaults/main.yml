@@ -1,0 +1,38 @@
+---
+coder_base_dir: '{{ (podman_containers_root | default("/opt/containers"), "coder") | path_join }}'
+coder_config_dir: '{{ (coder_base_dir, "config") | path_join }}'
+coder_cache_dir: '{{ (coder_base_dir, "cache") | path_join }}'
+coder_env_file: '{{ (coder_config_dir, "coder.env") | path_join }}'
+coder_quadlet_unit_dir: '{{ podman_quadlet_unit_dir | default("/etc/containers/systemd") }}'
+
+coder_container_user: 1000
+coder_container_group: 1000
+coder_config_dir_mode: '0750'
+coder_config_file_mode: '0600'
+coder_cache_dir_mode: '0750'
+
+coder_image_repo: 'ghcr.io/coder/coder'
+coder_image_ref: 'latest'
+coder_service_name: 'coder'
+coder_state: 'started'
+coder_enable: true
+coder_restart: 'on-failure'
+coder_timeout_start: '120s'
+coder_timeout_stop: '30s'
+
+coder_access_url: ''
+coder_wildcard_access_url:
+coder_http_address: '0.0.0.0:3000'
+coder_tls_enable: false
+coder_redirect_to_access_url: true
+coder_derp_force_websockets: true
+coder_provisioner_daemons: 0
+coder_pg_connection_url: ''
+coder_disable_password_auth: false
+coder_secure_auth_cookie: true
+coder_host_prefix_cookie: true
+coder_disable_path_apps: '{{ coder_wildcard_access_url is not none }}'
+coder_telemetry_enable: false
+coder_update_check: false
+
+coder_networks: []

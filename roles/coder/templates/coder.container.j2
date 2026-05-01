@@ -1,0 +1,29 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=Coder management interface, {{ coder_image_ref }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart={{ coder_restart }}
+TimeoutStartSec={{ coder_timeout_start }}
+TimeoutStopSec={{ coder_timeout_stop }}
+
+[Container]
+Image={{ coder_image_repo }}:{{ coder_image_ref }}
+CgroupsMode=no-conmon
+Exec=server
+User={{ coder_container_user }}:{{ coder_container_group }}
+NoNewPrivileges=true
+ReadOnly=true
+ReadOnlyTmpfs=true
+EnvironmentFile={{ coder_env_file }}
+Volume={{ coder_cache_dir }}:/home/coder/.cache:Z
+{% for network in coder_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+
+[Install]
+WantedBy=multi-user.target

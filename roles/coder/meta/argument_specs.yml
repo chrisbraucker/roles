@@ -1,0 +1,174 @@
+---
+argument_specs:
+  main:
+    short_description: 'Deploys the Coder management interface as a Quadlet-managed container.'
+    options:
+      coder_base_dir:
+        type: 'str'
+        default: '/opt/containers/coder'
+        description: 'Base host directory for Coder runtime files managed by this role.'
+
+      coder_config_dir:
+        type: 'str'
+        default: '/opt/containers/coder/config'
+        description: 'Host directory containing the generated Coder environment file.'
+
+      coder_cache_dir:
+        type: 'str'
+        default: '/opt/containers/coder/cache'
+        description: 'Host directory mounted as Coder cache storage.'
+
+      coder_env_file:
+        type: 'str'
+        default: '/opt/containers/coder/config/coder.env'
+        description: 'Root-readable environment file consumed by the Quadlet unit.'
+
+      coder_quadlet_unit_dir:
+        type: 'str'
+        default: '/etc/containers/systemd'
+        description: 'System-level Quadlet unit directory where the Coder unit is rendered.'
+
+      coder_container_user:
+        type: 'int'
+        default: 1000
+        description: 'Numeric UID used to run the Coder container process.'
+
+      coder_container_group:
+        type: 'int'
+        default: 1000
+        description: 'Numeric GID used to run the Coder container process.'
+
+      coder_config_dir_mode:
+        type: 'str'
+        default: '0750'
+        description: 'Mode used for the Coder configuration directory.'
+
+      coder_config_file_mode:
+        type: 'str'
+        default: '0600'
+        description: 'Mode used for the generated Coder environment file.'
+
+      coder_cache_dir_mode:
+        type: 'str'
+        default: '0750'
+        description: 'Mode used for the Coder cache directory.'
+
+      coder_image_repo:
+        type: 'str'
+        default: 'ghcr.io/coder/coder'
+        description: 'Container image repository used for Coder.'
+
+      coder_image_ref:
+        type: 'str'
+        default: 'latest'
+        description: 'Container image version used for Coder.'
+
+      coder_service_name:
+        type: 'str'
+        default: 'coder'
+        description: 'Quadlet and systemd service name for the Coder container.'
+
+      coder_state:
+        type: 'str'
+        default: 'started'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
+        description: 'Desired systemd service state for Coder.'
+
+      coder_enable:
+        type: 'bool'
+        default: true
+        description: 'Whether the Coder systemd service should be enabled.'
+
+      coder_restart:
+        type: 'str'
+        default: 'on-failure'
+        description: 'Restart policy passed through to the Quadlet service definition.'
+
+      coder_timeout_start:
+        type: 'str'
+        default: '120s'
+        description: 'Systemd start timeout used by the Coder service.'
+
+      coder_timeout_stop:
+        type: 'str'
+        default: '30s'
+        description: 'Systemd stop timeout used by the Coder service.'
+
+      coder_access_url:
+        type: 'str'
+        required: true
+        description: 'Public URL that users and workspace agents use to reach Coder.'
+
+      coder_wildcard_access_url:
+        type: 'str'
+        description: 'Optional wildcard hostname used for workspace applications, for example *.coder.example.com.'
+
+      coder_http_address:
+        type: 'str'
+        default: '0.0.0.0:3000'
+        description: 'HTTP bind address inside the Coder container.'
+
+      coder_tls_enable:
+        type: 'bool'
+        default: false
+        description: 'Whether Coder should terminate TLS itself. Keep false when nginx terminates TLS.'
+
+      coder_redirect_to_access_url:
+        type: 'bool'
+        default: true
+        description: 'Whether Coder redirects requests that do not match the configured access URL host.'
+
+      coder_derp_force_websockets:
+        type: 'bool'
+        default: true
+        description: 'Whether Coder should force DERP through WebSockets for reverse-proxy compatibility.'
+
+      coder_provisioner_daemons:
+        type: 'int'
+        default: 0
+        description: 'Number of built-in provisioner daemons started on the management host.'
+
+      coder_pg_connection_url:
+        type: 'str'
+        required: true
+        description: 'External PostgreSQL connection URL used as Coder persistent state.'
+
+      coder_disable_password_auth:
+        type: 'bool'
+        default: false
+        description: 'Whether password authentication is disabled. Keep false until OIDC is configured.'
+
+      coder_secure_auth_cookie:
+        type: 'bool'
+        default: true
+        description: 'Whether Coder marks browser session cookies as Secure.'
+
+      coder_host_prefix_cookie:
+        type: 'bool'
+        default: true
+        description: 'Whether Coder uses the __Host- cookie prefix.'
+
+      coder_disable_path_apps:
+        type: 'bool'
+        description: 'Whether path-based workspace applications are disabled.'
+
+      coder_telemetry_enable:
+        type: 'bool'
+        default: false
+        description: 'Whether Coder telemetry is enabled.'
+
+      coder_update_check:
+        type: 'bool'
+        default: false
+        description: 'Whether Coder periodically checks for updates.'
+
+      coder_networks:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'edge.network:alias=coder'
+        description: 'Quadlet network entries attached to the Coder container.'
