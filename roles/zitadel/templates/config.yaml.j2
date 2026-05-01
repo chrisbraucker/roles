@@ -22,3 +22,6 @@ Database:
 {% if zitadel_database_admin_existing_database | length > 0 %}
       ExistingDatabase: '{{ zitadel_database_admin_existing_database }}'
 {% endif %}
+{% if zitadel_login_enabled | bool %}
+DefaultInstance.Features.LoginV2.BaseURI: '{{ zitadel_login_base_uri }}'
+{% endif %}

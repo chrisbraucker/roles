@@ -4,41 +4,19 @@
   when: 'not (zitadel_skip_prepare | default(false) | bool)'
 
 
-- name: 'Deploy zitadel-login through quadlet'
-  ansible.builtin.include_role:
-    name: 'quadlet'
-  vars:
-    quadlet_services:
-      - name: '{{ zitadel_login_service_name }}'
-        description: 'ZITADEL Login V2 UI'
-        image: '{{ zitadel_login_image }}'
-        container_name: '{{ zitadel_login_container_name }}'
-        container_user: '{{ zitadel_container_user ~ ":" ~ zitadel_container_group }}'
-        restart: '{{ zitadel_login_restart }}'
-        timeout_start: '{{ zitadel_login_timeout_start }}'
-        timeout_stop: '{{ zitadel_login_timeout_stop }}'
-        state: '{{ zitadel_login_state }}'
-        enable: '{{ zitadel_login_enable }}'
-        ports: '{{ zitadel_login_publish_ports }}'
-        networks: '{{ zitadel_login_networks }}'
-        unit_requires: '{{ [zitadel_service_name ~ ".service"] }}'
-        unit_after: '{{ [zitadel_service_name ~ ".service"] }}'
-        env: >-
-          {{
-            {
-              'ZITADEL_API_URL': zitadel_login_api_url,
-              'NEXT_PUBLIC_BASE_PATH': zitadel_login_base_path,
-              'ZITADEL_SERVICE_USER_TOKEN_FILE': zitadel_login_client_pat_container_path,
-              'CUSTOM_REQUEST_HEADERS': zitadel_login_custom_request_headers
-            }
-            | combine(zitadel_login_env)
-          }}
-        env_files: '{{ zitadel_login_env_files }}'
-        volumes: >-
-          {{
-            [zitadel_data_dir ~ ':' ~ (zitadel_login_client_pat_container_path | dirname) ~ ':Z,ro']
-            + zitadel_login_extra_volumes
-          }}
-        read_only: false
-        read_only_tmpfs: false
-        extra_args: '{{ zitadel_login_extra_quadlet_args }}'
+- name: 'Render zitadel-login quadlet unit'
+  ansible.builtin.template:
+    src: 'zitadel-login.container.j2'
+    dest: '{{ (zitadel_quadlet_unit_dir, zitadel_login_service_name ~ ".container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'zitadel_login_quadlet_unit'
+
+
+- name: 'Manage zitadel-login service'
+  ansible.builtin.systemd_service:
+    name: '{{ zitadel_login_service_name }}.service'
+    state: '{{ zitadel_login_state }}'
+    enabled: '{{ zitadel_login_enable }}'
+    daemon_reload: '{{ zitadel_login_quadlet_unit.changed }}'

@@ -13,8 +13,8 @@
 - name: 'Require zitadel init before setup'
   ansible.builtin.fail:
     msg: >-
-      The ZITADEL init phase has not completed yet. Run the role main entrypoint
-      or tasks_from=init.yml before running setup.
+      The ZITADEL init phase has not completed yet. Run tasks_from=init.yml
+      before running setup.
   when: 'not zitadel_init_marker_stat.stat.exists'
 
 
@@ -45,7 +45,7 @@
         + [
           '--secret',
           zitadel_masterkey_secret_name ~ ',target=' ~ zitadel_masterkey_secret_target,
-          zitadel_image,
+          zitadel_image_repo ~ ':' ~ zitadel_image_ref,
           'setup',
           '--masterkeyFile',
           zitadel_masterkey_secret_container_path,
@@ -60,7 +60,6 @@
           '/etc/zitadel/init-steps.yaml'
         ]
       }}
-  register: 'zitadel_setup_result'
   changed_when: true
   when: 'not zitadel_setup_marker_stat.stat.exists'
   async: '{{ zitadel_setup_timeout }}'
@@ -71,7 +70,7 @@
   ansible.builtin.copy:
     dest: '{{ zitadel_setup_marker_file }}'
     content: |
-      image={{ zitadel_image }}
+      image={{ zitadel_image_repo }}:{{ zitadel_image_ref }}
       revision={{ zitadel_setup_revision }}
       completed=true
     owner: '{{ zitadel_container_user }}'

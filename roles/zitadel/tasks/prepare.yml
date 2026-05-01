@@ -2,36 +2,73 @@
 - name: 'Validate zitadel configuration'
   ansible.builtin.assert:
     that:
-      - 'zitadel_image | length > 0'
+      - 'zitadel_image_repo | length > 0'
+      - 'zitadel_image_ref | length > 0'
+      - 'zitadel_quadlet_unit_dir | length > 0'
+      - 'zitadel_base_dir | length > 0'
+      - 'zitadel_config_dir | length > 0'
+      - 'zitadel_data_dir | length > 0'
+      - 'zitadel_state_dir | length > 0'
+      - 'zitadel_init_marker_file | length > 0'
+      - 'zitadel_setup_revision | length > 0'
+      - 'zitadel_setup_marker_file | length > 0'
       - 'zitadel_service_name | length > 0'
+      - 'zitadel_container_user | int >= 0'
+      - 'zitadel_container_group | int >= 0'
+      - 'zitadel_state in ["reloaded", "restarted", "started", "stopped"]'
+      - 'zitadel_restart | length > 0'
+      - 'zitadel_timeout_start | length > 0'
+      - 'zitadel_timeout_stop | length > 0'
+      - 'zitadel_listen_port | int > 0'
       - 'zitadel_external_domain | length > 0'
+      - 'zitadel_external_port | int > 0'
       - 'zitadel_tls_mode in ["disabled", "external", "enabled"]'
       - 'zitadel_database_host | length > 0'
+      - 'zitadel_database_port | int > 0'
       - 'zitadel_database_name | length > 0'
       - 'zitadel_database_user_username | length > 0'
       - 'zitadel_database_user_password | length > 0'
       - 'zitadel_database_admin_username | length > 0'
       - 'zitadel_database_admin_password | length > 0'
-      - 'zitadel_firstinstance_org_admin_username | length > 0'
-      - 'zitadel_firstinstance_org_admin_password | length > 0'
+      - 'zitadel_firstinstance_org_human_username | length > 0'
+      - 'zitadel_firstinstance_org_human_password | length > 0'
       - 'zitadel_masterkey | length == 32'
       - 'zitadel_masterkey_secret_name | length > 0'
       - 'zitadel_masterkey_secret_target | length > 0'
       - 'zitadel_masterkey_secret_driver | length > 0'
+      - 'zitadel_masterkey_secret_container_path | length > 0'
+      - 'zitadel_public_config_file | length > 0'
+      - 'zitadel_init_secret_config_file | length > 0'
+      - 'zitadel_runtime_secret_config_file | length > 0'
+      - 'zitadel_init_steps_file | length > 0'
       - 'zitadel_init_timeout | int > 0'
       - 'zitadel_setup_timeout | int > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_image | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_service_name | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_base_path | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_base_uri | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_api_url | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_login_client_pat_container_path | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_machine_username | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_machine_name | length > 0'
-      - 'not zitadel_login_enabled | bool or zitadel_firstinstance_loginclient_pat_expiration_date | length > 0'
     fail_msg: >-
       ZITADEL requires explicit external domain, PostgreSQL connectivity,
       first-instance administrator credentials, and a 32-byte masterkey.
+
+
+- name: 'Validate zitadel login configuration'
+  ansible.builtin.assert:
+    that:
+      - 'zitadel_login_image_repo | length > 0'
+      - 'zitadel_login_image_ref | length > 0'
+      - 'zitadel_login_service_name | length > 0'
+      - 'zitadel_login_state in ["reloaded", "restarted", "started", "stopped"]'
+      - 'zitadel_login_restart | length > 0'
+      - 'zitadel_login_timeout_start | length > 0'
+      - 'zitadel_login_timeout_stop | length > 0'
+      - 'zitadel_login_base_path | length > 0'
+      - 'zitadel_login_base_uri | length > 0'
+      - 'zitadel_login_api_url | length > 0'
+      - 'zitadel_login_client_pat_container_path | length > 0'
+      - 'zitadel_firstinstance_loginclient_machine_username | length > 0'
+      - 'zitadel_firstinstance_loginclient_machine_name | length > 0'
+      - 'zitadel_firstinstance_loginclient_pat_expiration_date | length > 0'
+    fail_msg: >-
+      ZITADEL login deployment requires image, service, lifecycle, URI, API,
+      and login-client PAT configuration.
+  when: 'zitadel_login_enabled | bool'
 
 
 - name: 'Ensure zitadel host directories exist'
@@ -122,15 +159,6 @@
     group: '{{ zitadel_container_group }}'
     mode: '{{ zitadel_config_file_mode }}'
   no_log: true
-
-
-- name: 'Assemble zitadel quadlet volumes'
-  ansible.builtin.set_fact:
-    zitadel_quadlet_volumes: '{{ zitadel_default_volumes + zitadel_extra_volumes }}'
-  vars:
-    zitadel_default_volumes:
-      - '{{ zitadel_config_dir }}:/etc/zitadel:Z,ro'
-      - '{{ zitadel_data_dir }}:/var/lib/zitadel:z'
 
 
 - name: 'Assemble zitadel podman run network args'

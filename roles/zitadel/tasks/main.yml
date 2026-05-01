@@ -1,46 +1,20 @@
 ---
-- name: 'Deploy zitadel runtime through quadlet'
-  ansible.builtin.include_role:
-    name: 'quadlet'
-  vars:
-    quadlet_services:
-      - name: '{{ zitadel_service_name }}'
-        description: 'ZITADEL identity service'
-        image: '{{ zitadel_image }}'
-        container_name: '{{ zitadel_container_name }}'
-        container_user: '{{ zitadel_container_user ~ ":" ~ zitadel_container_group }}'
-        command: >-
-          start
-          --masterkeyFile {{ zitadel_masterkey_secret_container_path }}
-          --tlsMode {{ zitadel_tls_mode }}
-          --config /etc/zitadel/config.yaml
-          --config /etc/zitadel/runtime-secrets.yaml
-        restart: '{{ zitadel_restart }}'
-        timeout_start: '{{ zitadel_timeout_start }}'
-        timeout_stop: '{{ zitadel_timeout_stop }}'
-        state: '{{ zitadel_state }}'
-        enable: '{{ zitadel_enable }}'
-        ports: '{{ zitadel_publish_ports }}'
-        networks: '{{ zitadel_networks }}'
-        unit_requires: '{{ zitadel_unit_requires }}'
-        unit_after: '{{ zitadel_unit_after }}'
-        env: '{{ zitadel_env }}'
-        env_files: '{{ zitadel_env_files }}'
-        volumes: '{{ zitadel_quadlet_volumes }}'
-        secrets:
-          - '{{ zitadel_masterkey_secret_name }},target={{ zitadel_masterkey_secret_target }}'
-        read_only: false
-        read_only_tmpfs: false
-        health_cmd: >-
-          CMD-SHELL /app/zitadel ready
-          --config /etc/zitadel/config.yaml
-          --config /etc/zitadel/runtime-secrets.yaml
-          || exit 1
-        health_interval: '30s'
-        health_timeout: '5s'
-        health_retries: 5
-        health_start_period: '40s'
-        extra_args: '{{ zitadel_extra_quadlet_args }}'
+- name: 'Render zitadel quadlet unit'
+  ansible.builtin.template:
+    src: 'zitadel.container.j2'
+    dest: '{{ (zitadel_quadlet_unit_dir, zitadel_service_name ~ ".container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'zitadel_quadlet_unit'
+
+
+- name: 'Manage zitadel service'
+  ansible.builtin.systemd_service:
+    name: '{{ zitadel_service_name }}.service'
+    state: '{{ zitadel_state }}'
+    enabled: '{{ zitadel_enable }}'
+    daemon_reload: '{{ zitadel_quadlet_unit.changed }}'
 
 
 - name: 'Flush zitadel handlers'

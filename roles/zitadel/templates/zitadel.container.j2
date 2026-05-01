@@ -1,0 +1,35 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=ZITADEL identity service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart={{ zitadel_restart }}
+TimeoutStartSec={{ zitadel_timeout_start }}
+TimeoutStopSec={{ zitadel_timeout_stop }}
+
+[Container]
+Image={{ zitadel_image_repo }}:{{ zitadel_image_ref }}
+CgroupsMode=no-conmon
+Exec=start --masterkeyFile {{ zitadel_masterkey_secret_container_path }} --tlsMode {{ zitadel_tls_mode }} --config /etc/zitadel/config.yaml --config /etc/zitadel/runtime-secrets.yaml
+User={{ zitadel_container_user }}:{{ zitadel_container_group }}
+NoNewPrivileges=true
+ReadOnly=true
+ReadOnlyTmpfs=false
+Volume={{ zitadel_config_dir }}:/etc/zitadel:Z,ro
+Volume={{ zitadel_data_dir }}:/var/lib/zitadel:z
+{% for network in zitadel_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+Secret={{ zitadel_masterkey_secret_name }},target={{ zitadel_masterkey_secret_target }}
+HealthCmd=/app/zitadel ready --config /etc/zitadel/config.yaml --config /etc/zitadel/runtime-secrets.yaml || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=5
+HealthStartPeriod=40s
+
+[Install]
+WantedBy=multi-user.target

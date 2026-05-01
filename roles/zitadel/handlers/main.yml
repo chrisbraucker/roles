@@ -2,7 +2,7 @@
 - name: 'Check for rendered zitadel quadlet unit'
   listen: 'Restart zitadel'
   ansible.builtin.stat:
-    path: '/etc/containers/systemd/{{ zitadel_service_name }}.container'
+    path: '{{ (zitadel_quadlet_unit_dir, zitadel_service_name ~ ".container") | path_join }}'
   register: 'zitadel_quadlet_unit_stat'
 
 

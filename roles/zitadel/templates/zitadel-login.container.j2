@@ -1,0 +1,33 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=ZITADEL Login V2 UI
+Requires={{ zitadel_service_name }}.service
+Wants=network-online.target
+After=network-online.target
+After={{ zitadel_service_name }}.service
+
+[Service]
+Restart={{ zitadel_login_restart }}
+TimeoutStartSec={{ zitadel_login_timeout_start }}
+TimeoutStopSec={{ zitadel_login_timeout_stop }}
+
+[Container]
+Image={{ zitadel_login_image_repo }}:{{ zitadel_login_image_ref }}
+CgroupsMode=no-conmon
+User={{ zitadel_container_user }}:{{ zitadel_container_group }}
+NoNewPrivileges=true
+ReadOnly=false
+ReadOnlyTmpfs=false
+Environment=ZITADEL_API_URL={{ zitadel_login_api_url }}
+Environment=NEXT_PUBLIC_BASE_PATH={{ zitadel_login_base_path }}
+Environment=ZITADEL_SERVICE_USER_TOKEN_FILE={{ zitadel_login_client_pat_container_path }}
+Environment=CUSTOM_REQUEST_HEADERS={{ zitadel_login_custom_request_headers }}
+Volume={{ zitadel_data_dir }}:{{ zitadel_login_client_pat_container_path | dirname }}:Z,ro
+{% for network in zitadel_login_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+
+[Install]
+WantedBy=multi-user.target

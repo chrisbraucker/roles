@@ -29,7 +29,7 @@
         ]
         + zitadel_podman_run_network_args
         + [
-          zitadel_image,
+          zitadel_image_repo ~ ':' ~ zitadel_image_ref,
           'init',
           '--config',
           '/etc/zitadel/config.yaml',
@@ -37,7 +37,6 @@
           '/etc/zitadel/init-secrets.yaml'
         ]
       }}
-  register: 'zitadel_init_result'
   changed_when: true
   when: 'not zitadel_init_marker_stat.stat.exists'
   async: '{{ zitadel_init_timeout }}'
@@ -48,7 +47,7 @@
   ansible.builtin.copy:
     dest: '{{ zitadel_init_marker_file }}'
     content: |
-      image={{ zitadel_image }}
+      image={{ zitadel_image_repo }}:{{ zitadel_image_ref }}
       completed=true
     owner: '{{ zitadel_container_user }}'
     group: '{{ zitadel_container_group }}'

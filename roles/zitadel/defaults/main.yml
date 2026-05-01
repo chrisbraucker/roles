@@ -3,8 +3,9 @@ zitadel_base_dir: '{{ (podman_containers_root | default("/opt/containers"), "zit
 zitadel_config_dir: '{{ (zitadel_base_dir, "config") | path_join }}'
 zitadel_data_dir: '{{ (zitadel_base_dir, "data") | path_join }}'
 zitadel_state_dir: '{{ (zitadel_base_dir, "state") | path_join }}'
+zitadel_quadlet_unit_dir: '{{ podman_quadlet_unit_dir | default("/etc/containers/systemd") }}'
 zitadel_init_marker_file: '{{ (zitadel_state_dir, "init.done") | path_join }}'
-zitadel_setup_revision: '{{ zitadel_image }}'
+zitadel_setup_revision: '{{ zitadel_image_repo }}:{{ zitadel_image_ref }}'
 zitadel_setup_marker_file: >-
   {{
     (
@@ -21,22 +22,15 @@ zitadel_config_file_mode: '0600'
 zitadel_data_dir_mode: '0755'
 zitadel_state_dir_mode: '0755'
 
-zitadel_image: 'ghcr.io/zitadel/zitadel:stable'
+zitadel_image_repo: 'ghcr.io/zitadel/zitadel'
+zitadel_image_ref: 'stable'
 zitadel_service_name: 'zitadel'
-zitadel_container_name:
-zitadel_state:
-zitadel_enable:
-zitadel_restart:
+zitadel_state: 'restarted'
+zitadel_enable: true
+zitadel_restart: 'on-failure'
 zitadel_timeout_start: '120s'
 zitadel_timeout_stop: '30s'
-zitadel_publish_ports: []
 zitadel_networks: []
-zitadel_env: {}
-zitadel_env_files: []
-zitadel_extra_volumes: []
-zitadel_extra_quadlet_args: []
-zitadel_unit_requires: []
-zitadel_unit_after: []
 zitadel_init_timeout: 300
 zitadel_setup_timeout: 600
 zitadel_setup_init_projections: true
@@ -61,6 +55,7 @@ zitadel_database_admin_password: ''
 
 zitadel_firstinstance_org_human_username: 'root'
 zitadel_firstinstance_org_human_password: ''
+zitadel_firstinstance_trusted_domains: []
 
 zitadel_masterkey: ''
 zitadel_masterkey_secret_name: '{{ zitadel_service_name }}-masterkey'
@@ -74,20 +69,15 @@ zitadel_runtime_secret_config_file: '{{ (zitadel_config_dir, "runtime-secrets.ya
 zitadel_init_steps_file: '{{ (zitadel_config_dir, "init-steps.yaml") | path_join }}'
 
 zitadel_login_enabled: true
-zitadel_login_image: 'ghcr.io/zitadel/zitadel-login:latest'
+zitadel_login_image_repo: 'ghcr.io/zitadel/zitadel-login'
+zitadel_login_image_ref: 'latest'
 zitadel_login_service_name: '{{ zitadel_service_name }}-login'
-zitadel_login_container_name:
-zitadel_login_state:
-zitadel_login_enable:
-zitadel_login_restart:
+zitadel_login_state: 'restarted'
+zitadel_login_enable: true
+zitadel_login_restart: 'on-failure'
 zitadel_login_timeout_start: '60s'
 zitadel_login_timeout_stop: '30s'
-zitadel_login_publish_ports: []
 zitadel_login_networks: '{{ zitadel_networks }}'
-zitadel_login_env: {}
-zitadel_login_env_files: []
-zitadel_login_extra_volumes: []
-zitadel_login_extra_quadlet_args: []
 zitadel_login_base_path: '/ui/v2/login'
 zitadel_login_base_uri: >-
   {{

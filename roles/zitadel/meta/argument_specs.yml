@@ -8,32 +8,119 @@ argument_specs:
         default: '/opt/containers/zitadel'
         description: 'Base host directory for ZITADEL configuration and runtime data.'
 
+      zitadel_config_dir:
+        type: 'str'
+        default: '/opt/containers/zitadel/config'
+        description: 'Host directory for rendered ZITADEL configuration files.'
+
+      zitadel_data_dir:
+        type: 'str'
+        default: '/opt/containers/zitadel/data'
+        description: 'Host directory for ZITADEL runtime data shared with containers.'
+
       zitadel_state_dir:
         type: 'str'
         default: '/opt/containers/zitadel/state'
         description: 'Host directory used for Ansible-managed init and setup marker files.'
 
-      zitadel_image:
+      zitadel_quadlet_unit_dir:
         type: 'str'
-        default: 'ghcr.io/zitadel/zitadel:stable'
-        description: 'Container image used for ZITADEL.'
+        default: '/etc/containers/systemd'
+        description: 'Podman Quadlet unit directory prepared by the podman role.'
+
+      zitadel_init_marker_file:
+        type: 'str'
+        default: '/opt/containers/zitadel/state/init.done'
+        description: 'Marker file written after the ZITADEL init phase completes successfully.'
+
+      zitadel_setup_revision:
+        type: 'str'
+        description: 'Revision token used to decide whether setup must run again. Defaults to the full ZITADEL image reference.'
+
+      zitadel_setup_marker_file:
+        type: 'str'
+        description: 'Marker file written after the ZITADEL setup phase completes successfully for the current revision.'
+
+      zitadel_container_user:
+        type: 'str'
+        default: '80'
+        description: 'UID used for ZITADEL containers and owned host files.'
+
+      zitadel_container_group:
+        type: 'str'
+        default: '80'
+        description: 'GID used for ZITADEL containers and owned host files.'
+
+      zitadel_config_dir_mode:
+        type: 'str'
+        default: '0755'
+        description: 'Default mode for ZITADEL configuration directories.'
+
+      zitadel_config_file_mode:
+        type: 'str'
+        default: '0600'
+        description: 'Mode for rendered ZITADEL configuration and marker files.'
+
+      zitadel_data_dir_mode:
+        type: 'str'
+        default: '0755'
+        description: 'Mode for the ZITADEL data directory.'
+
+      zitadel_state_dir_mode:
+        type: 'str'
+        default: '0755'
+        description: 'Mode for the ZITADEL state directory.'
+
+      zitadel_image_repo:
+        type: 'str'
+        default: 'ghcr.io/zitadel/zitadel'
+        description: 'Container image repository used for ZITADEL.'
+
+      zitadel_image_ref:
+        type: 'str'
+        default: 'stable'
+        description: 'Container image version used for ZITADEL.'
 
       zitadel_service_name:
         type: 'str'
         default: 'zitadel'
         description: 'Quadlet and systemd service name for the ZITADEL container.'
 
-      zitadel_publish_ports:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Host ports published by the ZITADEL container.'
-
       zitadel_networks:
         type: 'list'
         elements: 'str'
         default: []
-        description: 'Quadlet networks attached to the ZITADEL container.'
+        description: 'Existing Podman networks attached to the ZITADEL containers.'
+
+      zitadel_state:
+        type: 'str'
+        default: 'restarted'
+        description: 'Desired systemd service state for the ZITADEL workload.'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
+
+      zitadel_enable:
+        type: 'bool'
+        default: true
+        description: 'Whether the ZITADEL systemd service should be enabled.'
+
+      zitadel_restart:
+        type: 'str'
+        default: 'on-failure'
+        description: 'Restart policy passed through to the ZITADEL Quadlet unit.'
+
+      zitadel_timeout_start:
+        type: 'str'
+        default: '120s'
+        description: 'Systemd start timeout used by the ZITADEL service.'
+
+      zitadel_timeout_stop:
+        type: 'str'
+        default: '30s'
+        description: 'Systemd stop timeout used by the ZITADEL service.'
 
       zitadel_init_timeout:
         type: 'int'
@@ -49,6 +136,16 @@ argument_specs:
         type: 'bool'
         default: true
         description: 'Whether the ZITADEL setup phase should initialize projections before runtime starts.'
+
+      zitadel_log_level:
+        type: 'str'
+        default: 'info'
+        description: 'ZITADEL log level written to the public runtime configuration.'
+
+      zitadel_listen_port:
+        type: 'int'
+        default: 8080
+        description: 'Port ZITADEL listens on inside the container.'
 
       zitadel_external_domain:
         type: 'str'
@@ -130,6 +227,12 @@ argument_specs:
         default: ''
         description: 'Password for the first human administrator created by ZITADEL.'
 
+      zitadel_firstinstance_trusted_domains:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Trusted domains configured on the first ZITADEL instance during setup.'
+
       zitadel_masterkey:
         type: 'str'
         default: ''
@@ -150,32 +253,85 @@ argument_specs:
         default: 'file'
         description: 'Podman secret driver used for the ZITADEL masterkey.'
 
+      zitadel_masterkey_secret_container_path:
+        type: 'str'
+        default: '/run/secrets/zitadel-masterkey'
+        description: 'Container path used by ZITADEL to read the mounted masterkey secret.'
+
+      zitadel_public_config_file:
+        type: 'str'
+        default: '/opt/containers/zitadel/config/config.yaml'
+        description: 'Host path for the rendered public ZITADEL configuration.'
+
+      zitadel_init_secret_config_file:
+        type: 'str'
+        default: '/opt/containers/zitadel/config/init-secrets.yaml'
+        description: 'Host path for the rendered init-only ZITADEL secret configuration.'
+
+      zitadel_runtime_secret_config_file:
+        type: 'str'
+        default: '/opt/containers/zitadel/config/runtime-secrets.yaml'
+        description: 'Host path for the rendered runtime ZITADEL secret configuration.'
+
+      zitadel_init_steps_file:
+        type: 'str'
+        default: '/opt/containers/zitadel/config/init-steps.yaml'
+        description: 'Host path for the rendered ZITADEL setup steps configuration.'
+
       zitadel_login_enabled:
         type: 'bool'
         default: true
         description: 'Whether the self-hosted Login V2 UI should be deployed alongside ZITADEL.'
 
-      zitadel_login_image:
+      zitadel_login_image_repo:
         type: 'str'
-        default: 'ghcr.io/zitadel/zitadel-login:latest'
-        description: 'Container image used for the self-hosted ZITADEL login UI.'
+        default: 'ghcr.io/zitadel/zitadel-login'
+        description: 'Container image repository used for the self-hosted ZITADEL login UI.'
+
+      zitadel_login_image_ref:
+        type: 'str'
+        default: 'latest'
+        description: 'Container image version used for the self-hosted ZITADEL login UI.'
 
       zitadel_login_service_name:
         type: 'str'
         default: 'zitadel-login'
         description: 'Quadlet and systemd service name for the ZITADEL login UI container.'
 
-      zitadel_login_publish_ports:
-        type: 'list'
-        elements: 'str'
-        default: []
-        description: 'Host ports published by the ZITADEL login UI container.'
-
       zitadel_login_networks:
         type: 'list'
         elements: 'str'
-        default: []
-        description: 'Quadlet networks attached to the ZITADEL login UI container.'
+        description: 'Existing Podman networks attached to the ZITADEL login UI container. Defaults to zitadel_networks.'
+
+      zitadel_login_state:
+        type: 'str'
+        default: 'restarted'
+        description: 'Desired systemd service state for the ZITADEL login UI.'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
+
+      zitadel_login_enable:
+        type: 'bool'
+        default: true
+        description: 'Whether the ZITADEL login UI systemd service should be enabled.'
+
+      zitadel_login_restart:
+        type: 'str'
+        default: 'on-failure'
+        description: 'Restart policy passed through to the ZITADEL login UI Quadlet unit.'
+
+      zitadel_login_timeout_start:
+        type: 'str'
+        default: '60s'
+        description: 'Systemd start timeout used by the ZITADEL login UI service.'
+
+      zitadel_login_timeout_stop:
+        type: 'str'
+        default: '30s'
+        description: 'Systemd stop timeout used by the ZITADEL login UI service.'
 
       zitadel_login_base_path:
         type: 'str'
@@ -184,18 +340,15 @@ argument_specs:
 
       zitadel_login_base_uri:
         type: 'str'
-        default: ''
         description: 'External base URI of the self-hosted Login V2 UI used to enable Login V2 on the instance.'
 
       zitadel_login_api_url:
         type: 'str'
-        default: ''
-        description: 'Internal API URL the login UI uses to reach the ZITADEL API.'
+        description: 'Internal API URL the login UI uses to reach the ZITADEL API. Defaults to the internal ZITADEL service URL.'
 
       zitadel_login_custom_request_headers:
         type: 'str'
-        default: ''
-        description: 'Custom request headers passed to the login UI, for example the forwarded Host header.'
+        description: 'Custom request headers passed to the login UI. Defaults to forwarding the configured external Host header.'
 
       zitadel_login_client_pat_container_path:
         type: 'str'
@@ -220,16 +373,21 @@ argument_specs:
   init:
     short_description: 'Runs the synchronous ZITADEL init phase through podman.'
     options:
-      zitadel_image:
+      zitadel_image_repo:
         type: 'str'
-        default: 'ghcr.io/zitadel/zitadel:stable'
-        description: 'Container image used for ZITADEL.'
+        default: 'ghcr.io/zitadel/zitadel'
+        description: 'Container image repository used for ZITADEL.'
+
+      zitadel_image_ref:
+        type: 'str'
+        default: 'stable'
+        description: 'Container image version used for ZITADEL.'
 
       zitadel_networks:
         type: 'list'
         elements: 'str'
         default: []
-        description: 'Podman networks attached to the ephemeral init container.'
+        description: 'Existing Podman networks attached to the ephemeral init container.'
 
       zitadel_init_timeout:
         type: 'int'
@@ -243,16 +401,21 @@ argument_specs:
   setup:
     short_description: 'Runs the synchronous ZITADEL setup phase through podman.'
     options:
-      zitadel_image:
+      zitadel_image_repo:
         type: 'str'
-        default: 'ghcr.io/zitadel/zitadel:stable'
-        description: 'Container image used for ZITADEL.'
+        default: 'ghcr.io/zitadel/zitadel'
+        description: 'Container image repository used for ZITADEL.'
+
+      zitadel_image_ref:
+        type: 'str'
+        default: 'stable'
+        description: 'Container image version used for ZITADEL.'
 
       zitadel_networks:
         type: 'list'
         elements: 'str'
         default: []
-        description: 'Podman networks attached to the ephemeral setup container.'
+        description: 'Existing Podman networks attached to the ephemeral setup container.'
 
       zitadel_setup_timeout:
         type: 'int'
