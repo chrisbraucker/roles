@@ -21,7 +21,8 @@ nginx_runtime_gid: 101
 nginx_container_user: '{{ nginx_runtime_uid }}:{{ nginx_runtime_gid }}'
 nginx_worker_user: ''
 
-nginx_image: 'docker.io/library/nginx:mainline'
+nginx_image_repo: 'docker.io/library/nginx'
+nginx_image_ref: 'mainline'
 nginx_service_name: 'nginx'
 nginx_container_name:
 nginx_state:

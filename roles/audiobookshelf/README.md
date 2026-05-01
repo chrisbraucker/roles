@@ -14,8 +14,8 @@ Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
 
 - `audiobookshelf_root`
 - `audiobookshelf_quadlet_unit_dir`
-- `audiobookshelf_image`
-- `audiobookshelf_ref`
+- `audiobookshelf_image_repo`
+- `audiobookshelf_image_ref`
 - `audiobookshelf_container_uid`
 - `audiobookshelf_container_gid`
 - `audiobookshelf_port`

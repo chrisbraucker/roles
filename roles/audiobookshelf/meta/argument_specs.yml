@@ -13,12 +13,12 @@ argument_specs:
         default: '/opt/containers/audiobookshelf'
         description: 'Root directory for Audiobookshelf host storage.'
 
-      audiobookshelf_image:
+      audiobookshelf_image_repo:
         type: 'str'
         default: 'ghcr.io/advplyr/audiobookshelf'
         description: 'Container image repository used for Audiobookshelf.'
 
-      audiobookshelf_ref:
+      audiobookshelf_image_ref:
         type: 'str'
         default: 'latest'
         description: 'Image version used for Audiobookshelf.'

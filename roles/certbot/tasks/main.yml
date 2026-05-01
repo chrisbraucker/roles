@@ -10,7 +10,7 @@
     quadlet_services:
       - name: '{{ certbot_service_name }}'
         description: 'Certbot renewal runner'
-        image: '{{ certbot_container_image }}'
+        image: '{{ certbot_image_repo }}:{{ certbot_image_ref }}'
         command: 'renew'
         service_type: 'oneshot'
         remain_after_exit: false

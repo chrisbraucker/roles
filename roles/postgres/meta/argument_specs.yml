@@ -58,12 +58,12 @@ argument_specs:
         description: 'PostgreSQL major version used to locate the initialized PG_VERSION marker.'
         default: 18
 
-      postgres_image:
+      postgres_image_repo:
         type: 'str'
         description: 'Container image repository used for PostgreSQL.'
         default: 'docker.io/library/postgres'
 
-      postgres_ref:
+      postgres_image_ref:
         type: 'str'
         description: 'Container image version used for PostgreSQL.'
         default: '18'
@@ -183,12 +183,12 @@ argument_specs:
         description: 'PostgreSQL major version used to locate the initialized PG_VERSION marker.'
         default: 18
 
-      postgres_image:
+      postgres_image_repo:
         type: 'str'
         description: 'Container image repository used for PostgreSQL bootstrap.'
         default: 'docker.io/library/postgres'
 
-      postgres_ref:
+      postgres_image_ref:
         type: 'str'
         description: 'Container image version used for PostgreSQL bootstrap.'
         default: '18'

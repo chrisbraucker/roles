@@ -3,8 +3,8 @@
   ansible.builtin.assert:
     that:
       - 'postgres_service_name | length > 0'
-      - 'postgres_image | length > 0'
-      - 'postgres_ref | length > 0'
+      - 'postgres_image_repo | length > 0'
+      - 'postgres_image_ref | length > 0'
       - 'postgres_superuser_name | length > 0'
       - 'postgres_superuser_password_length | int >= 24'
       - 'postgres_secret_name | length > 0'
@@ -180,7 +180,7 @@
         ]
         + postgres_bootstrap_volume_args
         + postgres_bootstrap_env_args
-        + [postgres_image ~ ':' ~ postgres_ref]
+        + [postgres_image_repo ~ ':' ~ postgres_image_ref]
       }}
   changed_when: true
   when: 'postgres_bootstrap_required | bool'

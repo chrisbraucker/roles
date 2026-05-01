@@ -2,7 +2,8 @@
 certbot_email: ''
 certbot_server: ''
 certbot_key_type: 'ecdsa'
-certbot_container_image: 'docker.io/certbot/certbot:latest'
+certbot_image_repo: 'docker.io/certbot/certbot'
+certbot_image_ref: 'latest'
 certbot_challenge_type: ''
 certbot_service_name: 'certbot'
 certbot_certificates: []

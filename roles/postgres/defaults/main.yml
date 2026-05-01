@@ -12,8 +12,8 @@ postgres_config_dir_mode: '0755'
 postgres_data_dir_mode: '0700'
 
 postgres_version: 18
-postgres_image: 'docker.io/library/postgres'
-postgres_ref: '18'
+postgres_image_repo: 'docker.io/library/postgres'
+postgres_image_ref: '18'
 postgres_service_name: 'postgres'
 postgres_state: 'restarted'
 postgres_enable: true

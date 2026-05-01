@@ -5,8 +5,8 @@ audiobookshelf_root: '{{ (podman_containers_root | default("/opt/containers"), "
 audiobookshelf_container_uid: 150
 audiobookshelf_container_gid: 150
 
-audiobookshelf_image: 'ghcr.io/advplyr/audiobookshelf'
-audiobookshelf_ref: 'latest'
+audiobookshelf_image_repo: 'ghcr.io/advplyr/audiobookshelf'
+audiobookshelf_image_ref: 'latest'
 audiobookshelf_port:
 audiobookshelf_networks:
   - 'edge.network:alias=audiobookshelf'

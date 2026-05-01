@@ -23,7 +23,8 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 
 ## Important Variables
 
-- `nginx_image`
+- `nginx_image_repo`
+- `nginx_image_ref`
 - `nginx_service_name`
 - `nginx_container_user`
 - `nginx_publish_ports`

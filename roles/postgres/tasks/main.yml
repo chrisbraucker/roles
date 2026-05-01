@@ -2,8 +2,8 @@
 - name: 'Validate postgres container configuration'
   ansible.builtin.assert:
     that:
-      - 'postgres_image | length > 0'
-      - 'postgres_ref | length > 0'
+      - 'postgres_image_repo | length > 0'
+      - 'postgres_image_ref | length > 0'
       - 'postgres_service_name | length > 0'
       - 'postgres_quadlet_unit_dir | length > 0'
       - 'postgres_superuser_name | length > 0'

@@ -18,10 +18,15 @@ argument_specs:
         default: 'ecdsa'
         description: 'Default key type to use for future certificate requests.'
 
-      certbot_container_image:
+      certbot_image_repo:
         type: 'str'
-        default: 'docker.io/certbot/certbot:latest'
-        description: 'Container image used for certbot renewal runs.'
+        default: 'docker.io/certbot/certbot'
+        description: 'Container image repository used for certbot renewal runs.'
+
+      certbot_image_ref:
+        type: 'str'
+        default: 'latest'
+        description: 'Container image version used for certbot renewal runs.'
 
       certbot_challenge_type:
         type: 'str'
@@ -85,10 +90,15 @@ argument_specs:
         default: 'ecdsa'
         description: 'Default key type to use for certificate requests unless overridden per certificate.'
 
-      certbot_container_image:
+      certbot_image_repo:
         type: 'str'
-        default: 'docker.io/certbot/certbot:latest'
-        description: 'Container image used for certificate issuance runs.'
+        default: 'docker.io/certbot/certbot'
+        description: 'Container image repository used for certificate issuance runs.'
+
+      certbot_image_ref:
+        type: 'str'
+        default: 'latest'
+        description: 'Container image version used for certificate issuance runs.'
 
       certbot_challenge_type:
         type: 'str'

@@ -20,7 +20,8 @@ Containerized certbot role built on Quadlet and systemd timers.
 
 ## Important Variables
 
-- `certbot_container_image`
+- `certbot_image_repo`
+- `certbot_image_ref`
 - `certbot_service_name`
 - `certbot_challenge_type`
 - `certbot_certificates`

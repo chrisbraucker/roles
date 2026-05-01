@@ -8,10 +8,15 @@ argument_specs:
         default: '/srv/nginx'
         description: 'Base host directory for nginx configuration, content, cache, and certificates.'
 
-      nginx_image:
+      nginx_image_repo:
         type: 'str'
-        default: 'docker.io/library/nginx:mainline'
-        description: 'Container image used for the nginx workload.'
+        default: 'docker.io/library/nginx'
+        description: 'Container image repository used for the nginx workload.'
+
+      nginx_image_ref:
+        type: 'str'
+        default: 'mainline'
+        description: 'Container image version used for the nginx workload.'
 
       nginx_service_name:
         type: 'str'

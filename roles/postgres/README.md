@@ -31,8 +31,8 @@ host storage and one-time superuser bootstrap.
 - `postgres_container_user`
 - `postgres_container_group`
 - `postgres_version`
-- `postgres_image`
-- `postgres_ref`
+- `postgres_image_repo`
+- `postgres_image_ref`
 - `postgres_service_name`
 - `postgres_networks`
 - `postgres_superuser_name`

@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=Quadlet audiobookshelf service, v{{ audiobookshelf_ref }}
+Description=Quadlet audiobookshelf service, {{ audiobookshelf_image_ref }}
 Wants=network-online.target
 After=network-online.target
 
@@ -9,7 +9,7 @@ After=network-online.target
 Restart=on-failure
 
 [Container]
-Image={{ audiobookshelf_image }}:{{ audiobookshelf_ref }}
+Image={{ audiobookshelf_image_repo }}:{{ audiobookshelf_image_ref }}
 User={{ audiobookshelf_container_uid }}:{{ audiobookshelf_container_gid }}
 CgroupsMode=no-conmon
 NoNewPrivileges=true

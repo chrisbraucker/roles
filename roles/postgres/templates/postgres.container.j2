@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=PostgreSQL database, v{{ postgres_ref }}
+Description=PostgreSQL database, {{ postgres_image_ref }}
 Wants=network-online.target
 After=network-online.target
 
@@ -11,7 +11,7 @@ TimeoutStartSec={{ postgres_timeout_start }}
 TimeoutStopSec={{ postgres_timeout_stop }}
 
 [Container]
-Image={{ postgres_image }}:{{ postgres_ref }}
+Image={{ postgres_image_repo }}:{{ postgres_image_ref }}
 CgroupsMode=no-conmon
 User={{ postgres_container_user }}:{{ postgres_container_group }}
 NoNewPrivileges=true

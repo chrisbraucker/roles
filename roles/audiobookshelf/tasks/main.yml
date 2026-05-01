@@ -4,8 +4,8 @@
     that:
       - 'audiobookshelf_quadlet_unit_dir | length > 0'
       - 'audiobookshelf_root | length > 0'
-      - 'audiobookshelf_image | length > 0'
-      - 'audiobookshelf_ref | length > 0'
+      - 'audiobookshelf_image_repo | length > 0'
+      - 'audiobookshelf_image_ref | length > 0'
       - 'audiobookshelf_container_uid | int >= 0'
       - 'audiobookshelf_container_gid | int >= 0'
       - 'audiobookshelf_port is none or audiobookshelf_port | int > 0'

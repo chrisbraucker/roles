@@ -43,7 +43,7 @@
           | list
         )
         + [
-          certbot_container_image,
+          certbot_image_repo ~ ':' ~ certbot_image_ref,
           'certonly',
           '--non-interactive',
           '--agree-tos',
