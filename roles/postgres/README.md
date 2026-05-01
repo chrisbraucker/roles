@@ -18,6 +18,7 @@ host storage and one-time superuser bootstrap.
 - passes the secret into the bootstrap container through `POSTGRES_PASSWORD_FILE`
 - removes the bootstrap Podman secret from the target host after initialization has completed
 - deploys the long-lived Quadlet service only after bootstrap and without any secret mount
+- optionally creates application owner roles and databases after the service is running
 
 
 ## Important Variables
@@ -34,6 +35,7 @@ host storage and one-time superuser bootstrap.
 - `postgres_image_repo`
 - `postgres_image_ref`
 - `postgres_service_name`
+- `postgres_container_name`
 - `postgres_networks`
 - `postgres_superuser_name`
 - `postgres_secret_name`
@@ -43,9 +45,29 @@ host storage and one-time superuser bootstrap.
 - `postgres_bootstrap_marker_script_name`
 - `postgres_bootstrap_wait_retries`
 - `postgres_bootstrap_wait_delay`
+- `postgres_database_wait_retries`
+- `postgres_database_wait_delay`
+- `postgres_databases`
 - `postgres_superuser_password`
 - `postgres_local_password_dir`
 - `postgres_local_password_file`
+
+
+## Application Databases
+
+Set `postgres_databases` to create service-owned databases after PostgreSQL is
+running:
+
+```yaml
+postgres_databases:
+  - name: 'coder'
+    owner: 'coder'
+    password: '{{ coder_postgres_password }}'
+```
+
+Database names and owner roles are intentionally limited to lower-case SQL
+identifiers. The role creates missing owner roles and databases, but it does not
+rotate passwords for existing roles.
 
 
 ## Notes

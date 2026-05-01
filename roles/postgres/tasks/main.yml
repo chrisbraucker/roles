@@ -106,3 +106,8 @@
   failed_when: false
   when: 'not postgres_bootstrap_required | bool'
   no_log: true
+
+
+- name: 'Manage postgres application databases'
+  ansible.builtin.import_tasks: 'databases.yml'
+  when: 'postgres_databases | length > 0'

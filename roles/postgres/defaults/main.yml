@@ -15,6 +15,7 @@ postgres_version: 18
 postgres_image_repo: 'docker.io/library/postgres'
 postgres_image_ref: '18'
 postgres_service_name: 'postgres'
+postgres_container_name: 'systemd-{{ postgres_service_name }}'
 postgres_state: 'restarted'
 postgres_enable: true
 postgres_restart: 'on-failure'
@@ -31,6 +32,9 @@ postgres_bootstrap_container_name: '{{ postgres_service_name }}-bootstrap'
 postgres_bootstrap_wait_retries: 60
 postgres_bootstrap_wait_delay: 2
 postgres_bootstrap_marker_script_name: '999-bootstrap-complete.sh'
+postgres_database_wait_retries: 60
+postgres_database_wait_delay: 2
+postgres_databases: []
 
 postgres_local_password_dir: 'out/postgres'
 postgres_local_password_file: >-
