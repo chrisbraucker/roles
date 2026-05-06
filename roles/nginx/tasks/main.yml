@@ -1,4 +1,20 @@
 ---
+- name: 'Validate nginx configuration'
+  ansible.builtin.assert:
+    that:
+      - 'nginx_quadlet_unit_dir | length > 0'
+      - 'nginx_image_repo | length > 0'
+      - 'nginx_image_ref | length > 0'
+      - 'nginx_service_name | length > 0'
+      - 'nginx_state in ["reloaded", "restarted", "started", "stopped"]'
+      - 'nginx_container_uid | int >= 0'
+      - 'nginx_container_gid | int >= 0'
+      - 'nginx_networks | length > 0'
+    fail_msg: >-
+      nginx requires image, service, lifecycle, runtime UID/GID, at least one
+      Quadlet network, and Quadlet unit directory.
+
+
 - name: 'Assemble nginx quadlet volumes'
   ansible.builtin.set_fact:
     nginx_quadlet_volumes: >-
@@ -14,7 +30,6 @@
           if nginx_certbot_http_01_enabled | bool
           else []
         )
-        + nginx_extra_volumes
       }}
   vars:
     nginx_default_volumes:
@@ -22,7 +37,6 @@
       - '{{ nginx_http_config_dir }}:/etc/nginx/http.d:Z'
       - '{{ nginx_stream_config_dir }}:/etc/nginx/stream.d:Z'
       - '{{ nginx_include_config_dir }}:/etc/nginx/includes:Z'
-      - '{{ nginx_html_dir }}:/usr/share/nginx/html:z'
       - '{{ nginx_cache_dir }}:/var/cache/nginx:Z'
 
 
@@ -39,7 +53,6 @@
     - path: '{{ nginx_http_config_dir }}'
     - path: '{{ nginx_stream_config_dir }}'
     - path: '{{ nginx_include_config_dir }}'
-    - path: '{{ nginx_html_dir }}'
     - path: '{{ nginx_cache_dir }}'
     - path: '{{ nginx_letsencrypt_dir }}'
       mode: '0755'
@@ -86,66 +99,30 @@
   notify: 'Restart nginx'
 
 
-- name: 'Deploy nginx quadlet stack'
-  ansible.builtin.include_role:
-    name: 'quadlet'
-  vars:
-    quadlet_networks: >-
+- name: 'Render nginx Quadlet unit'
+  ansible.builtin.template:
+    src: 'nginx.container.j2'
+    dest: '{{ (nginx_quadlet_unit_dir, nginx_service_name ~ ".container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'nginx_quadlet_unit'
+
+
+- name: 'Manage nginx service'
+  ansible.builtin.systemd_service:
+    name: '{{ nginx_service_name }}.service'
+    enabled: '{{ nginx_enabled }}'
+    state: >-
       {{
-        [
-          nginx_edge_network
-          | combine(
-            {
-              'subnets': [nginx_edge_subnet],
-              'gateways': [nginx_edge_gateway]
-            }
-            if nginx_static_edge_ip_enabled | bool
-            else {}
-          )
-        ]
-        if nginx_manage_edge_network
-        else []
+        'restarted'
+        if (
+          nginx_quadlet_unit.changed
+          and nginx_state in ['started', 'restarted']
+        )
+        else nginx_state
       }}
-    quadlet_services:
-      - name: '{{ nginx_service_name }}'
-        description: 'Nginx reverse proxy'
-        image: '{{ nginx_image_repo }}:{{ nginx_image_ref }}'
-        container_name: '{{ nginx_container_name }}'
-        restart: '{{ nginx_restart }}'
-        timeout_start: '{{ nginx_timeout_start }}'
-        timeout_stop: '{{ nginx_timeout_stop }}'
-        state: '{{ nginx_state }}'
-        enable: '{{ nginx_enable }}'
-        ports: '{{ nginx_publish_ports }}'
-        networks: >-
-          {{
-            (
-              [
-                nginx_networks[0]
-                ~ ':ip=' ~ nginx_static_edge_ip
-                ~ ',mac=' ~ (
-                  nginx_static_edge_mac
-                  | default_if_none_or_empty(
-                    nginx_static_edge_ip | ipv4_to_mac(nginx_static_edge_mac_prefix)
-                  )
-                )
-              ]
-              if (nginx_static_edge_ip_enabled | bool and nginx_networks | length > 0)
-              else [nginx_networks[0]]
-            )
-            + nginx_networks[1:]
-          }}
-        env: '{{ nginx_env }}'
-        env_files: '{{ nginx_env_files }}'
-        container_user: '{{ nginx_container_user }}'
-        volumes: '{{ nginx_quadlet_volumes }}'
-        add_capabilities: '{{ nginx_add_capabilities }}'
-        health_cmd: 'CMD-SHELL nginx -t'
-        health_interval: '30s'
-        health_timeout: '5s'
-        health_retries: 3
-        health_start_period: '10s'
-        extra_args: '{{ nginx_extra_quadlet_args }}'
+    daemon_reload: '{{ nginx_quadlet_unit.changed }}'
 
 
 - name: 'Flush nginx handlers'

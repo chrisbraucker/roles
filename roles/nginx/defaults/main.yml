@@ -4,8 +4,8 @@ nginx_config_dir: '{{ (nginx_base_dir, "config") | path_join }}'
 nginx_http_config_dir: '{{ (nginx_config_dir, "http.d") | path_join }}'
 nginx_stream_config_dir: '{{ (nginx_config_dir, "stream.d") | path_join }}'
 nginx_include_config_dir: '{{ (nginx_config_dir, "includes") | path_join }}'
-nginx_html_dir: '{{ (nginx_base_dir, "html") | path_join }}'
 nginx_cache_dir: '{{ (nginx_base_dir, "cache") | path_join }}'
+nginx_quadlet_unit_dir: '{{ podman_quadlet_unit_dir | default("/etc/containers/systemd") }}'
 nginx_mount_letsencrypt: false
 nginx_letsencrypt_dir: '/etc/letsencrypt'
 nginx_letsencrypt_live_dir: '/etc/letsencrypt/live'
@@ -16,42 +16,17 @@ nginx_config_owner: 'root'
 nginx_config_group: 'root'
 nginx_config_dir_mode: '0755'
 nginx_config_file_mode: '0644'
-nginx_runtime_uid: 101
-nginx_runtime_gid: 101
-nginx_container_user: '{{ nginx_runtime_uid }}:{{ nginx_runtime_gid }}'
+nginx_container_uid: 101
+nginx_container_gid: 101
 nginx_worker_user: ''
 
 nginx_image_repo: 'docker.io/library/nginx'
 nginx_image_ref: 'mainline'
 nginx_service_name: 'nginx'
-nginx_container_name:
-nginx_state:
-nginx_enable:
-nginx_restart:
-nginx_timeout_start: '30s'
-nginx_timeout_stop: '15s'
-nginx_publish_ports: []
+nginx_state: 'restarted'
+nginx_enabled: true
 nginx_networks:
-  - 'edge'
-nginx_add_capabilities:
-  - 'NET_BIND_SERVICE'
-nginx_extra_volumes: []
-nginx_extra_quadlet_args: []
-nginx_env: {}
-nginx_env_files: []
-
-nginx_manage_edge_network: true
-nginx_static_edge_ip_enabled: false
-nginx_static_edge_ip: '10.89.0.2'
-nginx_static_edge_mac: ''
-nginx_static_edge_mac_prefix: '02:89'
-nginx_edge_subnet: '10.89.0.0/24'
-nginx_edge_gateway: '10.89.0.1'
-nginx_edge_network:
-  name: 'edge'
-  description: 'Ingress network for reverse proxy workloads'
-  network_name: 'edge'
-  driver: 'bridge'
+  - 'edge.network'
 
 nginx_worker_processes: 'auto'
 nginx_worker_connections: 256

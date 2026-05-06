@@ -1,0 +1,35 @@
+#jinja2: trim_blocks:True,lstrip_blocks:True
+# {{ ansible_managed }}
+[Unit]
+Description=Nginx reverse proxy, {{ nginx_image_ref }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=30s
+TimeoutStopSec=15s
+
+[Container]
+Image={{ nginx_image_repo }}:{{ nginx_image_ref }}
+CgroupsMode=no-conmon
+User={{ nginx_container_uid }}:{{ nginx_container_gid }}
+NoNewPrivileges=true
+ReadOnly=true
+ReadOnlyTmpfs=true
+{% for volume in nginx_quadlet_volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% for network in nginx_networks %}
+Network={{ network }}
+{% endfor %}
+DropCapability=all
+AddCapability=NET_BIND_SERVICE
+HealthCmd=nginx -t
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=10s
+
+[Install]
+WantedBy=multi-user.target

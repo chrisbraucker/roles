@@ -111,7 +111,7 @@ quadlet_services:
       com.example.purpose: 'show-every-supported-field'
 
     # Health checks
-    health_cmd: 'CMD-SHELL test -d /data'
+    health_cmd: 'test -d /data'
     health_interval: '30s'
     health_retries: 3
     health_start_period: '5s'
