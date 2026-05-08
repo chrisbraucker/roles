@@ -7,8 +7,11 @@ audiobookshelf_container_gid: 150
 
 audiobookshelf_image_repo: 'ghcr.io/advplyr/audiobookshelf'
 audiobookshelf_image_ref: 'latest'
+audiobookshelf_memory:
 audiobookshelf_port:
+audiobookshelf_network_aliases:
+  - 'audiobookshelf'
 audiobookshelf_networks:
-  - 'edge.network:alias=audiobookshelf'
+  - 'edge.network'
 audiobookshelf_state: 'started'
 audiobookshelf_enabled: true

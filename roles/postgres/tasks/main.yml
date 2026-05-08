@@ -4,6 +4,7 @@
     that:
       - 'postgres_image_repo | length > 0'
       - 'postgres_image_ref | length > 0'
+      - 'postgres_memory is none or postgres_memory | length > 0'
       - 'postgres_service_name | length > 0'
       - 'postgres_quadlet_unit_dir | length > 0'
       - 'postgres_superuser_name | length > 0'
@@ -11,9 +12,16 @@
       - 'postgres_secret_name | length > 0'
       - 'postgres_secret_target | length > 0'
       - 'postgres_secret_driver | length > 0'
+      - >-
+        postgres_network_aliases
+        | select('length')
+        | list
+        | length
+        == postgres_network_aliases | length
     fail_msg: >-
       PostgreSQL requires image, service name, superuser name, and Podman
-      secret settings. Password length must be at least 24 characters.
+      secret settings. Password length must be at least 24 characters. If set,
+      memory and network aliases must be non-empty.
 
 
 - name: 'Ensure postgres host directories exist'

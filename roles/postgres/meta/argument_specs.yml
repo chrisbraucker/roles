@@ -68,6 +68,10 @@ argument_specs:
         description: 'Container image version used for PostgreSQL.'
         default: '18'
 
+      postgres_memory:
+        type: 'str'
+        description: 'Optional Podman memory limit rendered as Quadlet Container Memory=.'
+
       postgres_service_name:
         type: 'str'
         description: 'Quadlet and systemd service name for the PostgreSQL container.'
@@ -83,6 +87,13 @@ argument_specs:
         elements: 'str'
         description: 'Quadlet networks attached to the PostgreSQL container.'
         default: []
+
+      postgres_network_aliases:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'postgres'
+        description: 'Optional network aliases applied across all attached networks.'
 
       postgres_state:
         type: 'str'

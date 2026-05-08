@@ -26,11 +26,13 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 
 - `nginx_image_repo`
 - `nginx_image_ref`
+- `nginx_memory`
 - `nginx_service_name`
 - `nginx_quadlet_unit_dir`
 - `nginx_container_uid`
 - `nginx_container_gid`
 - `nginx_networks`
+- `nginx_network_aliases`
 - `nginx_global_https_redirect`
 - `nginx_global_https_redirect_http_port`
 - `nginx_mount_letsencrypt`
@@ -57,6 +59,9 @@ The container name, restart policy, systemd timeouts, health check, published
 ports, environment, hardening settings, and `NET_BIND_SERVICE` capability are
 intentionally fixed by the role until the deployment needs a concrete reason to
 expose them.
+
+`nginx_memory` is rendered as Quadlet `Memory=` in the `[Container]` section
+only when set.
 
 
 ## HTTP Site Behavior

@@ -16,10 +16,12 @@ Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
 - `audiobookshelf_quadlet_unit_dir`
 - `audiobookshelf_image_repo`
 - `audiobookshelf_image_ref`
+- `audiobookshelf_memory`
 - `audiobookshelf_container_uid`
 - `audiobookshelf_container_gid`
 - `audiobookshelf_port`
 - `audiobookshelf_networks`
+- `audiobookshelf_network_aliases`
 - `audiobookshelf_state`
 - `audiobookshelf_enabled`
 
@@ -30,9 +32,12 @@ Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
   available, otherwise `/opt/containers`
 - Quadlet units are rendered under `podman_quadlet_unit_dir` when that variable
   is available, otherwise `/etc/containers/systemd`
-- the default container name and network alias are both `audiobookshelf`
+- the role sets the `audiobookshelf` DNS name by rendering
+  `NetworkAlias=audiobookshelf` across all attached networks as default
 - the image repository and image ref are separate variables, and the rendered
   systemd description includes the ref
+- `audiobookshelf_memory` is rendered as Quadlet `Memory=` in the
+  `[Container]` section only when set
 - no `PORT` environment variable is rendered unless `audiobookshelf_port` is set
 - the container runs as UID/GID `150:150` by default, and managed host
   directories are owned by that identity so writable bind mounts do not require

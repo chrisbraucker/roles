@@ -34,9 +34,11 @@ host storage and one-time superuser bootstrap.
 - `postgres_version`
 - `postgres_image_repo`
 - `postgres_image_ref`
+- `postgres_memory`
 - `postgres_service_name`
 - `postgres_container_name`
 - `postgres_networks`
+- `postgres_network_aliases`
 - `postgres_superuser_name`
 - `postgres_secret_name`
 - `postgres_secret_target`
@@ -90,3 +92,7 @@ rotate passwords for existing roles.
 - this role renders its own native Quadlet container unit and does not manage
   Quadlet network units; pass existing network attachments through
   `postgres_networks`
+- `postgres_memory` is rendered as Quadlet `Memory=` in the `[Container]`
+  section only when set
+- the role sets the `postgres` DNS name by rendering
+  `NetworkAlias=postgres` across all attached networks as default

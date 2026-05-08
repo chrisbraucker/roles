@@ -14,6 +14,7 @@ postgres_data_dir_mode: '0700'
 postgres_version: 18
 postgres_image_repo: 'docker.io/library/postgres'
 postgres_image_ref: '18'
+postgres_memory:
 postgres_service_name: 'postgres'
 postgres_container_name: 'systemd-{{ postgres_service_name }}'
 postgres_state: 'restarted'
@@ -22,6 +23,8 @@ postgres_restart: 'on-failure'
 postgres_timeout_start: '60s'
 postgres_timeout_stop: '30s'
 postgres_networks: []
+postgres_network_aliases:
+  - 'postgres'
 
 postgres_superuser_name: 'postgres'
 postgres_superuser_password_length: 48

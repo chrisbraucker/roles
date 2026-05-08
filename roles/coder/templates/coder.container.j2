@@ -12,16 +12,21 @@ TimeoutStopSec={{ coder_timeout_stop }}
 
 [Container]
 Image={{ coder_image_repo }}:{{ coder_image_ref }}
-CgroupsMode=no-conmon
 Exec=server
 User={{ coder_container_user }}:{{ coder_container_group }}
 NoNewPrivileges=true
 ReadOnly=true
 ReadOnlyTmpfs=true
+{% if coder_memory is not none %}
+Memory={{ coder_memory }}
+{% endif %}
 EnvironmentFile={{ coder_env_file }}
 Volume={{ coder_cache_dir }}:/home/coder/.cache:Z
 {% for network in coder_networks %}
 Network={{ network }}
+{% endfor %}
+{% for alias in coder_network_aliases %}
+NetworkAlias={{ alias }}
 {% endfor %}
 DropCapability=all
 

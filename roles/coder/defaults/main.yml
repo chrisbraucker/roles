@@ -13,6 +13,7 @@ coder_cache_dir_mode: '0750'
 
 coder_image_repo: 'ghcr.io/coder/coder'
 coder_image_ref: 'latest'
+coder_memory:
 coder_service_name: 'coder'
 coder_state: 'started'
 coder_enable: true
@@ -36,3 +37,5 @@ coder_telemetry_enable: false
 coder_update_check: false
 
 coder_networks: []
+coder_network_aliases:
+  - 'coder'

@@ -63,6 +63,10 @@ argument_specs:
         default: 'latest'
         description: 'Container image version used for Coder.'
 
+      coder_memory:
+        type: 'str'
+        description: 'Optional Podman memory limit rendered as Quadlet Container Memory=.'
+
       coder_service_name:
         type: 'str'
         default: 'coder'
@@ -169,6 +173,12 @@ argument_specs:
       coder_networks:
         type: 'list'
         elements: 'str'
-        default:
-          - 'edge.network:alias=coder'
+        default: []
         description: 'Quadlet network entries attached to the Coder container.'
+
+      coder_network_aliases:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'coder'
+        description: 'Optional network aliases applied across all attached networks.'

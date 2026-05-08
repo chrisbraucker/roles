@@ -22,11 +22,13 @@ nginx_worker_user: ''
 
 nginx_image_repo: 'docker.io/library/nginx'
 nginx_image_ref: 'mainline'
+nginx_memory:
 nginx_service_name: 'nginx'
 nginx_state: 'restarted'
 nginx_enabled: true
 nginx_networks:
   - 'edge.network'
+nginx_network_aliases: []
 
 nginx_worker_processes: 'auto'
 nginx_worker_connections: 256

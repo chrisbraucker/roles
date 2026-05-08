@@ -12,16 +12,21 @@ TimeoutStopSec={{ zitadel_timeout_stop }}
 
 [Container]
 Image={{ zitadel_image_repo }}:{{ zitadel_image_ref }}
-CgroupsMode=no-conmon
 Exec=start --masterkeyFile {{ zitadel_masterkey_secret_container_path }} --tlsMode {{ zitadel_tls_mode }} --config /etc/zitadel/config.yaml --config /etc/zitadel/runtime-secrets.yaml
 User={{ zitadel_container_user }}:{{ zitadel_container_group }}
 NoNewPrivileges=true
 ReadOnly=true
 ReadOnlyTmpfs=false
+{% if zitadel_memory is not none %}
+Memory={{ zitadel_memory }}
+{% endif %}
 Volume={{ zitadel_config_dir }}:/etc/zitadel:Z,ro
 Volume={{ zitadel_data_dir }}:/var/lib/zitadel:z
 {% for network in zitadel_networks %}
 Network={{ network }}
+{% endfor %}
+{% for alias in zitadel_network_aliases %}
+NetworkAlias={{ alias }}
 {% endfor %}
 DropCapability=all
 Secret={{ zitadel_masterkey_secret_name }},target={{ zitadel_masterkey_secret_target }}

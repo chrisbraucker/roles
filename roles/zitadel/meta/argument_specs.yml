@@ -81,6 +81,10 @@ argument_specs:
         default: 'stable'
         description: 'Container image version used for ZITADEL.'
 
+      zitadel_memory:
+        type: 'str'
+        description: 'Optional Podman memory limit rendered as Quadlet Container Memory= for the ZITADEL service.'
+
       zitadel_service_name:
         type: 'str'
         default: 'zitadel'
@@ -91,6 +95,13 @@ argument_specs:
         elements: 'str'
         default: []
         description: 'Existing Podman networks attached to the ZITADEL containers.'
+
+      zitadel_network_aliases:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'zitadel'
+        description: 'Optional network aliases applied across all ZITADEL service network attachments.'
 
       zitadel_state:
         type: 'str'
@@ -293,6 +304,10 @@ argument_specs:
         default: 'latest'
         description: 'Container image version used for the self-hosted ZITADEL login UI.'
 
+      zitadel_login_memory:
+        type: 'str'
+        description: 'Optional Podman memory limit rendered as Quadlet Container Memory= for the login UI.'
+
       zitadel_login_service_name:
         type: 'str'
         default: 'zitadel-login'
@@ -302,6 +317,13 @@ argument_specs:
         type: 'list'
         elements: 'str'
         description: 'Existing Podman networks attached to the ZITADEL login UI container. Defaults to zitadel_networks.'
+
+      zitadel_login_network_aliases:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'zitadel-login'
+        description: 'Optional network aliases applied across all login UI network attachments.'
 
       zitadel_login_state:
         type: 'str'

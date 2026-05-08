@@ -11,10 +11,12 @@ Restart=on-failure
 [Container]
 Image={{ audiobookshelf_image_repo }}:{{ audiobookshelf_image_ref }}
 User={{ audiobookshelf_container_uid }}:{{ audiobookshelf_container_gid }}
-CgroupsMode=no-conmon
 NoNewPrivileges=true
 ReadOnly=true
 ReadOnlyTmpfs=true
+{% if audiobookshelf_memory is not none %}
+Memory={{ audiobookshelf_memory }}
+{% endif %}
 {% if audiobookshelf_port is not none %}
 Environment=PORT={{ audiobookshelf_port }}
 {% endif %}
@@ -23,6 +25,9 @@ Volume={{ (audiobookshelf_root, "config") | path_join }}:/config:Z
 Volume={{ (audiobookshelf_root, "metadata") | path_join }}:/metadata:Z
 {% for network in audiobookshelf_networks %}
 Network={{ network }}
+{% endfor %}
+{% for alias in audiobookshelf_network_aliases %}
+NetworkAlias={{ alias }}
 {% endfor %}
 DropCapability=all
 

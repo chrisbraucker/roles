@@ -19,7 +19,9 @@ Quadlet-managed service.
 - `coder_wildcard_access_url`
 - `coder_image_repo`
 - `coder_image_ref`
+- `coder_memory`
 - `coder_networks`
+- `coder_network_aliases`
 - `coder_provisioner_daemons`
 - `coder_disable_password_auth`
 - `coder_state`
@@ -40,10 +42,14 @@ Quadlet-managed service.
   can be bootstrapped before OIDC is added
 - the image repository and image ref are separate variables, and the rendered
   systemd description includes the ref
+- `coder_memory` is rendered as Quadlet `Memory=` in the `[Container]` section
+  only when set
 - the container runs as UID/GID `1000:1000` by default
 - the Coder cache directory is mounted at `/home/coder/.cache`
 - the service name, restart policy, cache mount target, and Quadlet hardening
   settings are intentionally fixed by the role
+- the role sets the `coder` DNS name by rendering
+  `NetworkAlias=coder` across all attached networks as default
 
 
 ## Nginx

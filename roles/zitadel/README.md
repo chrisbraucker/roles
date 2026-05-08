@@ -25,11 +25,13 @@ PostgreSQL.
 
 - `zitadel_image_repo`
 - `zitadel_image_ref`
+- `zitadel_memory`
 - `zitadel_quadlet_unit_dir`
 - `zitadel_container_user`
 - `zitadel_container_group`
 - `zitadel_service_name`
 - `zitadel_networks`
+- `zitadel_network_aliases`
 - `zitadel_state`
 - `zitadel_enable`
 - `zitadel_restart`
@@ -59,8 +61,10 @@ PostgreSQL.
 - `zitadel_login_enabled`
 - `zitadel_login_image_repo`
 - `zitadel_login_image_ref`
+- `zitadel_login_memory`
 - `zitadel_login_service_name`
 - `zitadel_login_networks`
+- `zitadel_login_network_aliases`
 - `zitadel_login_state`
 - `zitadel_login_enable`
 - `zitadel_login_restart`
@@ -80,6 +84,8 @@ PostgreSQL.
   and `zitadel_quadlet_unit_dir` already exist
 - this role does not manage network units; `zitadel_networks` and
   `zitadel_login_networks` attach containers to existing Podman networks
+- `zitadel_memory` and `zitadel_login_memory` render Quadlet `Memory=` in the
+  respective `[Container]` sections only when set
 - the role stores database credentials and first-instance credentials in
   root-only host files rendered from Ansible variables
 - the Podman secret for the masterkey is only created when absent; rotation is
@@ -92,3 +98,5 @@ PostgreSQL.
   `zitadel_setup_revision`, which defaults to the full ZITADEL image reference
 - login UI deployment lives in `tasks/login.yml` and is included from `main.yml`
   behind `zitadel_login_enabled`, which defaults to `true`
+- the role sets the `zitadel` and `zitadel-login` DNS name by rendering
+  `NetworkAlias=$NAME` across all attached networks as default

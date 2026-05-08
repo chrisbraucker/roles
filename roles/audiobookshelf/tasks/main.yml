@@ -8,12 +8,20 @@
       - 'audiobookshelf_image_ref | length > 0'
       - 'audiobookshelf_container_uid | int >= 0'
       - 'audiobookshelf_container_gid | int >= 0'
+      - 'audiobookshelf_memory is none or audiobookshelf_memory | length > 0'
       - 'audiobookshelf_port is none or audiobookshelf_port | int > 0'
       - 'audiobookshelf_networks | length > 0'
+      - >-
+        audiobookshelf_network_aliases
+        | select('length')
+        | list
+        | length
+        == audiobookshelf_network_aliases | length
     fail_msg: >-
       Audiobookshelf requires a storage root, image repository/ref, runtime
       UID/GID, at least one Quadlet network, and Quadlet unit directory. If set,
-      the container port must be positive.
+      the memory value and network aliases must be non-empty and the container
+      port must be positive.
 
 
 - name: 'Ensure Audiobookshelf host directories exist'

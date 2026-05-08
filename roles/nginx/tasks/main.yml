@@ -5,14 +5,22 @@
       - 'nginx_quadlet_unit_dir | length > 0'
       - 'nginx_image_repo | length > 0'
       - 'nginx_image_ref | length > 0'
+      - 'nginx_memory is none or nginx_memory | length > 0'
       - 'nginx_service_name | length > 0'
       - 'nginx_state in ["reloaded", "restarted", "started", "stopped"]'
       - 'nginx_container_uid | int >= 0'
       - 'nginx_container_gid | int >= 0'
       - 'nginx_networks | length > 0'
+      - >-
+        nginx_network_aliases
+        | select('length')
+        | list
+        | length
+        == nginx_network_aliases | length
     fail_msg: >-
       nginx requires image, service, lifecycle, runtime UID/GID, at least one
-      Quadlet network, and Quadlet unit directory.
+      Quadlet network, and Quadlet unit directory. If set, memory and network
+      aliases must be non-empty.
 
 
 - name: 'Assemble nginx quadlet volumes'

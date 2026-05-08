@@ -23,6 +23,10 @@ argument_specs:
         default: 'latest'
         description: 'Image version used for Audiobookshelf.'
 
+      audiobookshelf_memory:
+        type: 'str'
+        description: 'Optional Podman memory limit rendered as Quadlet Container Memory=.'
+
       audiobookshelf_container_uid:
         type: 'int'
         default: 150
@@ -41,8 +45,15 @@ argument_specs:
         type: 'list'
         elements: 'str'
         default:
-          - 'edge.network:alias=audiobookshelf'
+          - 'edge.network'
         description: 'Quadlet network entries attached to the container.'
+
+      audiobookshelf_network_aliases:
+        type: 'list'
+        elements: 'str'
+        default:
+          - 'audiobookshelf'
+        description: 'Optional network aliases applied across all attached networks.'
 
       audiobookshelf_state:
         type: 'str'

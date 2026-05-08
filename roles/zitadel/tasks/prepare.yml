@@ -4,6 +4,7 @@
     that:
       - 'zitadel_image_repo | length > 0'
       - 'zitadel_image_ref | length > 0'
+      - 'zitadel_memory is none or zitadel_memory | length > 0'
       - 'zitadel_quadlet_unit_dir | length > 0'
       - 'zitadel_base_dir | length > 0'
       - 'zitadel_config_dir | length > 0'
@@ -43,9 +44,16 @@
       - 'zitadel_init_steps_file | length > 0'
       - 'zitadel_init_timeout | int > 0'
       - 'zitadel_setup_timeout | int > 0'
+      - >-
+        zitadel_network_aliases
+        | select('length')
+        | list
+        | length
+        == zitadel_network_aliases | length
     fail_msg: >-
       ZITADEL requires explicit external domain, PostgreSQL connectivity,
-      first-instance administrator credentials, and a 32-byte masterkey.
+      first-instance administrator credentials, and a 32-byte masterkey. If
+      set, memory and network aliases must be non-empty.
 
 
 - name: 'Validate zitadel login configuration'
@@ -53,6 +61,7 @@
     that:
       - 'zitadel_login_image_repo | length > 0'
       - 'zitadel_login_image_ref | length > 0'
+      - 'zitadel_login_memory is none or zitadel_login_memory | length > 0'
       - 'zitadel_login_service_name | length > 0'
       - 'zitadel_login_state in ["reloaded", "restarted", "started", "stopped"]'
       - 'zitadel_login_restart | length > 0'
@@ -65,9 +74,16 @@
       - 'zitadel_firstinstance_loginclient_machine_username | length > 0'
       - 'zitadel_firstinstance_loginclient_machine_name | length > 0'
       - 'zitadel_firstinstance_loginclient_pat_expiration_date | length > 0'
+      - >-
+        zitadel_login_network_aliases
+        | select('length')
+        | list
+        | length
+        == zitadel_login_network_aliases | length
     fail_msg: >-
       ZITADEL login deployment requires image, service, lifecycle, URI, API,
-      and login-client PAT configuration.
+      and login-client PAT configuration. If set, memory and network aliases
+      must be non-empty.
   when: 'zitadel_login_enabled | bool'
 
 

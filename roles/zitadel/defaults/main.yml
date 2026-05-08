@@ -24,6 +24,7 @@ zitadel_state_dir_mode: '0755'
 
 zitadel_image_repo: 'ghcr.io/zitadel/zitadel'
 zitadel_image_ref: 'stable'
+zitadel_memory:
 zitadel_service_name: 'zitadel'
 zitadel_state: 'restarted'
 zitadel_enable: true
@@ -31,6 +32,8 @@ zitadel_restart: 'on-failure'
 zitadel_timeout_start: '120s'
 zitadel_timeout_stop: '30s'
 zitadel_networks: []
+zitadel_network_aliases:
+  - 'zitadel'
 zitadel_init_timeout: 300
 zitadel_setup_timeout: 600
 zitadel_setup_init_projections: true
@@ -71,6 +74,7 @@ zitadel_init_steps_file: '{{ (zitadel_config_dir, "init-steps.yaml") | path_join
 zitadel_login_enabled: true
 zitadel_login_image_repo: 'ghcr.io/zitadel/zitadel-login'
 zitadel_login_image_ref: 'latest'
+zitadel_login_memory:
 zitadel_login_service_name: '{{ zitadel_service_name }}-login'
 zitadel_login_state: 'restarted'
 zitadel_login_enable: true
@@ -78,6 +82,8 @@ zitadel_login_restart: 'on-failure'
 zitadel_login_timeout_start: '60s'
 zitadel_login_timeout_stop: '30s'
 zitadel_login_networks: '{{ zitadel_networks }}'
+zitadel_login_network_aliases:
+  - 'zitadel-login'
 zitadel_login_base_path: '/ui/v2/login'
 zitadel_login_base_uri: >-
   {{

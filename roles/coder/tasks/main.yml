@@ -11,6 +11,7 @@
       - 'coder_container_group | int >= 0'
       - 'coder_image_repo | length > 0'
       - 'coder_image_ref | length > 0'
+      - 'coder_memory is none or coder_memory | length > 0'
       - 'coder_service_name | length > 0'
       - 'coder_state in ["reloaded", "restarted", "started", "stopped"]'
       - 'coder_restart | length > 0'
@@ -22,10 +23,17 @@
       - 'coder_pg_connection_url | length > 0'
       - 'coder_provisioner_daemons | int >= 0'
       - 'coder_networks | length > 0'
+      - >-
+        coder_network_aliases
+        | select('length')
+        | list
+        | length
+        == coder_network_aliases | length
     fail_msg: >-
       Coder requires explicit access URL, external PostgreSQL connection URL,
       image, service, runtime identity, at least one Quadlet network, and
-      Quadlet unit directory.
+      Quadlet unit directory. If set, memory and network aliases must be
+      non-empty.
 
 
 - name: 'Ensure coder host directories exist'
