@@ -3,7 +3,15 @@
 Ansible roles for some light infrastructure management and workload deployment via podman's quadlet feature.\
 Efficient, boring, and just works.
 
+
 ## Roles
+
+### Audiobookshelf
+
+Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
+
+[Audiobookshelf README](roles/audiobookshelf/README.md)
+
 
 ### Bastion
 
@@ -12,11 +20,19 @@ Hardens bastion hosts with SSH-oriented policy and notification helpers.
 [Bastion README](roles/bastion/README.md)
 
 
-### Audiobookshelf
+### Certbot
 
-Deploys Audiobookshelf as a rootful Podman Quadlet-managed service.
+Deploys certbot renewal as a Quadlet-managed oneshot container plus a systemd timer.
+Interfaces with nginx' static file hosting capabilities to serve the acme-challenges when needed.
 
-[Audiobookshelf README](roles/audiobookshelf/README.md)
+[Certbot README](roles/certbot/README.md)
+
+
+### Coder
+
+Deploys a coder instance, requires dns-01 challenge support in Certbot for wildcard workspace names.
+
+[Coder README](roles/coder/README.md)
 
 
 ### Common
@@ -26,11 +42,11 @@ Configures defaults for debian and almalinux-based distros.
 [Common README](roles/common/README.md)
 
 
-### Firewall
+### CrowdSec
 
-Installs and manages the host firewall baseline via firewalld.
+Deploys CrowdSec host-locally with the security engine and firewall bouncer.
 
-[Firewall README](roles/firewall/README.md)
+[CrowdSec README](roles/crowdsec/README.md)
 
 
 ### Fail2Ban
@@ -40,17 +56,11 @@ Deploys Fail2Ban host-locally with nftables-backed jails, primarily for nginx vi
 [Fail2Ban README](roles/fail2ban/README.md)
 
 
-### Certbot
+### Firewall
 
-Deploys certbot renewal as a Quadlet-managed oneshot container plus a systemd timer.
+Installs and manages the host firewall baseline via firewalld.
 
-[Certbot README](roles/certbot/README.md)
-
-### CrowdSec
-
-Deploys CrowdSec host-locally with the security engine and firewall bouncer.
-
-[CrowdSec README](roles/crowdsec/README.md)
+[Firewall README](roles/firewall/README.md)
 
 
 ### Nginx
@@ -76,17 +86,17 @@ Podman-secret-based superuser bootstrap.
 [Postgres README](roles/postgres/README.md)
 
 
-### Zitadel
-
-Deploys ZITADEL as a Quadlet-managed service backed by PostgreSQL and intended
-to sit behind an HTTP/2-capable reverse proxy such as nginx.
-
-[Zitadel README](roles/zitadel/README.md)
-
-
 ### Quadlet
 
 Generic role to deploy containerized services via Podman Quadlet as systemD-managed services.
 Provides support for containers and networks, which can be consumed as lightweight playbook-driven instructions or by other roles if more configuration is needed.
 
 [Quadlet README](roles/quadlet/README.md)
+
+
+### Zitadel
+
+Deploys ZITADEL as a Quadlet-managed service backed by PostgreSQL and intended
+to sit behind an HTTP/2-capable reverse proxy such as nginx.
+
+[Zitadel README](roles/zitadel/README.md)
