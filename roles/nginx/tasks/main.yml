@@ -13,7 +13,7 @@
       - 'nginx_networks | length > 0'
       - >-
         nginx_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == nginx_network_aliases | length

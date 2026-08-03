@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=ZITADEL Login V2 UI, {{ zitadel_login_image_ref }}
+Description=ZITADEL Login V2 UI, ref: {{ zitadel_login_image_ref }}
 Requires={{ zitadel_service_name }}.service
 Wants=network-online.target
 After=network-online.target

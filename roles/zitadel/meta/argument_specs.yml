@@ -90,6 +90,12 @@ argument_specs:
         default: 'zitadel'
         description: 'Quadlet and systemd service name for the ZITADEL container.'
 
+      zitadel_service_dependencies:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Optional systemd unit dependencies rendered as both Requires= and After= in the ZITADEL container unit.'
+
       zitadel_networks:
         type: 'list'
         elements: 'str'

@@ -14,7 +14,7 @@
       - 'postgres_secret_driver | length > 0'
       - >-
         postgres_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == postgres_network_aliases | length

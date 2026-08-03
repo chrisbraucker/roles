@@ -1,9 +1,15 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=ZITADEL identity service, {{ zitadel_image_ref }}
+Description=ZITADEL identity service, ref: {{ zitadel_image_ref }}
+{% if zitadel_service_dependencies | length > 0 %}
+Requires={{ zitadel_service_dependencies | join(' ') }}
+{% endif %}
 Wants=network-online.target
 After=network-online.target
+{% if zitadel_service_dependencies | length > 0 %}
+After={{ zitadel_service_dependencies | join(' ') }}
+{% endif %}
 
 [Service]
 Restart={{ zitadel_restart }}

@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=Nginx reverse proxy, {{ nginx_image_ref }}
+Description=Nginx reverse proxy, ref: {{ nginx_image_ref }}
 Wants=network-online.target
 After=network-online.target
 

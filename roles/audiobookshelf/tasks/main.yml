@@ -13,7 +13,7 @@
       - 'audiobookshelf_networks | length > 0'
       - >-
         audiobookshelf_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == audiobookshelf_network_aliases | length

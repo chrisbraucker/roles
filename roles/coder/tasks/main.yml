@@ -25,7 +25,7 @@
       - 'coder_networks | length > 0'
       - >-
         coder_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == coder_network_aliases | length

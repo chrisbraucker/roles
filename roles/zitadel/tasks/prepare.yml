@@ -14,6 +14,7 @@
       - 'zitadel_setup_revision | length > 0'
       - 'zitadel_setup_marker_file | length > 0'
       - 'zitadel_service_name | length > 0'
+      - 'zitadel_service_dependencies | reject("equalto", "") | list | length == zitadel_service_dependencies | length'
       - 'zitadel_container_user | int >= 0'
       - 'zitadel_container_group | int >= 0'
       - 'zitadel_state in ["reloaded", "restarted", "started", "stopped"]'
@@ -46,7 +47,7 @@
       - 'zitadel_setup_timeout | int > 0'
       - >-
         zitadel_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == zitadel_network_aliases | length
@@ -76,7 +77,7 @@
       - 'zitadel_firstinstance_loginclient_pat_expiration_date | length > 0'
       - >-
         zitadel_login_network_aliases
-        | select('length')
+        | reject('equalto', '')
         | list
         | length
         == zitadel_login_network_aliases | length

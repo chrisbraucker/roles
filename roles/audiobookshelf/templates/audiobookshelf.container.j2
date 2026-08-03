@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=Quadlet audiobookshelf service, {{ audiobookshelf_image_ref }}
+Description=Quadlet audiobookshelf service, ref: {{ audiobookshelf_image_ref }}
 Wants=network-online.target
 After=network-online.target
 

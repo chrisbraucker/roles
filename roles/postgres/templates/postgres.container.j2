@@ -1,7 +1,7 @@
 #jinja2: trim_blocks:True,lstrip_blocks:True
 # {{ ansible_managed }}
 [Unit]
-Description=PostgreSQL database, {{ postgres_image_ref }}
+Description=PostgreSQL database, ref: {{ postgres_image_ref }}
 Wants=network-online.target
 After=network-online.target
 

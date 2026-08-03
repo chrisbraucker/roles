@@ -26,6 +26,7 @@ zitadel_image_repo: 'ghcr.io/zitadel/zitadel'
 zitadel_image_ref: 'stable'
 zitadel_memory:
 zitadel_service_name: 'zitadel'
+zitadel_service_dependencies: []
 zitadel_state: 'restarted'
 zitadel_enable: true
 zitadel_restart: 'on-failure'

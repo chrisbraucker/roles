@@ -30,6 +30,7 @@ PostgreSQL.
 - `zitadel_container_user`
 - `zitadel_container_group`
 - `zitadel_service_name`
+- `zitadel_service_dependencies`
 - `zitadel_networks`
 - `zitadel_network_aliases`
 - `zitadel_state`
@@ -82,6 +83,8 @@ PostgreSQL.
   PostgreSQL
 - the `podman` role must run before this role so Podman, the Quadlet generator,
   and `zitadel_quadlet_unit_dir` already exist
+- `zitadel_service_dependencies` can be used to add explicit systemd ordering
+  and requirement edges such as `postgres.service`
 - this role does not manage network units; `zitadel_networks` and
   `zitadel_login_networks` attach containers to existing Podman networks
 - `zitadel_memory` and `zitadel_login_memory` render Quadlet `Memory=` in the

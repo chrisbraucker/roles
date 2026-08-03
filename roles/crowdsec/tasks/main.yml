@@ -188,6 +188,18 @@
   when: 'crowdsec_firewall_bouncer_config_stat.stat.exists'
 
 
+- name: 'Parse existing CrowdSec firewall bouncer config'
+  ansible.builtin.set_fact:
+    crowdsec_firewall_bouncer_existing_config_data: >-
+      {{
+        crowdsec_firewall_bouncer_existing_config.content
+        | b64decode
+        | from_yaml
+        | default({}, true)
+      }}
+  when: 'crowdsec_firewall_bouncer_config_stat.stat.exists'
+
+
 - name: 'Inspect existing CrowdSec firewall bouncer registration'
   ansible.builtin.command:
     argv:
@@ -210,9 +222,7 @@
         if crowdsec_firewall_bouncer_api_key | length > 0
         else (
           (
-            crowdsec_firewall_bouncer_existing_config.content
-            | b64decode
-            | regex_search('(?m)^api_key:\\s*(\\S+)\\s*$', '\\1')
+            crowdsec_firewall_bouncer_existing_config_data.api_key
             | default('', true)
           )
           if crowdsec_firewall_bouncer_config_stat.stat.exists
