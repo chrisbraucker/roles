@@ -3,6 +3,7 @@
 FirstInstance:
   Skip: false
   InstanceName: Zitadel
+  PatPath: '{{ zitadel_firstinstance_machine_pat_container_path }}'
 {% if zitadel_login_enabled | bool %}
   LoginClientPatPath: '{{ zitadel_login_client_pat_container_path }}'
 {% endif %}
@@ -16,6 +17,12 @@ FirstInstance:
     Human:
       UserName: '{{ zitadel_firstinstance_org_human_username }}'
       Password: '{{ zitadel_firstinstance_org_human_password }}'
+    Machine:
+      Machine:
+        Username: '{{ zitadel_firstinstance_machine_username }}'
+        Name: '{{ zitadel_firstinstance_machine_name }}'
+      Pat:
+        ExpirationDate: '{{ zitadel_firstinstance_machine_pat_expiration_date }}'
 {% if zitadel_login_enabled | bool %}
     LoginClient:
       Machine:

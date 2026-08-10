@@ -12,7 +12,7 @@ PostgreSQL.
 - runs `zitadel init` synchronously through `podman run` to provision the
   database and bootstrap schemas
 - runs `zitadel setup` synchronously through `podman run` to apply setup,
-  create the first instance, and generate the login-client PAT
+  create the first instance, and generate IAM owner and login-client PATs
 - runs the steady-state ZITADEL service through Quadlet with `zitadel start`
 - deploys the self-hosted `zitadel-login` UI by default and wires it to a
   login-client PAT written by ZITADEL during first-instance setup
@@ -57,6 +57,10 @@ PostgreSQL.
 - `zitadel_database_admin_password`
 - `zitadel_firstinstance_org_human_username`
 - `zitadel_firstinstance_org_human_password`
+- `zitadel_firstinstance_machine_pat_container_path`
+- `zitadel_firstinstance_machine_username`
+- `zitadel_firstinstance_machine_name`
+- `zitadel_firstinstance_machine_pat_expiration_date`
 - `zitadel_firstinstance_trusted_domains`
 - `zitadel_masterkey`
 - `zitadel_login_enabled`
@@ -91,6 +95,9 @@ PostgreSQL.
   respective `[Container]` sections only when set
 - the role stores database credentials and first-instance credentials in
   root-only host files rendered from Ansible variables
+- the first-instance IAM owner PAT is written to
+  `zitadel_firstinstance_machine_pat_container_path`; store it outside the
+  deployment host after the initial setup
 - the Podman secret for the masterkey is only created when absent; rotation is
   intentionally left out of this first version
 - the role is split into `tasks/init.yml`, `tasks/setup.yml`, `tasks/login.yml`,

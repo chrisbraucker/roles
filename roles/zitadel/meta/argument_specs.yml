@@ -244,6 +244,26 @@ argument_specs:
         default: ''
         description: 'Password for the first human administrator created by ZITADEL.'
 
+      zitadel_firstinstance_machine_pat_container_path:
+        type: 'str'
+        default: '/var/lib/zitadel/iam-admin.pat'
+        description: 'Shared container path where ZITADEL writes the first-instance IAM_OWNER machine PAT.'
+
+      zitadel_firstinstance_machine_username:
+        type: 'str'
+        default: 'iam-admin'
+        description: 'Username for the first-instance machine user created with IAM_OWNER permissions.'
+
+      zitadel_firstinstance_machine_name:
+        type: 'str'
+        default: 'Automatically Initialized IAM Admin'
+        description: 'Display name for the first-instance machine user created with IAM_OWNER permissions.'
+
+      zitadel_firstinstance_machine_pat_expiration_date:
+        type: 'str'
+        default: '2049-01-01T00:00:00Z'
+        description: 'Expiration date for the IAM_OWNER machine PAT written during first-instance setup.'
+
       zitadel_firstinstance_trusted_domains:
         type: 'list'
         elements: 'str'
@@ -395,7 +415,7 @@ argument_specs:
 
       zitadel_firstinstance_loginclient_pat_expiration_date:
         type: 'str'
-        default: '2029-01-01T00:00:00Z'
+        default: '2049-01-01T00:00:00Z'
         description: 'Expiration date for the login-client PAT written during first-instance setup.'
 
   init:
