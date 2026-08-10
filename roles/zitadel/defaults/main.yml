@@ -99,6 +99,7 @@ zitadel_login_api_url: >-
     ~ ':'
     ~ (zitadel_listen_port | string)
   }}
+# Format expected without space between colon and domain
 zitadel_login_custom_request_headers: 'Host:{{ zitadel_external_domain }}'
 zitadel_login_client_pat_container_path: '/var/lib/zitadel/login-client.pat'
 zitadel_firstinstance_loginclient_machine_username: 'login-client'

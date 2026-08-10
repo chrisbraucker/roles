@@ -22,6 +22,9 @@ ReadOnlyTmpfs=true
 Memory={{ zitadel_login_memory }}
 {% endif %}
 Environment=ZITADEL_API_URL={{ zitadel_login_api_url }}
+{% if zitadel_login_custom_request_headers %}
+Environment=CUSTOM_REQUEST_HEADERS={{ zitadel_login_custom_request_headers }}
+{% endif %}
 Environment=NEXT_PUBLIC_BASE_PATH={{ zitadel_login_base_path }}
 Environment=ZITADEL_SERVICE_USER_TOKEN_FILE={{ zitadel_login_client_pat_container_path }}
 Volume={{ zitadel_data_dir }}:{{ zitadel_login_client_pat_container_path | dirname }}:Z,ro
