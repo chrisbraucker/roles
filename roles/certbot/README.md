@@ -10,6 +10,8 @@ Containerized certbot role built on Quadlet and systemd timers.
   - issues or updates certificate lineages from structured certificate objects
 - `http_01`
   - prepares the shared ACME webroot for HTTP-01 challenges
+- `dns_01`
+  - mounts a provider credentials file and passes provider-specific Certbot arguments
 
 ## Model
 
@@ -24,6 +26,8 @@ Containerized certbot role built on Quadlet and systemd timers.
 - `certbot_image_ref`
 - `certbot_service_name`
 - `certbot_challenge_type`
+- `certbot_dns_01_credentials_file`
+- `certbot_dns_01_args`
 - `certbot_certificates`
 - `certbot_config_dir`
 - `certbot_work_dir`
@@ -42,6 +46,27 @@ Optional per-certificate overrides:
 
 - `server`
 - `key_type`
+
+## DNS-01
+
+DNS-01 uses an externally managed credentials file and a provider-specific Certbot image and argv.
+The credentials file must be outside `certbot_config_dir`, use mode `0400` or `0600`, and remain available at the same host path for issuance and renewal.
+The role mounts it read-only at `/run/secrets/certbot-dns-credentials`.
+Put only plugin flags and paths in `certbot_dns_01_args`; keep token and key values in the credentials file.
+
+For example, with the Cloudflare plugin image:
+
+```yaml
+certbot_challenge_type: 'dns_01'
+certbot_image_repo: 'docker.io/certbot/dns-cloudflare'
+certbot_dns_01_credentials_file: '/root/.secrets/certbot/cloudflare.ini'
+certbot_dns_01_args:
+  - '--dns-cloudflare'
+  - '--dns-cloudflare-credentials'
+  - '/run/secrets/certbot-dns-credentials'
+  - '--dns-cloudflare-propagation-seconds'
+  - '60'
+```
 
 ## Notes
 

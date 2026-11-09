@@ -23,7 +23,7 @@ Hardens bastion hosts with SSH-oriented policy and notification helpers.
 ### Certbot
 
 Deploys certbot renewal as a Quadlet-managed oneshot container plus a systemd timer.
-Interfaces with nginx' static file hosting capabilities to serve the acme-challenges when needed.
+Supports HTTP-01 through nginx's challenge webroot and DNS-01 through a provider-specific Certbot plugin image.
 
 [Certbot README](roles/certbot/README.md)
 

@@ -5,6 +5,8 @@ certbot_key_type: 'ecdsa'
 certbot_image_repo: 'docker.io/certbot/certbot'
 certbot_image_ref: 'latest'
 certbot_challenge_type: ''
+certbot_dns_01_credentials_file: ''
+certbot_dns_01_args: []
 certbot_service_name: 'certbot'
 certbot_certificates: []
 certbot_timer_enabled: true

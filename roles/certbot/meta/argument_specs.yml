@@ -21,7 +21,7 @@ argument_specs:
       certbot_image_repo:
         type: 'str'
         default: 'docker.io/certbot/certbot'
-        description: 'Container image repository used for certbot renewal runs.'
+        description: 'Container image repository used for certbot runs; DNS-01 requires an image that includes the selected provider plugin.'
 
       certbot_image_ref:
         type: 'str'
@@ -34,7 +34,19 @@ argument_specs:
         choices:
           - ''
           - 'http_01'
-        description: 'Selected ACME challenge setup imported by the role, for example http_01.'
+          - 'dns_01'
+        description: 'Selected ACME challenge setup imported by the role, either http_01 or dns_01.'
+
+      certbot_dns_01_credentials_file:
+        type: 'str'
+        default: ''
+        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+
+      certbot_dns_01_args:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Provider-specific Certbot argv, including the DNS authenticator and credentials-file option; do not include secret values.'
 
       certbot_service_name:
         type: 'str'
@@ -93,7 +105,7 @@ argument_specs:
       certbot_image_repo:
         type: 'str'
         default: 'docker.io/certbot/certbot'
-        description: 'Container image repository used for certificate issuance runs.'
+        description: 'Container image repository used for certificate issuance; DNS-01 requires an image that includes the selected provider plugin.'
 
       certbot_image_ref:
         type: 'str'
@@ -103,7 +115,22 @@ argument_specs:
       certbot_challenge_type:
         type: 'str'
         default: ''
-        description: 'Selected ACME challenge setup imported by the role, for example http_01.'
+        choices:
+          - ''
+          - 'http_01'
+          - 'dns_01'
+        description: 'Selected ACME challenge setup imported by the role, either http_01 or dns_01.'
+
+      certbot_dns_01_credentials_file:
+        type: 'str'
+        default: ''
+        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+
+      certbot_dns_01_args:
+        type: 'list'
+        elements: 'str'
+        default: []
+        description: 'Provider-specific Certbot argv, including the DNS authenticator and credentials-file option; do not include secret values.'
 
       certbot_service_name:
         type: 'str'
@@ -128,3 +155,17 @@ argument_specs:
         type: 'str'
         default: '/var/www/letsencrypt'
         description: 'Webroot directory that an HTTP server should expose for ACME HTTP-01 challenges.'
+
+  dns_01:
+    short_description: 'Mounts provider credentials for DNS-01 certificate challenges.'
+    options:
+      certbot_dns_01_credentials_file:
+        type: 'str'
+        required: true
+        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+
+      certbot_dns_01_args:
+        type: 'list'
+        elements: 'str'
+        required: true
+        description: 'Provider-specific Certbot argv, including the DNS authenticator and credentials-file option; do not include secret values.'

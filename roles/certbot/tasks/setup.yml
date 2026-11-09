@@ -5,10 +5,10 @@
       - 'certbot_image_repo | length > 0'
       - 'certbot_image_ref | length > 0'
       - 'certbot_service_name | length > 0'
-      - 'certbot_challenge_type in ["", "http_01"]'
+      - 'certbot_challenge_type in ["", "http_01", "dns_01"]'
     fail_msg: >-
       certbot_image_repo, certbot_image_ref, and certbot_service_name must be set, and
-      certbot_challenge_type must be empty or one of: http_01.
+      certbot_challenge_type must be empty or one of: http_01, dns_01.
 
 
 - name: 'Ensure certbot base directories exist'
