@@ -32,11 +32,13 @@
     crowdsec_lapi_effective_url: >-
       {{
         (
-          crowdsec_lapi_listen_uri
-          if '://' in crowdsec_lapi_listen_uri
-          else 'http://' ~ crowdsec_lapi_listen_uri
-        )
-        | regex_replace('/?$', '/')
+          (
+            crowdsec_lapi_listen_uri
+            if '://' in crowdsec_lapi_listen_uri
+            else 'http://' ~ crowdsec_lapi_listen_uri
+          )
+          | regex_replace('/+$', '')
+        ) ~ '/'
       }}
 
 
@@ -45,11 +47,13 @@
     crowdsec_firewall_bouncer_effective_api_url: >-
       {{
         (
-          crowdsec_firewall_bouncer_api_url
-          if crowdsec_firewall_bouncer_api_url | length > 0
-          else crowdsec_lapi_effective_url
-        )
-        | regex_replace('/?$', '/')
+          (
+            crowdsec_firewall_bouncer_api_url
+            if crowdsec_firewall_bouncer_api_url | length > 0
+            else crowdsec_lapi_effective_url
+          )
+          | regex_replace('/+$', '')
+        ) ~ '/'
       }}
 
 
