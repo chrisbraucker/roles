@@ -15,7 +15,7 @@ Image={{ postgres_image_repo }}:{{ postgres_image_ref }}
 User={{ postgres_container_user }}:{{ postgres_container_group }}
 NoNewPrivileges=true
 ReadOnly=true
-ReadOnlyTmpfs=false
+ReadOnlyTmpfs=true
 {% if postgres_memory is not none %}
 Memory={{ postgres_memory }}
 {% endif %}
