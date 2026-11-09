@@ -12,6 +12,7 @@ TimeoutStopSec=15s
 
 [Container]
 Image={{ nginx_image_repo }}:{{ nginx_image_ref }}
+Pull=always
 User={{ nginx_container_uid }}:{{ nginx_container_gid }}
 NoNewPrivileges=true
 ReadOnly=true
