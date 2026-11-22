@@ -27,6 +27,7 @@
           'podman',
           'run',
           '--rm',
+          '--log-driver=journald',
           '--name',
           certbot_service_name ~ '-issue-' ~ item.name,
           '--volume',
@@ -84,4 +85,18 @@
   loop: '{{ certbot_certificates }}'
   loop_control:
     label: '{{ item.name }}'
-  notify: 'Reload certbot target service'
+
+
+- name: 'Allow nginx to read certbot certificate material'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'directory'
+    group: '{{ nginx_container_gid | string }}'
+    mode: 'g+rX'
+    recurse: true
+  loop:
+    - '{{ (certbot_config_dir, "live") | path_join }}'
+    - '{{ (certbot_config_dir, "archive") | path_join }}'
+  loop_control:
+    label: '{{ item }}'
+  when: 'nginx_container_gid is defined and nginx_container_gid is not none'

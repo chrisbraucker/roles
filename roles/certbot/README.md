@@ -18,7 +18,8 @@ Containerized certbot role built on Quadlet and systemd timers.
 - renewal runs in a Quadlet-managed oneshot container
 - a systemd timer triggers the renewal service
 - certificate issuance is explicit through `tasks_from: certificates.yml`
-- nginx or another dependent service can be reloaded via a post-success service hook
+- direct certificate issuance does not reload a dependent service; callers should do so after deploying that service
+- the post-success hook reloads the dependent service after scheduled renewal runs
 
 ## Important Variables
 
@@ -34,6 +35,7 @@ Containerized certbot role built on Quadlet and systemd timers.
 - `certbot_logs_dir`
 - `certbot_http_01_webroot`
 - `certbot_reload_service_name`
+- `nginx_container_gid`
 
 ## Certificate Objects
 
@@ -72,4 +74,4 @@ certbot_dns_01_args:
 
 - by default the role does not force an ACME directory URL; certbot uses its own default server selection unless `certbot_server` or `item.server` is set
 - HTTP-01 support is infrastructure-level and intended to work with the nginx role’s global HTTP redirect server
-- when `nginx_runtime_gid` is available in the play context, the post-success hook adjusts group ownership and permissions under `live/` and `archive/` so nginx can read certbot-managed keys and certificate material before the target service is reloaded
+- when `nginx_container_gid` is set, certificate issuance and the post-success hook adjust group ownership and permissions under `live/` and `archive/` so nginx can read certbot-managed keys and certificate material
