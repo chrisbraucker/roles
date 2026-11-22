@@ -182,11 +182,35 @@
   no_log: true
 
 
+- name: 'Initialize zitadel podman run network args'
+  ansible.builtin.set_fact:
+    zitadel_podman_run_network_args: []
+
+
 - name: 'Assemble zitadel podman run network args'
   ansible.builtin.set_fact:
     zitadel_podman_run_network_args: >-
+      {{ zitadel_podman_run_network_args + ['--network=' ~ zitadel_podman_run_network_name] }}
+  vars:
+    zitadel_quadlet_network_name: "{{ item | regex_replace('\\.network$', '') }}"
+    zitadel_quadlet_network: >-
       {{
-        zitadel_networks
-        | map('strformat', '--network=%s')
-        | list
+        (
+          quadlet_networks | default([])
+          | selectattr('name', 'equalto', zitadel_quadlet_network_name)
+          | list
+          | first
+        ) | default({})
       }}
+    zitadel_podman_run_network_name: >-
+      {{
+        (
+          zitadel_quadlet_network.network_name
+          | default('systemd-' ~ zitadel_quadlet_network_name, true)
+        )
+        if item.endswith('.network')
+        else item
+      }}
+  loop: '{{ zitadel_networks }}'
+  loop_control:
+    label: '{{ item }}'

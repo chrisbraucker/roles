@@ -91,6 +91,7 @@ PostgreSQL.
   and requirement edges such as `postgres.service`
 - this role does not manage network units; `zitadel_networks` and
   `zitadel_login_networks` attach containers to existing Podman networks
+- `zitadel_networks` values ending in `.network` are Quadlet references and resolve to the configured `network_name`, or Quadlet's `systemd-<name>` default, for the init and setup commands
 - `zitadel_memory` and `zitadel_login_memory` render Quadlet `Memory=` in the
   respective `[Container]` sections only when set
 - the role stores database credentials and first-instance credentials in
