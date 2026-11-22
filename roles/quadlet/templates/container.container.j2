@@ -5,8 +5,6 @@ Description={{ item.description | default(item.name) }}
 {% for unit in item.unit_requires | default([]) %}
 Requires={{ unit }}
 {% endfor %}
-Wants=network-online.target
-After=network-online.target
 {% for unit in item.unit_wants | default([]) %}
 Wants={{ unit }}
 {% endfor %}
@@ -35,6 +33,7 @@ TimeoutStopSec={{ item.timeout_stop }}
 [Container]
 ContainerName={{ (item.container_name if item.container_name is defined else none) | default_if_none_or_empty('systemd-' ~ item.name) }}
 Image={{ item.image }}
+LogDriver=journald
 {% if item.cgroups_mode is defined or quadlet_default_cgroups_mode | length > 0 %}
 CgroupsMode={{ (item.cgroups_mode if item.cgroups_mode is defined else none) | default_if_none_or_empty(quadlet_default_cgroups_mode) }}
 {% endif %}

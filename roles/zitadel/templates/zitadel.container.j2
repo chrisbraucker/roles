@@ -5,8 +5,6 @@ Description=ZITADEL identity service, ref: {{ zitadel_image_ref }}
 {% if zitadel_service_dependencies | length > 0 %}
 Requires={{ zitadel_service_dependencies | join(' ') }}
 {% endif %}
-Wants=network-online.target
-After=network-online.target
 {% if zitadel_service_dependencies | length > 0 %}
 After={{ zitadel_service_dependencies | join(' ') }}
 {% endif %}
@@ -18,6 +16,7 @@ TimeoutStopSec={{ zitadel_timeout_stop }}
 
 [Container]
 Image={{ zitadel_image_repo }}:{{ zitadel_image_ref }}
+LogDriver=journald
 Exec=start --masterkeyFile {{ zitadel_masterkey_secret_container_path }} --tlsMode {{ zitadel_tls_mode }} --config /etc/zitadel/config.yaml --config /etc/zitadel/runtime-secrets.yaml
 User={{ zitadel_container_user }}:{{ zitadel_container_group }}
 NoNewPrivileges=true

@@ -3,8 +3,6 @@
 [Unit]
 Description=ZITADEL Login V2 UI, ref: {{ zitadel_login_image_ref }}
 Requires={{ zitadel_service_name }}.service
-Wants=network-online.target
-After=network-online.target
 After={{ zitadel_service_name }}.service
 
 [Service]
@@ -14,6 +12,7 @@ TimeoutStopSec={{ zitadel_login_timeout_stop }}
 
 [Container]
 Image={{ zitadel_login_image_repo }}:{{ zitadel_login_image_ref }}
+LogDriver=journald
 User={{ zitadel_container_user }}:{{ zitadel_container_group }}
 NoNewPrivileges=true
 ReadOnly=true

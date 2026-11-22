@@ -2,14 +2,12 @@
 # {{ ansible_managed }}
 [Unit]
 Description=Quadlet audiobookshelf service, ref: {{ audiobookshelf_image_ref }}
-Wants=network-online.target
-After=network-online.target
-
 [Service]
 Restart=on-failure
 
 [Container]
 Image={{ audiobookshelf_image_repo }}:{{ audiobookshelf_image_ref }}
+LogDriver=journald
 User={{ audiobookshelf_container_uid }}:{{ audiobookshelf_container_gid }}
 NoNewPrivileges=true
 ReadOnly=true

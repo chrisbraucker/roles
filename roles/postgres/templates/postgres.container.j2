@@ -2,9 +2,6 @@
 # {{ ansible_managed }}
 [Unit]
 Description=PostgreSQL database, ref: {{ postgres_image_ref }}
-Wants=network-online.target
-After=network-online.target
-
 [Service]
 Restart={{ postgres_restart }}
 TimeoutStartSec={{ postgres_timeout_start }}
@@ -12,6 +9,7 @@ TimeoutStopSec={{ postgres_timeout_stop }}
 
 [Container]
 Image={{ postgres_image_repo }}:{{ postgres_image_ref }}
+LogDriver=journald
 User={{ postgres_container_user }}:{{ postgres_container_group }}
 NoNewPrivileges=true
 ReadOnly=true

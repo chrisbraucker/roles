@@ -2,9 +2,6 @@
 # {{ ansible_managed }}
 [Unit]
 Description=Nginx reverse proxy, ref: {{ nginx_image_ref }}
-Wants=network-online.target
-After=network-online.target
-
 [Service]
 Restart=on-failure
 TimeoutStartSec=30s
@@ -13,6 +10,7 @@ TimeoutStopSec=15s
 [Container]
 Image={{ nginx_image_repo }}:{{ nginx_image_ref }}
 Pull=always
+LogDriver=journald
 User={{ nginx_container_uid }}:{{ nginx_container_gid }}
 NoNewPrivileges=true
 ReadOnly=true
