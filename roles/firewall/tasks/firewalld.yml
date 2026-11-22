@@ -46,6 +46,18 @@
     - 'ansible_facts["os_family"] == "RedHat"'
 
 
+- name: 'Manage firewalld ingress ports'
+  ansible.posix.firewalld:
+    zone: '{{ item.zone | default(firewall_zone) }}'
+    port: '{{ item.port }}/{{ item.proto }}'
+    state: 'enabled'
+    permanent: true
+    immediate: true
+  loop: '{{ firewall_open_ports }}'
+  loop_control:
+    label: '{{ item.port }}/{{ item.proto }}'
+
+
 - name: 'Manage firewalld forward-port rules'
   ansible.posix.firewalld:
     zone: '{{ item.zone | default(firewall_zone) }}'

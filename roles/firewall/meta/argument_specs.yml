@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: 'Installs and manages the host firewall baseline and forward-port rules.'
+    short_description: 'Installs and manages the host firewall baseline and port rules.'
     options:
       firewall_backend:
         type: 'str'
@@ -13,12 +13,18 @@ argument_specs:
       firewall_zone:
         type: 'str'
         default: 'public'
-        description: 'Default firewalld zone used for services and forward-port rules.'
+        description: 'Default firewalld zone used for ingress and forward-port rules.'
 
       firewall_enable_dhcpv6_client:
         type: 'bool'
         default: true
         description: 'Whether the role should enable the dhcpv6-client service in the selected firewalld zone.'
+
+      firewall_open_ports:
+        type: 'list'
+        elements: 'dict'
+        default: []
+        description: 'Ingress port rules managed through firewalld.'
 
       firewall_port_forwards:
         type: 'list'

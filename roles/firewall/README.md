@@ -7,7 +7,7 @@ Host firewall baseline role. The current implementation targets `firewalld`.
 - install and enable `firewalld`
 - remove `ufw` on Debian-family hosts
 - apply the Red Hat initramfs workaround needed for firewalld module loading
-- manage explicit firewalld forward-port rules
+- manage explicit firewalld ingress-port and forward-port rules
 
 ## Important Variables
 
@@ -19,6 +19,8 @@ Host firewall baseline role. The current implementation targets `firewalld`.
   - enables the `dhcpv6-client` service in the configured zone where appropriate
 - `firewall_port_forwards`
   - structured forward-port rules rendered through `ansible.posix.firewalld`
+- `firewall_open_ports`
+  - structured ingress-port rules rendered through `ansible.posix.firewalld`
 
 ## Notes
 
