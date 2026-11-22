@@ -1,8 +1,8 @@
 ---
 argument_specs:
   main:
-    short_description: 'Deploys nginx core as a Quadlet-managed reverse proxy.'
-    options:
+    short_description: 'Configures nginx and applies the desired service state.'
+    options: &nginx_options
       nginx_base_dir:
         type: 'str'
         default: '/srv/nginx'
@@ -44,7 +44,7 @@ argument_specs:
 
       nginx_state:
         type: 'str'
-        default: 'restarted'
+        default: 'started'
         description: 'Desired systemd service state for the nginx workload.'
         choices:
           - 'reloaded'
@@ -197,6 +197,33 @@ argument_specs:
           - zone: 'perip_conn'
             count: 20
         description: 'Server-level connection limits applied to the global HTTP-to-HTTPS redirect server.'
+
+  configure:
+    short_description: 'Prepares nginx infrastructure without starting the service.'
+    options: *nginx_options
+
+  service:
+    short_description: 'Applies the desired nginx service state.'
+    options:
+      nginx_service_name:
+        type: 'str'
+        default: 'nginx'
+        description: 'Quadlet and systemd service name for the nginx container.'
+
+      nginx_state:
+        type: 'str'
+        default: 'started'
+        description: 'Desired systemd service state for the nginx workload.'
+        choices:
+          - 'reloaded'
+          - 'restarted'
+          - 'started'
+          - 'stopped'
+
+      nginx_enabled:
+        type: 'bool'
+        default: true
+        description: 'Whether the nginx systemd service should be enabled.'
 
   http_site:
     short_description: 'Renders nginx HTTP site definitions and related HTTP snippets.'

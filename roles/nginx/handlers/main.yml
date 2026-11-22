@@ -1,5 +1,11 @@
 ---
-- name: 'Restart nginx'
+- name: 'Apply nginx configuration'
   ansible.builtin.systemd_service:
     name: '{{ nginx_service_name }}.service'
-    state: 'restarted'
+    state: >-
+      {{
+        'restarted'
+        if (nginx_quadlet_unit.changed | default(false))
+        else 'reloaded'
+      }}
+  when: 'nginx_state == "started"'

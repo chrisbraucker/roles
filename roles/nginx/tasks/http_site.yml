@@ -86,7 +86,7 @@
   loop: '{{ nginx_include_snippets }}'
   loop_control:
     label: '{{ item.filename }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'
 
 
 - name: 'Render nginx HTTP snippets'
@@ -99,7 +99,7 @@
   loop: '{{ nginx_http_snippets }}'
   loop_control:
     label: '{{ item.filename }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'
 
 
 - name: 'Render nginx HTTP site configs'
@@ -112,4 +112,4 @@
   loop: '{{ nginx_http_sites }}'
   loop_control:
     label: '{{ item.name | default(item.filename | default("<unnamed http site>")) }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'

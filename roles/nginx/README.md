@@ -6,7 +6,11 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 ## Entry Points
 
 - `main`
-  - deploys nginx core, host directories, base config, and the Quadlet-managed container
+  - configures nginx and applies the desired service state
+- `configure`
+  - creates nginx infrastructure and renders the base config and Quadlet unit without starting the service
+- `service`
+  - applies pending config changes and the desired systemd service state
 - `http_site`
   - renders HTTP sites and related snippets
 - `stream_site`
@@ -21,6 +25,7 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 - runs the container as the configured UID/GID and adds `NET_BIND_SERVICE` so
   nginx can still bind `80` and `443`
 - owns the host cache directory with the configured container UID/GID so Nginx can write its temporary files
+- reloads nginx for config-only changes and restarts it only when the Quadlet unit changes or `nginx_state` requests it
 
 
 ## Backend Addressing

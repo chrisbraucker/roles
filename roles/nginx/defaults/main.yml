@@ -24,7 +24,7 @@ nginx_image_repo: 'docker.io/library/nginx'
 nginx_image_ref: 'mainline'
 nginx_memory:
 nginx_service_name: 'nginx'
-nginx_state: 'restarted'
+nginx_state: 'started'
 nginx_enabled: true
 nginx_networks:
   - 'edge.network'

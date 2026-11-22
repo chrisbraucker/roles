@@ -9,6 +9,7 @@ TimeoutStopSec=15s
 
 [Container]
 Image={{ nginx_image_repo }}:{{ nginx_image_ref }}
+ReloadSignal=SIGHUP
 Pull=always
 LogDriver=journald
 User={{ nginx_container_uid }}:{{ nginx_container_gid }}

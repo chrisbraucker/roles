@@ -32,7 +32,7 @@
     owner: '{{ nginx_config_owner }}'
     group: '{{ nginx_config_group }}'
     mode: '{{ nginx_config_file_mode }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'
 
 
 - name: 'Render nginx stream snippets'
@@ -45,7 +45,7 @@
   loop: '{{ nginx_stream_snippets }}'
   loop_control:
     label: '{{ item.filename }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'
 
 
 - name: 'Render nginx stream site configs'
@@ -58,4 +58,4 @@
   loop: '{{ nginx_stream_sites }}'
   loop_control:
     label: '{{ item.name | default(item.filename | default("<unnamed stream site>")) }}'
-  notify: 'Restart nginx'
+  notify: 'Apply nginx configuration'

@@ -1,0 +1,10 @@
+---
+- name: 'Apply pending nginx configuration changes'
+  ansible.builtin.meta: flush_handlers
+
+
+- name: 'Manage nginx service'
+  ansible.builtin.systemd_service:
+    name: '{{ nginx_service_name }}.service'
+    enabled: '{{ nginx_enabled }}'
+    state: '{{ nginx_state }}'

@@ -1,0 +1,127 @@
+---
+- name: 'Validate nginx configuration'
+  ansible.builtin.assert:
+    that:
+      - 'nginx_quadlet_unit_dir | length > 0'
+      - 'nginx_image_repo | length > 0'
+      - 'nginx_image_ref | length > 0'
+      - 'nginx_memory is none or nginx_memory | length > 0'
+      - 'nginx_service_name | length > 0'
+      - 'nginx_state in ["reloaded", "restarted", "started", "stopped"]'
+      - 'nginx_container_uid | int >= 0'
+      - 'nginx_container_gid | int >= 0'
+      - 'nginx_networks | length > 0'
+      - >-
+        nginx_network_aliases
+        | reject('equalto', '')
+        | list
+        | length
+        == nginx_network_aliases | length
+    fail_msg: >-
+      nginx requires image, service, lifecycle, runtime UID/GID, at least one
+      Quadlet network, and Quadlet unit directory. If set, memory and network
+      aliases must be non-empty.
+
+
+- name: 'Assemble nginx quadlet volumes'
+  ansible.builtin.set_fact:
+    nginx_quadlet_volumes: >-
+      {{
+        nginx_default_volumes
+        + (
+          [nginx_letsencrypt_dir ~ ':/etc/letsencrypt:z,ro']
+          if nginx_mount_letsencrypt | bool
+          else []
+        )
+        + (
+          [nginx_certbot_http_01_webroot ~ ':' ~ nginx_certbot_http_01_webroot ~ ':z,ro']
+          if nginx_certbot_http_01_enabled | bool
+          else []
+        )
+      }}
+  vars:
+    nginx_default_volumes:
+      - '{{ (nginx_config_dir, "nginx.conf") | path_join }}:/etc/nginx/nginx.conf:Z'
+      - '{{ nginx_http_config_dir }}:/etc/nginx/http.d:Z'
+      - '{{ nginx_stream_config_dir }}:/etc/nginx/stream.d:Z'
+      - '{{ nginx_include_config_dir }}:/etc/nginx/includes:Z'
+      - '{{ nginx_cache_dir }}:/var/cache/nginx:Z'
+
+
+- name: 'Ensure nginx host directories exist'
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: 'directory'
+    owner: '{{ item.owner | default(nginx_config_owner) }}'
+    group: '{{ item.group | default(nginx_config_group) }}'
+    mode: '{{ item.mode | default(nginx_config_dir_mode) }}'
+  loop:
+    - path: '{{ nginx_base_dir }}'
+    - path: '{{ nginx_config_dir }}'
+    - path: '{{ nginx_http_config_dir }}'
+    - path: '{{ nginx_stream_config_dir }}'
+    - path: '{{ nginx_include_config_dir }}'
+    - path: '{{ nginx_cache_dir }}'
+      owner: '{{ nginx_container_uid }}'
+      group: '{{ nginx_container_gid }}'
+      mode: '0750'
+    - path: '{{ nginx_letsencrypt_dir }}'
+      mode: '0755'
+    - path: '{{ nginx_certbot_http_01_webroot }}'
+      mode: '0755'
+  loop_control:
+    label: '{{ item.path }}'
+  when: >-
+    (
+      item.path != nginx_letsencrypt_dir
+      or nginx_mount_letsencrypt | bool
+    ) and (
+      item.path != nginx_certbot_http_01_webroot
+      or nginx_certbot_http_01_enabled | bool
+    )
+
+
+- name: 'Render nginx main configuration'
+  ansible.builtin.template:
+    src: 'nginx.conf.j2'
+    dest: '{{ (nginx_config_dir, "nginx.conf") | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  notify: 'Apply nginx configuration'
+
+
+- name: 'Render global HTTP to HTTPS redirect config'
+  ansible.builtin.template:
+    src: 'redirect_http_to_https.conf.j2'
+    dest: '{{ (nginx_http_config_dir, "00-redirect-http-to-https.conf") | path_join }}'
+    owner: '{{ nginx_config_owner }}'
+    group: '{{ nginx_config_group }}'
+    mode: '{{ nginx_config_file_mode }}'
+  when: 'nginx_global_https_redirect | bool'
+  notify: 'Apply nginx configuration'
+
+
+- name: 'Remove global HTTP to HTTPS redirect config when disabled'
+  ansible.builtin.file:
+    path: '{{ (nginx_http_config_dir, "00-redirect-http-to-https.conf") | path_join }}'
+    state: 'absent'
+  when: 'not nginx_global_https_redirect | bool'
+  notify: 'Apply nginx configuration'
+
+
+- name: 'Render nginx Quadlet unit'
+  ansible.builtin.template:
+    src: 'nginx.container.j2'
+    dest: '{{ (nginx_quadlet_unit_dir, nginx_service_name ~ ".container") | path_join }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: 'nginx_quadlet_unit'
+  notify: 'Apply nginx configuration'
+
+
+- name: 'Reload systemd after nginx Quadlet changes'
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: 'nginx_quadlet_unit.changed'
