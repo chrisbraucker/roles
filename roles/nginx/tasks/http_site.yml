@@ -1,4 +1,32 @@
 ---
+- name: 'Validate nginx HTTPS PROXY protocol trust configuration'
+  ansible.builtin.assert:
+    that:
+      - >-
+        not (item.listen_https_proxy_protocol | default(false) | bool)
+        or (
+          nginx_http_https_proxy_protocol_trusted_addresses | length > 0
+          and (
+            nginx_http_https_proxy_protocol_trusted_addresses
+            | reject('equalto', '')
+            | list
+            | length
+          ) == nginx_http_https_proxy_protocol_trusted_addresses | length
+        )
+      - >-
+        not (item.listen_https_proxy_protocol | default(false) | bool)
+        or (item.listen_https | default(false) | bool)
+      - >-
+        not (item.listen_https_proxy_protocol | default(false) | bool)
+        or not (item.listen_http | default(false) | bool)
+    fail_msg: >-
+      HTTPS sites accepting PROXY protocol need at least one trusted proxy
+      address and must not share their server block with a direct HTTP listener.
+  loop: '{{ nginx_http_sites }}'
+  loop_control:
+    label: '{{ item.name | default(item.filename | default("<unnamed http site>")) }}'
+
+
 - name: 'Validate nginx HTTP site definitions'
   ansible.builtin.assert:
     that:

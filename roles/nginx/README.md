@@ -20,6 +20,17 @@ Quadlet-managed nginx reverse proxy role with structured HTTP and stream site re
 - can serve the certbot HTTP-01 webroot from the global HTTP redirect server
 - runs the container as the configured UID/GID and adds `NET_BIND_SERVICE` so
   nginx can still bind `80` and `443`
+- owns the host cache directory with the configured container UID/GID so Nginx can write its temporary files
+
+
+## Backend Addressing
+
+Use fixed IP addresses for proxy backends on networks attached to nginx.
+Apply this to site `upstream` values, location `proxy_pass` and `grpc_pass` values, and stream backend targets.
+nginx-defined upstream group names and loopback destinations remain valid.
+This lets nginx start before a backend process is listening without resolving its container name at configuration load.
+The role renders backend addresses but does not allocate them; reserve each address outside the network's dynamic IP range.
+If an address changes, update the nginx target and redeploy the config.
 
 
 ## Important Variables
@@ -67,6 +78,9 @@ only when set.
 ## HTTP Site Behavior
 
 - `tls_certificate_name` derives `fullchain.pem`, `privkey.pem`, and `chain.pem` paths under `/etc/letsencrypt/live/<name>/`
+- set `listen_https_proxy_protocol: true` on an HTTPS site when it receives traffic from a local stream proxy that sends PROXY protocol; Nginx restores the client address and port for logs and forwarded headers
+- `nginx_http_https_proxy_protocol_trusted_addresses` lists the proxy addresses allowed to supply PROXY headers and defaults to `127.0.0.1`
+- sites using PROXY protocol must use HTTPS-only server blocks; their `X-Forwarded-Port` and `grpc_set_headers` default use the original destination port from the PROXY header
 - per-site `hsts: true` enables HSTS using `nginx_http_site_hsts_header_value`
 - by default, HTTP sites inherit server-level request-rate and connection limits from `nginx_http_site_default_limit_req` and `nginx_http_site_default_limit_conn`
 - set `use_default_limits: false` on a site to opt out, or define `limit_req` / `limit_conn` explicitly per site

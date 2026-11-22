@@ -5,6 +5,8 @@
 {% set use_default_limits = item.use_default_limits | default(nginx_http_site_use_default_limits) %}
 {% set server_limit_req = item.limit_req | default(nginx_http_site_default_limit_req if use_default_limits else []) %}
 {% set server_limit_conn = item.limit_conn | default(nginx_http_site_default_limit_conn if use_default_limits else []) %}
+{% set use_proxy_protocol = item.listen_https_proxy_protocol | default(false) | bool %}
+{% set forwarded_port = '$proxy_protocol_server_port' if use_proxy_protocol else '$server_port' %}
 {% if tls_certificate_name | length > 0 %}
 {% set tls_certificate = item.tls_certificate | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/fullchain.pem') %}
 {% set tls_certificate_key = item.tls_certificate_key | default(nginx_letsencrypt_live_dir ~ '/' ~ tls_certificate_name ~ '/privkey.pem') %}
@@ -18,11 +20,17 @@ server {
     {% endif %}
     {% endif %}
     {% if item.listen_https | default(false) %}
-    listen {{ item.listen_https_port | default(443) }} ssl;
+    listen {{ item.listen_https_port | default(443) }} ssl{% if use_proxy_protocol %} proxy_protocol{% endif %};
     {% if item.listen_https_ipv6 | default(true) %}
-    listen [::]:{{ item.listen_https_port | default(443) }} ssl;
+    listen [::]:{{ item.listen_https_port | default(443) }} ssl{% if use_proxy_protocol %} proxy_protocol{% endif %};
     {% endif %}
     http2 on;
+    {% if use_proxy_protocol %}
+    {% for address in nginx_http_https_proxy_protocol_trusted_addresses %}
+    set_real_ip_from {{ address }};
+    {% endfor %}
+    real_ip_header proxy_protocol;
+    {% endif %}
     ssl_certificate {{ tls_certificate if tls_certificate_name | length > 0 else item.tls_certificate }};
     ssl_certificate_key {{ tls_certificate_key if tls_certificate_name | length > 0 else item.tls_certificate_key }};
     {% if item.tls_trusted_certificate is defined or item.tls_certificate_chain is defined or tls_certificate_name | length > 0 %}
@@ -86,7 +94,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Port {{ forwarded_port }};
         {% if location.websocket | default(false) %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
@@ -99,7 +107,7 @@ server {
           'X-Forwarded-Proto': '$scheme',
           'X-Forwarded-For': '$proxy_add_x_forwarded_for',
           'X-Forwarded-Host': '$host',
-          'X-Forwarded-Port': '$server_port'
+          'X-Forwarded-Port': forwarded_port
         } | combine(location.grpc_set_headers | default({}))).items() %}
         grpc_set_header {{ header_name }} {{ header_value }};
         {% endfor %}

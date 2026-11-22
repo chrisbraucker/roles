@@ -121,6 +121,13 @@ argument_specs:
         default: ''
         description: 'Optional resolver validity window appended to the OCSP resolver configuration.'
 
+      nginx_http_https_proxy_protocol_trusted_addresses:
+        type: 'list'
+        elements: 'str'
+        default:
+          - '127.0.0.1'
+        description: 'Addresses trusted to supply PROXY protocol headers to HTTPS site listeners.'
+
       nginx_limit_req_status:
         type: 'int'
         default: 429
@@ -203,7 +210,14 @@ argument_specs:
         type: 'list'
         elements: 'dict'
         default: []
-        description: 'Structured HTTP server definitions rendered into http.d.'
+        description: 'Structured HTTP server definitions rendered into http.d; proxy backend targets should use fixed IP addresses.'
+
+      nginx_http_https_proxy_protocol_trusted_addresses:
+        type: 'list'
+        elements: 'str'
+        default:
+          - '127.0.0.1'
+        description: 'Addresses trusted to supply PROXY protocol headers to HTTPS site listeners.'
 
       nginx_ssl_stapling_enabled:
         type: 'bool'
@@ -291,7 +305,7 @@ argument_specs:
         type: 'list'
         elements: 'dict'
         default: []
-        description: 'Structured stream proxy definitions rendered into stream.d.'
+        description: 'Structured stream proxy definitions rendered into stream.d; backend targets should use fixed IP addresses.'
 
       nginx_stream_snippets:
         type: 'list'

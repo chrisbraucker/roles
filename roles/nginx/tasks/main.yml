@@ -52,8 +52,8 @@
   ansible.builtin.file:
     path: '{{ item.path }}'
     state: 'directory'
-    owner: '{{ nginx_config_owner }}'
-    group: '{{ nginx_config_group }}'
+    owner: '{{ item.owner | default(nginx_config_owner) }}'
+    group: '{{ item.group | default(nginx_config_group) }}'
     mode: '{{ item.mode | default(nginx_config_dir_mode) }}'
   loop:
     - path: '{{ nginx_base_dir }}'
@@ -62,6 +62,9 @@
     - path: '{{ nginx_stream_config_dir }}'
     - path: '{{ nginx_include_config_dir }}'
     - path: '{{ nginx_cache_dir }}'
+      owner: '{{ nginx_container_uid }}'
+      group: '{{ nginx_container_gid }}'
+      mode: '0750'
     - path: '{{ nginx_letsencrypt_dir }}'
       mode: '0755'
     - path: '{{ nginx_certbot_http_01_webroot }}'

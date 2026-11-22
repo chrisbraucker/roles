@@ -60,6 +60,8 @@ nginx_limit_conn_zones:
 
 nginx_http_site_hsts_default: false
 nginx_http_site_hsts_header_value: 'max-age=31536000; includeSubDomains'
+nginx_http_https_proxy_protocol_trusted_addresses:
+  - '127.0.0.1'
 nginx_http_site_use_default_limits: true
 nginx_http_site_default_limit_req:
   - zone: 'perip_req'
