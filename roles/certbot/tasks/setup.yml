@@ -34,6 +34,7 @@
 - name: 'Assemble certbot container volumes'
   ansible.builtin.set_fact:
     certbot_container_volumes: '{{ certbot_default_volumes + certbot_challenge_volumes | default([]) }}'
+    certbot_container_secrets: '{{ certbot_challenge_secrets | default([]) }}'
   vars:
     certbot_default_volumes:
       - '{{ certbot_config_dir }}:/etc/letsencrypt:z'

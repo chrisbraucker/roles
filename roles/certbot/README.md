@@ -11,7 +11,7 @@ Containerized certbot role built on Quadlet and systemd timers.
 - `http_01`
   - prepares the shared ACME webroot for HTTP-01 challenges
 - `dns_01`
-  - mounts a provider credentials file and passes provider-specific Certbot arguments
+  - supplies provider credentials as a Podman secret and passes provider-specific Certbot arguments
 
 ## Model
 
@@ -27,7 +27,7 @@ Containerized certbot role built on Quadlet and systemd timers.
 - `certbot_image_ref`
 - `certbot_service_name`
 - `certbot_challenge_type`
-- `certbot_dns_01_credentials_file`
+- `certbot_dns_01_credentials`
 - `certbot_dns_01_args`
 - `certbot_certificates`
 - `certbot_config_dir`
@@ -51,17 +51,17 @@ Optional per-certificate overrides:
 
 ## DNS-01
 
-DNS-01 uses an externally managed credentials file and a provider-specific Certbot image and argv.
-The credentials file must be outside `certbot_config_dir`, use mode `0400` or `0600`, and remain available at the same host path for issuance and renewal.
-The role mounts it read-only at `/run/secrets/certbot-dns-credentials`.
-Put only plugin flags and paths in `certbot_dns_01_args`; keep token and key values in the credentials file.
+DNS-01 accepts provider credentials as `certbot_dns_01_credentials` and stores them as a Podman secret for both issuance and renewal.
+The secret is available inside the container at `/run/secrets/certbot-dns-credentials`.
+Put only plugin flags and paths in `certbot_dns_01_args`; keep token and key values in Ansible Vault.
 
 For example, with the Cloudflare plugin image:
 
 ```yaml
 certbot_challenge_type: 'dns_01'
 certbot_image_repo: 'docker.io/certbot/dns-cloudflare'
-certbot_dns_01_credentials_file: '/root/.secrets/certbot/cloudflare.ini'
+certbot_dns_01_credentials: |
+  dns_cloudflare_api_token = {{ vault_certbot_cloudflare_token }}
 certbot_dns_01_args:
   - '--dns-cloudflare'
   - '--dns-cloudflare-credentials'
@@ -73,5 +73,5 @@ certbot_dns_01_args:
 ## Notes
 
 - by default the role does not force an ACME directory URL; certbot uses its own default server selection unless `certbot_server` or `item.server` is set
-- HTTP-01 support is infrastructure-level and intended to work with the nginx role’s global HTTP redirect server
+- HTTP-01 support is infrastructure-level and intended to work with the nginx role's global HTTP redirect server
 - when `nginx_container_gid` is set, certificate issuance and the post-success hook adjust group ownership and permissions under `live/` and `archive/` so nginx can read certbot-managed keys and certificate material

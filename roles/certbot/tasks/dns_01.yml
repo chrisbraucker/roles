@@ -2,40 +2,27 @@
 - name: 'Validate certbot DNS-01 configuration'
   ansible.builtin.assert:
     that:
-      - 'certbot_dns_01_credentials_file | length > 0'
-      - 'certbot_dns_01_credentials_file is match("^/")'
-      - >-
-        not certbot_dns_01_credentials_file.startswith(
-          (certbot_config_dir | regex_replace('/+$', '')) ~ '/'
-        )
+      - 'certbot_dns_01_credentials | length > 0'
       - 'certbot_dns_01_args is sequence'
       - 'certbot_dns_01_args is not string'
       - 'certbot_dns_01_args | length > 0'
     fail_msg: >-
-      DNS-01 requires an absolute credentials file outside certbot_config_dir
-      and a non-empty certbot_dns_01_args list for the selected provider plugin.
+      DNS-01 requires certbot_dns_01_credentials from Ansible Vault and a
+      non-empty certbot_dns_01_args list.
 
 
-- name: 'Inspect certbot DNS-01 credentials file'
-  ansible.builtin.stat:
-    path: '{{ certbot_dns_01_credentials_file }}'
-  register: 'certbot_dns_01_credentials_stat'
-
-
-- name: 'Validate certbot DNS-01 credentials file'
-  ansible.builtin.assert:
-    that:
-      - 'certbot_dns_01_credentials_stat.stat.exists | default(false)'
-      - 'certbot_dns_01_credentials_stat.stat.isreg | default(false)'
-      - '(certbot_dns_01_credentials_stat.stat.mode | default("")) in ["0400", "0600"]'
-    fail_msg: >-
-      certbot_dns_01_credentials_file must be an existing regular file with
-      mode 0400 or 0600.
+- name: 'Create Certbot DNS-01 Podman secret'
+  containers.podman.podman_secret:
+    state: 'present'
+    name: 'certbot-dns-credentials'
+    data: '{{ certbot_dns_01_credentials }}'
+  register: 'certbot_dns_01_secret'
+  no_log: true
 
 
 - name: 'Set certbot DNS-01 challenge facts'
   ansible.builtin.set_fact:
     certbot_challenge_type: 'dns_01'
-    certbot_challenge_volumes:
-      - '{{ certbot_dns_01_credentials_file }}:/run/secrets/certbot-dns-credentials:ro,Z'
+    certbot_challenge_volumes: []
+    certbot_challenge_secrets: ['certbot-dns-credentials']
     certbot_authenticator_args: '{{ certbot_dns_01_args }}'

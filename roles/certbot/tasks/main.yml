@@ -20,6 +20,7 @@
         wanted_by: []
         unit_on_success: '{{ [certbot_service_name ~ "-post.service"] if certbot_reload_service_name | length > 0 else [] }}'
         volumes: '{{ certbot_container_volumes }}'
+        secrets: '{{ certbot_container_secrets }}'
         # needed for post-renewal permissions confirmation
         add_capabilities: [ 'CAP_CHOWN' ]
 

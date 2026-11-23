@@ -37,10 +37,10 @@ argument_specs:
           - 'dns_01'
         description: 'Selected ACME challenge setup imported by the role, either http_01 or dns_01.'
 
-      certbot_dns_01_credentials_file:
+      certbot_dns_01_credentials:
         type: 'str'
         default: ''
-        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+        description: 'Provider credentials content, usually rendered from Ansible Vault and stored as a Podman secret.'
 
       certbot_dns_01_args:
         type: 'list'
@@ -125,10 +125,10 @@ argument_specs:
           - 'dns_01'
         description: 'Selected ACME challenge setup imported by the role, either http_01 or dns_01.'
 
-      certbot_dns_01_credentials_file:
+      certbot_dns_01_credentials:
         type: 'str'
         default: ''
-        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+        description: 'Provider credentials content, usually rendered from Ansible Vault and stored as a Podman secret.'
 
       certbot_dns_01_args:
         type: 'list'
@@ -160,12 +160,12 @@ argument_specs:
         description: 'Webroot directory that an HTTP server should expose for ACME HTTP-01 challenges.'
 
   dns_01:
-    short_description: 'Mounts provider credentials for DNS-01 certificate challenges.'
+    short_description: 'Supplies provider credentials for DNS-01 certificate challenges.'
     options:
-      certbot_dns_01_credentials_file:
+      certbot_dns_01_credentials:
         type: 'str'
-        required: true
-        description: 'Host path to the provider credentials file mounted read-only at /run/secrets/certbot-dns-credentials.'
+        default: ''
+        description: 'Provider credentials content, usually rendered from Ansible Vault and stored as a Podman secret.'
 
       certbot_dns_01_args:
         type: 'list'

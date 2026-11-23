@@ -43,6 +43,12 @@
           | map('strformat', '--volume=%s')
           | list
         )
+        + (
+          certbot_challenge_secrets
+          | default([])
+          | map('strformat', '--secret=%s')
+          | list
+        )
         + [
           certbot_image_repo ~ ':' ~ certbot_image_ref,
           'certonly',
