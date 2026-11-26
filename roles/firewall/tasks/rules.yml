@@ -1,0 +1,39 @@
+---
+- name: 'Enable DHCP6 client in firewalld'
+  ansible.posix.firewalld:
+    service: 'dhcpv6-client'
+    state: 'enabled'
+    zone: '{{ firewall_zone }}'
+    permanent: true
+    immediate: true
+  when:
+    - 'firewall_enable_dhcpv6_client | bool'
+    - 'ansible_facts["os_family"] == "RedHat"'
+
+
+- name: 'Manage firewalld ingress ports'
+  ansible.posix.firewalld:
+    zone: '{{ item.zone | default(firewall_zone) }}'
+    port: '{{ item.port }}/{{ item.proto }}'
+    state: 'enabled'
+    permanent: true
+    immediate: true
+  loop: '{{ firewall_open_ports }}'
+  loop_control:
+    label: '{{ item.port }}/{{ item.proto }}'
+
+
+- name: 'Manage firewalld forward-port rules'
+  ansible.posix.firewalld:
+    zone: '{{ item.zone | default(firewall_zone) }}'
+    port_forward:
+      - port: '{{ item.port }}'
+        proto: '{{ item.proto }}'
+        toport: '{{ item.to_port }}'
+        toaddr: '{{ item.to_addr }}'
+    state: 'enabled'
+    permanent: true
+    immediate: true
+  loop: '{{ firewall_port_forwards }}'
+  loop_control:
+    label: '{{ item.port }}/{{ item.proto }} -> {{ item.to_addr }}:{{ item.to_port }}'

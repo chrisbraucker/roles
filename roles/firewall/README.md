@@ -2,6 +2,12 @@
 
 Host firewall baseline role. The current implementation targets `firewalld`.
 
+## Entry Points
+
+- `main` runs `setup` and then applies `rules`.
+- `setup` installs and starts firewalld without applying configured rules.
+- `rules` applies configured firewalld services, ports, and forwards; firewalld must already be installed and running.
+
 ## Scope
 
 - install and enable `firewalld`

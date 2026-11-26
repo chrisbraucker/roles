@@ -1,0 +1,34 @@
+---
+- name: 'Install firewalld'
+  ansible.builtin.package:
+    name:
+      - 'firewalld'
+    state: 'latest'
+
+
+- name: 'Remove ufw on apt-based hosts'
+  ansible.builtin.package:
+    name:
+      - 'ufw'
+    state: 'absent'
+
+
+# see https://bugzilla.redhat.com/show_bug.cgi?id=1729287#c3 for reasoning
+- name: '[FIX] Add sysctl to initramfs to satisfy firewalld module loading in systemd-modules-load.service'
+  ansible.builtin.copy:
+    src: 'dracut-99-sysctl.conf'
+    dest: '/etc/dracut.conf.d/99-sysctl.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    seuser: 'system_u'
+    setype: 'etc_t'
+  notify: 'Regenerate initramfs'
+  when: 'ansible_facts["os_family"] == "RedHat"'
+
+
+- name: 'Enable and start firewalld'
+  ansible.builtin.systemd_service:
+    name: 'firewalld.service'
+    enabled: true
+    state: 'started'
